@@ -26,6 +26,7 @@ interface DataPanelProps {
   isAnimating: boolean;
   onAnimationToggle: () => void;
   currentYear: number;
+  onYearChange: (direction: 'next' | 'prev') => void;
 }
 
 export const DataPanel = ({
@@ -35,7 +36,8 @@ export const DataPanel = ({
   onForecastToggle,
   isAnimating,
   onAnimationToggle,
-  currentYear
+  currentYear,
+  onYearChange
 }: DataPanelProps) => {
   const [selectedScenario, setSelectedScenario] = useState<'current' | 'clean_energy' | 'no_action'>('current');
   const [animationSpeed, setAnimationSpeed] = useState(1);
@@ -59,6 +61,10 @@ export const DataPanel = ({
     onForecastToggle(scenario);
   };
 
+  const handleYearChange = (direction: 'next' | 'prev') => {
+    onYearChange(direction);
+  };
+
   const getCurrentPrediction = () => {
     if (!predictions.length) return null;
     const yearIndex = Math.min(currentYear - new Date().getFullYear(), predictions.length - 1);
@@ -68,78 +74,78 @@ export const DataPanel = ({
   const currentPrediction = getCurrentPrediction();
 
   return (
-    <div className="fixed top-6 left-6 w-80 space-y-4 z-40 max-h-[calc(100vh-3rem)]">
+    <div className="fixed top-6 left-6 w-80 space-y-4 z-40 max-h-[calc(100vh-3rem)] overflow-y-auto">
       {/* City Info Card */}
       {cityName && airQuality && (
-        <Card className="glass animate-fade-in-up max-h-64 overflow-hidden">
-          <ScrollArea className="h-full p-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-bold text-foreground">{cityName}</h2>
-                  <p className="text-sm text-muted-foreground">Live Air Quality</p>
-                </div>
-                <Badge 
-                  variant="outline" 
-                  className={`text-lg font-bold ${getAQIColor(airQuality.aqi)} border-current`}
-                >
-                  {airQuality.aqi}
-                </Badge>
+        <Card className="glass animate-fade-in-up">
+          <div className="p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-foreground">{cityName}</h2>
+                <p className="text-sm text-muted-foreground">Live Air Quality</p>
               </div>
+              <Badge 
+                variant="outline" 
+                className={`text-lg font-bold ${getAQIColor(airQuality.aqi)} border-current`}
+              >
+                {airQuality.aqi}
+              </Badge>
+            </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Air Quality</span>
-                  <span className={getAQIColor(airQuality.aqi)}>
-                    {getAQICategory(airQuality.aqi)}
-                  </span>
-                </div>
-                <Progress 
-                  value={(airQuality.aqi / 200) * 100} 
-                  className="h-2"
-                />
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Air Quality</span>
+                <span className={getAQIColor(airQuality.aqi)}>
+                  {getAQICategory(airQuality.aqi)}
+                </span>
               </div>
+              <Progress 
+                value={(airQuality.aqi / 200) * 100} 
+                className="h-2"
+              />
+            </div>
 
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <Wind className="w-4 h-4 text-primary" />
-                  <span>PM2.5: {airQuality.pm25}μg/m³</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Thermometer className="w-4 h-4 text-secondary" />
-                  <span>O₃: {airQuality.o3}μg/m³</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-accent" />
-                  <span>NO₂: {airQuality.no2}μg/m³</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-earth-blue" />
-                  <span>SO₂: {airQuality.so2}μg/m³</span>
-                </div>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="flex items-center gap-2">
+                <Wind className="w-4 h-4 text-primary" />
+                <span>PM2.5: {airQuality.pm25}μg/m³</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Thermometer className="w-4 h-4 text-secondary" />
+                <span>O₃: {airQuality.o3}μg/m³</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4 text-accent" />
+                <span>NO₂: {airQuality.no2}μg/m³</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-earth-blue" />
+                <span>SO₂: {airQuality.so2}μg/m³</span>
               </div>
             </div>
-          </ScrollArea>
+          </div>
         </Card>
       )}
 
       {/* Forecast Controls */}
       {predictions.length > 0 && (
-        <Card className="glass animate-fade-in-up max-h-96 overflow-hidden">
-          <ScrollArea className="h-full p-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">2030 Forecast</h3>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => window.location.reload()}
-                  className="glass"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                </Button>
-              </div>
-
+        <Card className="glass animate-fade-in-up">
+          <div className="p-4 border-b border-primary/20">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">2030 Forecast</h3>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => window.location.reload()}
+                className="glass"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+          
+          <div className="max-h-80 overflow-y-auto">
+            <div className="p-4 space-y-4">
               {/* Scenario Buttons */}
               <div className="grid grid-cols-1 gap-2">
                 <Button
@@ -190,25 +196,29 @@ export const DataPanel = ({
                   </span>
                 </div>
                 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => onAnimationToggle()}
+                    onClick={() => handleYearChange('prev')}
                     disabled={currentYear === 0}
-                    className="glass"
+                    className="glass flex-1"
                   >
                     Previous Year
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={onAnimationToggle}
+                    onClick={() => handleYearChange('next')}
                     disabled={currentYear >= 6}
-                    className="glass"
+                    className="glass flex-1"
                   >
                     Next Year
                   </Button>
+                </div>
+
+                <div className="text-center text-sm text-muted-foreground">
+                  Year {currentYear + 1} of 7
                 </div>
               </div>
 
@@ -241,7 +251,7 @@ export const DataPanel = ({
                 </div>
               )}
             </div>
-          </ScrollArea>
+          </div>
         </Card>
       )}
     </div>

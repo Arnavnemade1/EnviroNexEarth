@@ -5,6 +5,7 @@ import CitySearch from '@/components/CitySearch';
 import DataPanel from '@/components/DataPanel';
 import NaturalDisasters from '@/components/NaturalDisasters';
 import Chatbot from '@/components/Chatbot';
+import HomeScreen from '@/components/HomeScreen';
 import { nasaService } from '@/services/nasaApi';
 import { geocodingService } from '@/services/geocoding';
 import { AirQualityData, PredictionData, CityData } from '@/types';
@@ -19,6 +20,8 @@ const Index = () => {
   const [currentScenario, setCurrentScenario] = useState<'current' | 'clean_energy' | 'no_action'>('current');
   const [showIntro, setShowIntro] = useState(true);
   const [globeHue, setGlobeHue] = useState<string>('none');
+  const [showHomeScreen, setShowHomeScreen] = useState(true);
+  const [showDisasters, setShowDisasters] = useState(false);
 
   // Auto-hide intro after 5 seconds
   useEffect(() => {
@@ -39,6 +42,10 @@ const Index = () => {
 
   const handleCitySelect = async (city: { name: string; country: string; lat: number; lng: number }) => {
     try {
+      setShowHomeScreen(false);
+      setShowIntro(false);
+      setShowDisasters(false);
+      
       toast({
         title: "Loading city data...",
         description: `Fetching air quality data for ${city.name}`,
@@ -61,7 +68,6 @@ const Index = () => {
       setSelectedCity(cityData);
       setAirQuality(aqData);
       setPredictions(forecasts);
-      setShowIntro(false);
 
       // Generate pollution visualization data
       const pollutionPoints = [];
@@ -90,6 +96,7 @@ const Index = () => {
 
   const handleGlobeClick = async (lat: number, lng: number) => {
     try {
+      setShowDisasters(false);
       const location = await geocodingService.reverseGeocode(lat, lng);
       if (location) {
         handleCitySelect({
@@ -101,6 +108,19 @@ const Index = () => {
       }
     } catch (error) {
       console.error('Reverse geocoding failed:', error);
+    }
+  };
+
+  const handleQuickStart = (type: 'search' | 'globe' | 'disasters') => {
+    setShowHomeScreen(false);
+    setShowIntro(false);
+    
+    if (type === 'disasters') {
+      setShowDisasters(true);
+    } else if (type === 'search') {
+      // Show search in the center
+    } else if (type === 'globe') {
+      // Just show the globe for clicking
     }
   };
 
@@ -129,6 +149,14 @@ const Index = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-space">
+      {/* Home Screen */}
+      {showHomeScreen && (
+        <HomeScreen 
+          onStartExploring={() => setShowHomeScreen(false)}
+          onQuickStart={handleQuickStart}
+        />
+      )}
+
       {/* Globe Container */}
       <div className="absolute inset-0">
         <GlobeComponent
@@ -147,13 +175,15 @@ const Index = () => {
         />
       </div>
 
-      {/* Natural Disasters Sidebar */}
-      <div className="absolute top-6 right-96 z-40">
-        <NaturalDisasters onDisasterClick={handleGlobeClick} />
-      </div>
+      {/* Natural Disasters Sidebar - Only show when requested */}
+      {showDisasters && (
+        <div className="absolute top-6 right-6 z-40">
+          <NaturalDisasters onDisasterClick={handleGlobeClick} />
+        </div>
+      )}
 
-      {/* Intro Hook */}
-      {showIntro && (
+      {/* Intro Hook - Only show if no home screen */}
+      {showIntro && !showHomeScreen && (
         <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in-up">
           <div className="text-center max-w-2xl px-6">
             <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-earth bg-clip-text text-transparent animate-pulse-glow">
@@ -169,9 +199,9 @@ const Index = () => {
         </div>
       )}
 
-      {/* City Search */}
+      {/* City Search - Center when not selected */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30">
-        {!selectedCity && !showIntro && (
+        {!selectedCity && !showIntro && !showHomeScreen && (
           <div className="text-center animate-fade-in-up">
             <h2 className="text-3xl font-bold mb-8 text-foreground">
               Name a city you care about.
@@ -191,32 +221,39 @@ const Index = () => {
           isAnimating={false}
           onAnimationToggle={() => handleYearChange('next')}
           currentYear={currentYear}
+          onYearChange={handleYearChange}
         />
       )}
 
-      {/* Chatbot */}
-      <Chatbot 
-        selectedCity={selectedCity ? `${selectedCity.name}, ${selectedCity.country}` : undefined}
-        currentScenario={currentScenario}
-        currentYear={currentYear}
-      />
+      {/* Chatbot - Only show when not on home screen */}
+      {!showHomeScreen && (
+        <Chatbot 
+          selectedCity={selectedCity ? `${selectedCity.name}, ${selectedCity.country}` : undefined}
+          currentScenario={currentScenario}
+          currentYear={currentYear}
+        />
+      )}
 
-      {/* Bottom Credits */}
-      <div className="absolute bottom-6 right-6 z-40">
-        <div className="glass px-4 py-2 rounded-lg">
-          <p className="text-sm text-muted-foreground">
-            Powered by <span className="text-primary font-medium">NASA EarthData</span> + AI
-          </p>
+      {/* Bottom Credits - Only show when not on home screen */}
+      {!showHomeScreen && (
+        <div className="absolute bottom-6 left-6 z-40">
+          <div className="glass px-4 py-2 rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              Powered by <span className="text-primary font-medium">NASA EarthData</span> + AI
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Satellite indicator */}
-      <div className="absolute top-6 right-6 z-40">
-        <div className="glass px-3 py-2 rounded-lg flex items-center gap-2">
-          <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-          <span className="text-sm text-foreground">Live Satellites (Click to Info)</span>
+      {/* Satellite indicator - Only show when not on home screen */}
+      {!showHomeScreen && (
+        <div className="absolute top-6 right-6 z-40">
+          <div className="glass px-3 py-2 rounded-lg flex items-center gap-2">
+            <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+            <span className="text-sm text-foreground">Live Satellites (Click for Info)</span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
