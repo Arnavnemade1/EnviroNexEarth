@@ -3,6 +3,7 @@ import { useToast } from '@/hooks/use-toast';
 import GlobeComponent from '@/components/Globe';
 import CitySearch from '@/components/CitySearch';
 import DataPanel from '@/components/DataPanel';
+import NaturalDisasters from '@/components/NaturalDisasters';
 import { nasaService } from '@/services/nasaApi';
 import { geocodingService } from '@/services/geocoding';
 import { AirQualityData, PredictionData, CityData } from '@/types';
@@ -132,6 +133,11 @@ const Index = () => {
         />
       </div>
 
+      {/* Natural Disasters Sidebar */}
+      <div className="absolute top-6 left-6 z-40">
+        <NaturalDisasters onDisasterClick={handleGlobeClick} />
+      </div>
+
       {/* Intro Hook */}
       {showIntro && (
         <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in-up">
@@ -154,7 +160,7 @@ const Index = () => {
         {!selectedCity && !showIntro && (
           <div className="text-center animate-fade-in-up">
             <h2 className="text-3xl font-bold mb-8 text-foreground">
-              Judge, name a city you care about.
+              Name a city you care about.
             </h2>
             <CitySearch onCitySelect={handleCitySelect} />
           </div>
@@ -187,7 +193,7 @@ const Index = () => {
       <div className="absolute top-6 right-6 z-40">
         <div className="glass px-3 py-2 rounded-lg flex items-center gap-2">
           <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-          <span className="text-sm text-foreground">Live Satellites</span>
+          <span className="text-sm text-foreground">Live Satellites (Click to Info)</span>
         </div>
       </div>
     </div>

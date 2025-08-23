@@ -20,23 +20,49 @@ export const GlobeComponent = ({
   const globeRef = useRef<HTMLDivElement>(null);
   const globeInstanceRef = useRef<any>(null);
   const [satellites, setSatellites] = useState<SatelliteData[]>([]);
+  const [selectedSatellite, setSelectedSatellite] = useState<SatelliteData | null>(null);
 
   // Generate satellite data
   useEffect(() => {
     const generateSatellites = () => {
-      const sats: SatelliteData[] = [];
-      const names = ['ISS', 'Hubble', 'Landsat-8', 'TERRA', 'AQUA', 'SUOMI-NPP'];
-      
-      names.forEach((name, i) => {
-        sats.push({
-          id: `sat-${i}`,
-          name,
-          lat: (Math.random() - 0.5) * 180,
-          lng: (Math.random() - 0.5) * 360,
-          altitude: 400 + Math.random() * 400,
-          velocity: 7.5 + Math.random() * 2
-        });
-      });
+      const sats: SatelliteData[] = [
+        {
+          id: 'iss',
+          name: 'International Space Station',
+          lat: 51.6461,
+          lng: 0.0,
+          altitude: 408,
+          velocity: 7.66,
+          description: 'The ISS orbits Earth approximately every 90 minutes at an altitude of ~408 km'
+        },
+        {
+          id: 'hubble',
+          name: 'Hubble Space Telescope',
+          lat: 28.5,
+          lng: -80.6,
+          altitude: 547,
+          velocity: 7.59,
+          description: 'NASA\'s premier space telescope, capturing stunning images of the universe since 1990'
+        },
+        {
+          id: 'landsat8',
+          name: 'Landsat-8',
+          lat: -15.8,
+          lng: 120.3,
+          altitude: 705,
+          velocity: 7.47,
+          description: 'Earth observation satellite providing critical data for environmental monitoring'
+        },
+        {
+          id: 'terra',
+          name: 'TERRA',
+          lat: 45.2,
+          lng: -90.1,
+          altitude: 705,
+          velocity: 7.47,
+          description: 'NASA\'s flagship Earth observation satellite, monitoring climate and environmental change'
+        }
+      ];
       
       setSatellites(sats);
     };
@@ -147,32 +173,45 @@ export const GlobeComponent = ({
       .objectLat((d: any) => d.lat)
       .objectLng((d: any) => d.lng)
       .objectAltitude((d: any) => d.altitude / 1000)
-      .objectThreeObject(() => {
+      .objectThreeObject((d: any) => {
         // Create satellite mesh
-        const geometry = new THREE.BoxGeometry(0.5, 0.5, 2);
-        const material = new THREE.MeshLambertMaterial({ color: '#4fa8d8' });
+        const geometry = new THREE.BoxGeometry(0.8, 0.8, 2.5);
+        const material = new THREE.MeshLambertMaterial({ color: '#60a5fa' });
         const satellite = new THREE.Mesh(geometry, material);
         
         // Add solar panels
-        const panelGeometry = new THREE.PlaneGeometry(3, 1);
+        const panelGeometry = new THREE.PlaneGeometry(4, 1.5);
         const panelMaterial = new THREE.MeshLambertMaterial({ 
-          color: '#1a1a2e',
+          color: '#1e293b',
           transparent: true,
-          opacity: 0.8
+          opacity: 0.9
         });
         
         const panel1 = new THREE.Mesh(panelGeometry, panelMaterial);
         const panel2 = new THREE.Mesh(panelGeometry, panelMaterial);
         
-        panel1.position.set(-2, 0, 0);
-        panel2.position.set(2, 0, 0);
+        panel1.position.set(-2.5, 0, 0);
+        panel2.position.set(2.5, 0, 0);
         
         const satelliteGroup = new THREE.Group();
         satelliteGroup.add(satellite);
         satelliteGroup.add(panel1);
         satelliteGroup.add(panel2);
         
+        // Add glow effect
+        const glowGeometry = new THREE.SphereGeometry(1.5);
+        const glowMaterial = new THREE.MeshLambertMaterial({
+          color: '#60a5fa',
+          transparent: true,
+          opacity: 0.3
+        });
+        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+        satelliteGroup.add(glow);
+        
         return satelliteGroup;
+      })
+      .onObjectClick((sat: any) => {
+        setSelectedSatellite(sat);
       });
 
     return () => clearInterval(interval);
@@ -214,6 +253,30 @@ export const GlobeComponent = ({
           />
         ))}
       </div>
+
+      {/* Satellite Info Modal */}
+      {selectedSatellite && (
+        <div className="absolute top-4 left-4 z-50 glass p-4 rounded-xl max-w-sm">
+          <button 
+            onClick={() => setSelectedSatellite(null)}
+            className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
+          >
+            ✕
+          </button>
+          <h3 className="font-bold text-lg mb-2 text-primary">{selectedSatellite.name}</h3>
+          <p className="text-sm text-muted-foreground mb-3">{selectedSatellite.description}</p>
+          <div className="space-y-1 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Altitude:</span>
+              <span className="text-foreground">{selectedSatellite.altitude} km</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Velocity:</span>
+              <span className="text-foreground">{selectedSatellite.velocity} km/s</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

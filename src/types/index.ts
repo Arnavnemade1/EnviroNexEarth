@@ -46,4 +46,5 @@ export interface SatelliteData {
   lng: number;
   altitude: number;
   velocity: number;
+  description?: string;
 }
