@@ -4,6 +4,7 @@ import GlobeComponent from '@/components/Globe';
 import CitySearch from '@/components/CitySearch';
 import DataPanel from '@/components/DataPanel';
 import NaturalDisasters from '@/components/NaturalDisasters';
+import Chatbot from '@/components/Chatbot';
 import { nasaService } from '@/services/nasaApi';
 import { geocodingService } from '@/services/geocoding';
 import { AirQualityData, PredictionData, CityData } from '@/types';
@@ -14,10 +15,10 @@ const Index = () => {
   const [airQuality, setAirQuality] = useState<AirQualityData | null>(null);
   const [predictions, setPredictions] = useState<PredictionData[]>([]);
   const [pollutionData, setPollutionData] = useState<Array<{ lat: number; lng: number; value: number; color: string }>>([]);
-  const [isAnimating, setIsAnimating] = useState(false);
   const [currentYear, setCurrentYear] = useState(0);
   const [currentScenario, setCurrentScenario] = useState<'current' | 'clean_energy' | 'no_action'>('current');
   const [showIntro, setShowIntro] = useState(true);
+  const [globeHue, setGlobeHue] = useState<string>('none');
 
   // Auto-hide intro after 5 seconds
   useEffect(() => {
@@ -25,19 +26,16 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Animation loop for time-lapse
+  // Globe hue effect based on scenario
   useEffect(() => {
-    if (!isAnimating || !predictions.length) return;
-
-    const interval = setInterval(() => {
-      setCurrentYear(prev => {
-        const next = (prev + 1) % 8; // 0-7 years
-        return next;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isAnimating, predictions.length]);
+    if (currentScenario === 'clean_energy') {
+      setGlobeHue('green');
+    } else if (currentScenario === 'no_action') {
+      setGlobeHue('red');
+    } else {
+      setGlobeHue('orange');
+    }
+  }, [currentScenario]);
 
   const handleCitySelect = async (city: { name: string; country: string; lat: number; lng: number }) => {
     try {
@@ -121,6 +119,14 @@ const Index = () => {
     }
   };
 
+  const handleYearChange = (direction: 'next' | 'prev') => {
+    setCurrentYear(prev => {
+      if (direction === 'next' && prev < 6) return prev + 1;
+      if (direction === 'prev' && prev > 0) return prev - 1;
+      return prev;
+    });
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-space">
       {/* Globe Container */}
@@ -131,10 +137,18 @@ const Index = () => {
           pollutionData={pollutionData}
           showSatellites={true}
         />
+        {/* Globe Hue Overlay */}
+        <div 
+          className={`absolute inset-0 pointer-events-none transition-all duration-1000 ${
+            globeHue === 'green' ? 'bg-clean-green/10' : 
+            globeHue === 'red' ? 'bg-pollution-red/10' :
+            globeHue === 'orange' ? 'bg-accent/10' : 'bg-transparent'
+          }`} 
+        />
       </div>
 
       {/* Natural Disasters Sidebar */}
-      <div className="absolute top-6 left-6 z-40">
+      <div className="absolute top-6 right-96 z-40">
         <NaturalDisasters onDisasterClick={handleGlobeClick} />
       </div>
 
@@ -174,11 +188,18 @@ const Index = () => {
           airQuality={airQuality}
           predictions={predictions}
           onForecastToggle={handleForecastToggle}
-          isAnimating={isAnimating}
-          onAnimationToggle={() => setIsAnimating(!isAnimating)}
+          isAnimating={false}
+          onAnimationToggle={() => handleYearChange('next')}
           currentYear={currentYear}
         />
       )}
+
+      {/* Chatbot */}
+      <Chatbot 
+        selectedCity={selectedCity ? `${selectedCity.name}, ${selectedCity.country}` : undefined}
+        currentScenario={currentScenario}
+        currentYear={currentYear}
+      />
 
       {/* Bottom Credits */}
       <div className="absolute bottom-6 right-6 z-40">

@@ -3,6 +3,7 @@ import Globe from 'globe.gl';
 import * as THREE from 'three';
 import { interpolateRdYlBu } from 'd3-scale-chromatic';
 import { SatelliteData } from '@/types';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface GlobeComponentProps {
   onCityClick?: (lat: number, lng: number) => void;
@@ -256,25 +257,27 @@ export const GlobeComponent = ({
 
       {/* Satellite Info Modal */}
       {selectedSatellite && (
-        <div className="absolute top-4 left-4 z-50 glass p-4 rounded-xl max-w-sm">
-          <button 
-            onClick={() => setSelectedSatellite(null)}
-            className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
-          >
-            ✕
-          </button>
-          <h3 className="font-bold text-lg mb-2 text-primary">{selectedSatellite.name}</h3>
-          <p className="text-sm text-muted-foreground mb-3">{selectedSatellite.description}</p>
-          <div className="space-y-1 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Altitude:</span>
-              <span className="text-foreground">{selectedSatellite.altitude} km</span>
+        <div className="absolute top-4 right-4 z-50 glass rounded-xl max-w-sm max-h-64 overflow-hidden">
+          <ScrollArea className="h-full p-4">
+            <button 
+              onClick={() => setSelectedSatellite(null)}
+              className="absolute top-2 right-2 text-muted-foreground hover:text-foreground z-10"
+            >
+              ✕
+            </button>
+            <h3 className="font-bold text-lg mb-2 text-primary">{selectedSatellite.name}</h3>
+            <p className="text-sm text-muted-foreground mb-3">{selectedSatellite.description}</p>
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Altitude:</span>
+                <span className="text-foreground">{selectedSatellite.altitude} km</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Velocity:</span>
+                <span className="text-foreground">{selectedSatellite.velocity} km/s</span>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Velocity:</span>
-              <span className="text-foreground">{selectedSatellite.velocity} km/s</span>
-            </div>
-          </div>
+          </ScrollArea>
         </div>
       )}
     </div>
