@@ -35,7 +35,8 @@ Keep responses informative but concise (2-3 sentences max).
     ` : '';
 
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.apiKey}`, {
+      const model = 'gemini-1.5-flash';
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,10 +48,10 @@ Keep responses informative but concise (2-3 sentences max).
             }]
           }],
           generationConfig: {
-            temperature: 0.7,
+            temperature: 0.6,
             topK: 40,
             topP: 0.95,
-            maxOutputTokens: 200,
+            maxOutputTokens: 200
           }
         }),
       });

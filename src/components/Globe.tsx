@@ -280,6 +280,15 @@ export const GlobeComponent = ({
           </ScrollArea>
         </div>
       )}
+
+      {/* Legend */}
+      <div className="absolute bottom-4 right-4 z-40 glass rounded-lg px-3 py-2 text-xs text-muted-foreground">
+        <div className="font-medium text-foreground mb-1">Map Legend</div>
+        <ul className="space-y-1 list-disc pl-4">
+          <li>Hex towers show pollution intensity (green clean → red polluted)</li>
+          <li>Orbiting shapes are satellites; red panels are solar arrays (click for info)</li>
+        </ul>
+      </div>
     </div>
   );
 };

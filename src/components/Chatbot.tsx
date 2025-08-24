@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { MessageCircle, Send, X, Bot, User, Key } from 'lucide-react';
 import { geminiService } from '@/services/geminiApi';
+import { API_KEYS } from '@/types';
 
 interface ChatMessage {
   id: string;
@@ -44,9 +45,20 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
     scrollToBottom();
   }, [messages]);
 
+  // Auto-load API key from localStorage or fallback to API_KEYS
+  useEffect(() => {
+    const stored = localStorage.getItem('GEMINI_API_KEY');
+    const key = stored || API_KEYS.GEMINI || '';
+    if (key) {
+      setApiKey(key);
+      geminiService.setApiKey(key);
+    }
+  }, []);
+
   const setGeminiApiKey = (key: string) => {
     setApiKey(key);
     geminiService.setApiKey(key);
+    localStorage.setItem('GEMINI_API_KEY', key);
     setShowKeyInput(false);
     
     const welcomeMessage: ChatMessage = {

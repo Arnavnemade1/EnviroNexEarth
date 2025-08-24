@@ -75,28 +75,51 @@ export const DataPanel = ({
   };
 
   const calculateHealthImpact = () => {
-    if (!airQuality) return { outdoorDays: 0, asthmaRisk: 0, respiratoryIndex: 0 };
-    
-    const baseAQI = airQuality.aqi;
-    const yearMultiplier = 1 + (currentYear * 0.1);
-    
-    let scenarioMultiplier = 1;
-    if (selectedScenario === 'clean_energy') {
-      scenarioMultiplier = Math.max(0.3, 1 - (currentYear * 0.12)); // Improves over time
-    } else if (selectedScenario === 'no_action') {
-      scenarioMultiplier = 1 + (currentYear * 0.08); // Gets worse over time
-    } else {
-      scenarioMultiplier = 1 + (currentYear * 0.03); // Slight deterioration
+    if (!airQuality) return { outdoorDays: 0, asthmaRisk: 0, respiratoryIndex: 0, projectedAQI: 0 } as any;
+
+    const year = currentYear; // 0..6
+
+    // Scenario-specific pollutant multipliers (non-linear where it makes sense)
+    const expo = (r: number, y: number) => Math.exp(-r * y);
+
+    let pm25Factor = 1, o3Factor = 1, no2Factor = 1, so2Factor = 1;
+    switch (selectedScenario) {
+      case 'clean_energy':
+        pm25Factor = Math.max(0.35, expo(0.18, year));
+        o3Factor = Math.max(0.55, expo(0.08, year));
+        no2Factor = Math.max(0.40, expo(0.15, year));
+        so2Factor = Math.max(0.45, expo(0.14, year));
+        break;
+      case 'no_action':
+        pm25Factor = 1 + 0.12 * year;
+        o3Factor = 1 + 0.06 * year;
+        no2Factor = 1 + 0.10 * year;
+        so2Factor = 1 + 0.09 * year;
+        break;
+      default: // current trends
+        pm25Factor = 1 + 0.03 * year;
+        o3Factor = 1 + 0.02 * year;
+        no2Factor = 1 + 0.025 * year;
+        so2Factor = 1 + 0.02 * year;
     }
-    
-    const projectedAQI = Math.min(300, baseAQI * scenarioMultiplier);
-    
-    return {
-      outdoorDays: Math.max(50, 300 - (projectedAQI * 1.2)),
-      asthmaRisk: Math.min(200, projectedAQI * 0.4),
-      respiratoryIndex: Math.min(150, projectedAQI * 0.6),
-      projectedAQI
-    };
+
+    // Project pollutants
+    const pm25 = Math.max(1, Math.min(200, airQuality.pm25 * pm25Factor));
+    const o3 = Math.max(1, Math.min(200, airQuality.o3 * o3Factor));
+    const no2 = Math.max(1, Math.min(200, airQuality.no2 * no2Factor));
+    const so2 = Math.max(1, Math.min(200, airQuality.so2 * so2Factor));
+
+    // Rough AQI approximation emphasizing PM2.5 (dominant health driver)
+    const aqiFromPM25 = Math.min(300, pm25 * 4);
+    const aqiAdj = Math.min(300, aqiFromPM25 * 0.7 + o3 * 0.5 + no2 * 0.3);
+    const projectedAQI = Math.round(Math.min(300, Math.max(0, aqiAdj)));
+
+    // Health metrics (heuristic but grounded in epidemiology)
+    const outdoorDays = Math.max(40, Math.min(330, 320 - projectedAQI * 1.1));
+    const asthmaRisk = Math.min(200, Math.round(30 + pm25 * 0.6 + o3 * 0.2));
+    const respiratoryIndex = Math.min(150, Math.round(pm25 * 0.7 + no2 * 0.3));
+
+    return { outdoorDays, asthmaRisk, respiratoryIndex, projectedAQI };
   };
 
   const currentPrediction = getCurrentPrediction();
