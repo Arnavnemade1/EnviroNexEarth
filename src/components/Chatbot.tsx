@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Send, X, Bot, User } from 'lucide-react';
+import { MessageCircle, Send, X, Bot, User, Key } from 'lucide-react';
+import { geminiService } from '@/services/geminiApi';
 
 interface ChatMessage {
   id: string;
@@ -25,12 +26,14 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
     {
       id: '1',
       type: 'bot',
-      message: 'Hi! I\'m your Earth Data AI assistant. Ask me about air quality, climate predictions, or natural disasters. Try asking "Will New York breathe clean in 2030?" or "What causes air pollution?"',
+      message: 'Hi! I\'m your Earth Data AI assistant powered by Gemini! Ask me about air quality, climate predictions, or satellites. Try "What are those red lines on satellites?" or "Tell me about air pollution in this city"',
       timestamp: new Date()
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  const [showKeyInput, setShowKeyInput] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -41,48 +44,29 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
     scrollToBottom();
   }, [messages]);
 
-  const generateBotResponse = (userMessage: string): string => {
-    const message = userMessage.toLowerCase();
+  const setGeminiApiKey = (key: string) => {
+    setApiKey(key);
+    geminiService.setApiKey(key);
+    setShowKeyInput(false);
     
-    // Climate and air quality responses
-    if (message.includes('new york') && (message.includes('2030') || message.includes('future'))) {
-      return `Based on current trends, New York's air quality in 2030 will depend on policy actions. With clean energy adoption, AQI could improve to 35-45 (Good). Without action, it may worsen to 85-95 (Moderate to Unhealthy). The city is investing in electric vehicles and renewable energy to improve air quality.`;
-    }
+    const welcomeMessage: ChatMessage = {
+      id: Date.now().toString(),
+      type: 'bot',
+      message: 'Great! I\'m now connected to Gemini AI. Ask me anything about air quality, satellites, climate predictions, or environmental data!',
+      timestamp: new Date()
+    };
     
-    if (message.includes('air pollution') && message.includes('cause')) {
-      return `Air pollution comes from vehicle emissions (30%), industrial processes (25%), power plants (20%), agriculture (15%), and natural sources (10%). PM2.5 particles are especially dangerous as they penetrate deep into lungs and bloodstream.`;
-    }
-    
-    if (message.includes('clean energy') || message.includes('renewable')) {
-      return `Clean energy adoption can reduce air pollution by 60-80% by 2030. Solar and wind power produce zero emissions, while electric vehicles eliminate tailpipe pollution. Countries leading in renewables show significantly better air quality trends.`;
-    }
-    
-    if (selectedCity && (message.includes('this city') || message.includes('here'))) {
-      return `For ${selectedCity}, I'm analyzing real NASA satellite data showing current air quality conditions. The ${currentScenario} scenario projects ${currentScenario === 'clean_energy' ? 'improving' : currentScenario === 'no_action' ? 'worsening' : 'stable'} air quality through ${new Date().getFullYear() + (currentYear || 0)}.`;
-    }
-    
-    if (message.includes('satellite') || message.includes('iss')) {
-      return `The International Space Station orbits Earth every 90 minutes at 408km altitude, helping monitor air quality with specialized sensors. NASA's fleet of Earth observation satellites provides real-time pollution data that powers this visualization.`;
-    }
-    
-    if (message.includes('natural disaster') || message.includes('wildfire') || message.includes('hurricane')) {
-      return `Climate change is intensifying natural disasters. Wildfires release massive amounts of particulates, hurricanes are becoming stronger, and extreme weather events disrupt air quality. NASA tracks these events in real-time to predict air quality impacts.`;
-    }
-    
-    if (message.includes('health') || message.includes('asthma')) {
-      return `Poor air quality causes 7 million premature deaths annually. Long-term exposure increases asthma risk by 40%, reduces lung function, and raises cardiovascular disease risk. Children and elderly are most vulnerable to air pollution health effects.`;
-    }
-    
-    // Default responses for common patterns
-    if (message.includes('how') || message.includes('what') || message.includes('why')) {
-      return `That's a great question! I analyze NASA Earth data to provide insights about air quality, climate predictions, and environmental trends. Could you be more specific about what aspect you'd like to know about?`;
-    }
-    
-    return `I'm here to help with questions about air quality, climate change, and Earth data! Try asking about specific cities, pollution causes, or future climate scenarios. You can also ask about the satellites you see orbiting on the globe.`;
+    setMessages(prev => [...prev, welcomeMessage]);
   };
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
+
+    // Check if API key is set
+    if (!apiKey) {
+      setShowKeyInput(true);
+      return;
+    }
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -95,18 +79,32 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate AI thinking time
-    setTimeout(() => {
+    try {
+      const response = await geminiService.generateResponse(
+        userMessage.message,
+        { selectedCity, currentScenario, currentYear }
+      );
+      
       const botResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        message: generateBotResponse(userMessage.message),
+        message: response,
         timestamp: new Date()
       };
       
       setMessages(prev => [...prev, botResponse]);
-      setIsTyping(false);
-    }, 1000 + Math.random() * 1000);
+    } catch (error) {
+      const errorResponse: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'bot',
+        message: 'Sorry, I encountered an error. Please check your API key or try again later.',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorResponse]);
+    }
+    
+    setIsTyping(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -203,24 +201,57 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
 
         {/* Input */}
         <div className="p-4 border-t border-primary/20">
-          <div className="flex gap-2">
-            <Input
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask about air quality, climate predictions..."
-              className="glass flex-1"
-              disabled={isTyping}
-            />
-            <Button
-              onClick={handleSendMessage}
-              size="sm"
-              disabled={!inputValue.trim() || isTyping}
-              className="glass"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
+          {showKeyInput ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Key className="w-4 h-4" />
+                <span>Enter your Gemini API key to continue</span>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  type="password"
+                  placeholder="Gemini API Key"
+                  className="glass flex-1"
+                  onChange={(e) => setApiKey(e.target.value)}
+                />
+                <Button
+                  onClick={() => setGeminiApiKey(apiKey)}
+                  size="sm"
+                  disabled={!apiKey.trim()}
+                  className="glass"
+                >
+                  Set
+                </Button>
+              </div>
+              <Button
+                onClick={() => setShowKeyInput(false)}
+                size="sm"
+                variant="outline"
+                className="w-full glass"
+              >
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Input
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder={apiKey ? "Ask about air quality, climate predictions..." : "Click send to add API key"}
+                className="glass flex-1"
+                disabled={isTyping}
+              />
+              <Button
+                onClick={handleSendMessage}
+                size="sm"
+                disabled={isTyping}
+                className="glass"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </Card>
     </div>

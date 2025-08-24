@@ -14,7 +14,8 @@ import {
   TrendingDown,
   Play,
   Pause,
-  RotateCcw
+  RotateCcw,
+  Home
 } from 'lucide-react';
 import { AirQualityData, PredictionData } from '@/types';
 
@@ -27,6 +28,7 @@ interface DataPanelProps {
   onAnimationToggle: () => void;
   currentYear: number;
   onYearChange: (direction: 'next' | 'prev') => void;
+  onBackToHome?: () => void;
 }
 
 export const DataPanel = ({
@@ -37,7 +39,8 @@ export const DataPanel = ({
   isAnimating,
   onAnimationToggle,
   currentYear,
-  onYearChange
+  onYearChange,
+  onBackToHome
 }: DataPanelProps) => {
   const [selectedScenario, setSelectedScenario] = useState<'current' | 'clean_energy' | 'no_action'>('current');
   const [animationSpeed, setAnimationSpeed] = useState(1);
@@ -71,10 +74,48 @@ export const DataPanel = ({
     return predictions[Math.max(0, yearIndex)];
   };
 
+  const calculateHealthImpact = () => {
+    if (!airQuality) return { outdoorDays: 0, asthmaRisk: 0, respiratoryIndex: 0 };
+    
+    const baseAQI = airQuality.aqi;
+    const yearMultiplier = 1 + (currentYear * 0.1);
+    
+    let scenarioMultiplier = 1;
+    if (selectedScenario === 'clean_energy') {
+      scenarioMultiplier = Math.max(0.3, 1 - (currentYear * 0.12)); // Improves over time
+    } else if (selectedScenario === 'no_action') {
+      scenarioMultiplier = 1 + (currentYear * 0.08); // Gets worse over time
+    } else {
+      scenarioMultiplier = 1 + (currentYear * 0.03); // Slight deterioration
+    }
+    
+    const projectedAQI = Math.min(300, baseAQI * scenarioMultiplier);
+    
+    return {
+      outdoorDays: Math.max(50, 300 - (projectedAQI * 1.2)),
+      asthmaRisk: Math.min(200, projectedAQI * 0.4),
+      respiratoryIndex: Math.min(150, projectedAQI * 0.6),
+      projectedAQI
+    };
+  };
+
   const currentPrediction = getCurrentPrediction();
+  const healthImpact = calculateHealthImpact();
 
   return (
     <div className="fixed top-6 left-6 w-80 space-y-4 z-40 max-h-[calc(100vh-3rem)] overflow-y-auto">
+      {/* Back to Home Button */}
+      {onBackToHome && (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={onBackToHome}
+          className="glass mb-2"
+        >
+          <Home className="w-4 h-4 mr-2" />
+          Back to Home
+        </Button>
+      )}
       {/* City Info Card */}
       {cityName && airQuality && (
         <Card className="glass animate-fade-in-up">
@@ -223,33 +264,60 @@ export const DataPanel = ({
               </div>
 
               {/* Health Impact Preview */}
-              {currentPrediction && (
-                <div className="space-y-3 pt-3 border-t border-primary/20">
-                  <h4 className="font-medium text-foreground">Health Impact</h4>
+              <div className="space-y-3 pt-3 border-t border-primary/20">
+                <h4 className="font-medium text-foreground">Health Impact Forecast</h4>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm flex items-center gap-2">
+                      <Heart className="w-4 h-4 text-clean-green" />
+                      Outdoor Activity Days
+                    </span>
+                    <span className={`text-sm font-medium ${
+                      selectedScenario === 'clean_energy' ? 'text-clean-green' : 
+                      selectedScenario === 'no_action' ? 'text-pollution-red' : 'text-accent'
+                    }`}>
+                      {Math.round(healthImpact.outdoorDays)} days/year
+                    </span>
+                  </div>
                   
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm flex items-center gap-2">
-                        <Heart className="w-4 h-4 text-pollution-red" />
-                        Outdoor Activity Days
-                      </span>
-                      <span className="text-sm font-medium text-pollution-red">
-                        ↓ 28%
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-accent" />
-                        Asthma Risk
-                      </span>
-                      <span className="text-sm font-medium text-accent">
-                        +45%
-                      </span>
-                    </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-accent" />
+                      Asthma Risk Index
+                    </span>
+                    <span className={`text-sm font-medium ${
+                      selectedScenario === 'clean_energy' ? 'text-clean-green' : 
+                      selectedScenario === 'no_action' ? 'text-pollution-red' : 'text-accent'
+                    }`}>
+                      {Math.round(healthImpact.asthmaRisk)}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm flex items-center gap-2">
+                      <Eye className="w-4 h-4 text-earth-blue" />
+                      Projected AQI
+                    </span>
+                    <span className={`text-sm font-medium ${getAQIColor(healthImpact.projectedAQI)}`}>
+                      {Math.round(healthImpact.projectedAQI)}
+                    </span>
+                  </div>
+
+                  <div className="text-xs text-muted-foreground mt-2 p-2 glass rounded">
+                    <strong>Scenario Impact:</strong><br/>
+                    {selectedScenario === 'clean_energy' && 
+                      "Clean energy adoption reduces pollution by 60-80%, improving health outcomes significantly."
+                    }
+                    {selectedScenario === 'no_action' && 
+                      "Without intervention, air quality deteriorates, increasing respiratory risks and reducing quality of life."
+                    }
+                    {selectedScenario === 'current' && 
+                      "Current trends show gradual improvement but not enough to meet WHO standards."
+                    }
                   </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </Card>

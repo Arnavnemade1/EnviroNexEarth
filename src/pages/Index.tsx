@@ -222,6 +222,15 @@ const Index = () => {
           onAnimationToggle={() => handleYearChange('next')}
           currentYear={currentYear}
           onYearChange={handleYearChange}
+          onBackToHome={() => {
+            setShowHomeScreen(true);
+            setSelectedCity(null);
+            setAirQuality(null);
+            setPredictions([]);
+            setPollutionData([]);
+            setCurrentYear(0);
+            setCurrentScenario('current');
+          }}
         />
       )}
 

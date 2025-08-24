@@ -68,7 +68,8 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
 
   return (
     <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-      <div className="max-w-4xl w-full space-y-8 animate-fade-in-up">
+      <div className="max-w-4xl w-full h-full overflow-y-auto">
+        <div className="max-w-4xl w-full space-y-8 animate-fade-in-up py-8">
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3 mb-6">
@@ -154,6 +155,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
           <Badge variant="outline" className="glass">
             Real-time data • AI predictions • Interactive globe
           </Badge>
+        </div>
         </div>
       </div>
     </div>
