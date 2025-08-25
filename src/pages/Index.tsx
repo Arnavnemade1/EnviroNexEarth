@@ -8,6 +8,7 @@ import Chatbot from '@/components/Chatbot';
 import HomeScreen from '@/components/HomeScreen';
 import { nasaService } from '@/services/nasaApi';
 import { geocodingService } from '@/services/geocoding';
+import { openaqService } from '@/services/openAq';
 import { AirQualityData, PredictionData, CityData } from '@/types';
 
 const Index = () => {
@@ -51,8 +52,8 @@ const Index = () => {
         description: `Fetching air quality data for ${city.name}`,
       });
 
-      // Fetch air quality data
-      const aqData = await nasaService.getAirQualityData(city.lat, city.lng);
+      // Fetch live air quality from OpenAQ and forecasts
+      const aqData = await openaqService.getLatestAirQuality(city.lat, city.lng);
       const forecasts = await nasaService.getPollutionForecast(city.lat, city.lng);
 
       const cityData: CityData = {

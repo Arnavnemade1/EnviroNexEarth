@@ -146,7 +146,7 @@ export const DataPanel = ({
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold text-foreground">{cityName}</h2>
-                <p className="text-sm text-muted-foreground">Live Air Quality</p>
+                <p className="text-sm text-muted-foreground">Live Air Quality (OpenAQ)</p>
               </div>
               <Badge 
                 variant="outline" 
