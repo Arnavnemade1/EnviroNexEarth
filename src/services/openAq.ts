@@ -14,10 +14,15 @@ interface OpenAQLatestResponse {
 
 class OpenAQService {
   private baseUrl = 'https://api.openaq.org/v2/latest';
+  private apiKey = '2e4753879800c5b4d925b6b8b46486b145b4ecbec17ce2dad4d8f4162045a390';
 
   private async fetchNearest(lat: number, lon: number, radius: number = 25000) {
     const url = `${this.baseUrl}?coordinates=${lat},${lon}&radius=${radius}&limit=1&order_by=distance`;
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      headers: {
+        'X-API-Key': this.apiKey
+      }
+    });
     if (!res.ok) throw new Error(`OpenAQ error ${res.status}`);
     const data: OpenAQLatestResponse = await res.json();
     return data.results?.[0] || null;
