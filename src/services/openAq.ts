@@ -13,20 +13,23 @@ interface OpenAQLatestResponse {
 }
 
 class OpenAQService {
-  private baseUrl = 'https://api.openaq.org/v2/latest';
+  private baseUrl = 'https://api.openaq.org/v3/latest';
   private apiKey = '2e4753879800c5b4d925b6b8b46486b145b4ecbec17ce2dad4d8f4162045a390';
 
   private async fetchNearest(lat: number, lon: number, radius: number = 25000) {
     try {
-      const url = `${this.baseUrl}?coordinates=${lat},${lon}&radius=${radius}&limit=1&order_by=distance`;
-      console.log('Fetching from OpenAQ:', url);
+      // Use CORS proxy to bypass browser restrictions
+      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+      const apiUrl = `https://api.openaq.org/v2/latest?coordinates=${lat},${lon}&radius=${radius}&limit=1&order_by=distance`;
+      const url = proxyUrl + apiUrl;
+      console.log('Fetching from OpenAQ via proxy:', apiUrl);
       
       const res = await fetch(url, {
         method: 'GET',
         headers: {
           'X-API-Key': this.apiKey,
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'X-Requested-With': 'XMLHttpRequest'
         }
       });
       
@@ -34,15 +37,20 @@ class OpenAQService {
       
       if (!res.ok) {
         console.error('OpenAQ API error:', res.status, res.statusText);
-        return this.generateFallbackData(lat, lon);
+        throw new Error(`OpenAQ API error: ${res.status}`);
       }
       
       const data: OpenAQLatestResponse = await res.json();
       console.log('OpenAQ data:', data);
-      return data.results?.[0] || this.generateFallbackData(lat, lon);
+      
+      if (!data.results || data.results.length === 0) {
+        throw new Error('No air quality stations found in this area');
+      }
+      
+      return data.results[0];
     } catch (error) {
       console.error('OpenAQ fetch failed:', error);
-      return this.generateFallbackData(lat, lon);
+      throw error; // Re-throw to be handled by caller
     }
   }
 
@@ -84,50 +92,83 @@ class OpenAQService {
   }
 
   async getLatestAirQuality(lat: number, lon: number): Promise<AirQualityData> {
-    // Try smaller radius first, then expand if needed
-    let result = await this.fetchNearest(lat, lon, 20000);
-    if (!result) result = await this.fetchNearest(lat, lon, 50000);
-    if (!result) throw new Error('No OpenAQ stations nearby');
-
-    const map: Record<string, { value: number; unit: string }> = {};
-    for (const m of result.measurements) {
-      map[m.parameter.toLowerCase()] = { value: m.value, unit: m.unit };
-    }
-
-    // Helper to read value safely (µg/m3 preferred). For gases often ppb/ppm; keep raw value when unit is µg/m3
-    const readValue = (key: string): number => {
-      const entry = map[key];
-      if (!entry) return 0;
-      const { value, unit } = entry;
-      if (unit.includes('µg')) return Math.round(value);
-      // Basic conversion for O3 if provided in ppb/ppm to µg/m3 using MW/24.45 (MW O3 = 48)
-      if (key === 'o3') {
-        if (unit.toLowerCase() === 'ppb') return Math.round(value * (48 / 24.45)); // ≈1.963 µg/m3 per ppb
-        if (unit.toLowerCase() === 'ppm') return Math.round(value * 1000 * (48 / 24.45));
+    try {
+      // Try smaller radius first, then expand if needed
+      let result;
+      try {
+        result = await this.fetchNearest(lat, lon, 20000);
+      } catch (error) {
+        console.log('Trying larger radius...');
+        result = await this.fetchNearest(lat, lon, 50000);
       }
-      // For others, return rounded value; units vary but UI labels as µg/m3 generically
-      return Math.round(value);
-    };
 
-    const pm25 = readValue('pm25');
-    const pm10 = readValue('pm10');
-    const no2 = readValue('no2');
-    const so2 = readValue('so2');
-    const o3 = readValue('o3');
-    const co = readValue('co');
+      const map: Record<string, { value: number; unit: string }> = {};
+      for (const m of result.measurements) {
+        map[m.parameter.toLowerCase()] = { value: m.value, unit: m.unit };
+      }
 
-    const aqi = this.computeAQIFromPM25(pm25 || 0);
+      // Helper to read value safely (µg/m3 preferred). For gases often ppb/ppm; keep raw value when unit is µg/m3
+      const readValue = (key: string): number => {
+        const entry = map[key];
+        if (!entry) return 0;
+        const { value, unit } = entry;
+        if (unit.includes('µg')) return Math.round(value);
+        // Basic conversion for O3 if provided in ppb/ppm to µg/m3 using MW/24.45 (MW O3 = 48)
+        if (key === 'o3') {
+          if (unit.toLowerCase() === 'ppb') return Math.round(value * (48 / 24.45)); // ≈1.963 µg/m3 per ppb
+          if (unit.toLowerCase() === 'ppm') return Math.round(value * 1000 * (48 / 24.45));
+        }
+        // For others, return rounded value; units vary but UI labels as µg/m3 generically
+        return Math.round(value);
+      };
 
-    return {
-      aqi,
-      pm25,
-      pm10,
-      o3,
-      no2,
-      so2,
-      co,
-      timestamp: new Date().toISOString(),
-    };
+      const pm25 = readValue('pm25');
+      const pm10 = readValue('pm10');
+      const no2 = readValue('no2');
+      const so2 = readValue('so2');
+      const o3 = readValue('o3');
+      const co = readValue('co');
+
+      const aqi = this.computeAQIFromPM25(pm25 || 0);
+
+      return {
+        aqi,
+        pm25,
+        pm10,
+        o3,
+        no2,
+        so2,
+        co,
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('Failed to get real air quality data, using fallback:', error);
+      // Only fall back to generated data if real API fails completely
+      const fallback = this.generateFallbackData(lat, lon);
+      const map: Record<string, { value: number; unit: string }> = {};
+      for (const m of fallback.measurements) {
+        map[m.parameter.toLowerCase()] = { value: m.value, unit: m.unit };
+      }
+
+      const readValue = (key: string): number => {
+        const entry = map[key];
+        return entry ? Math.round(entry.value) : 0;
+      };
+
+      const pm25 = readValue('pm25');
+      const aqi = this.computeAQIFromPM25(pm25 || 0);
+
+      return {
+        aqi,
+        pm25: readValue('pm25'),
+        pm10: readValue('pm10'),
+        o3: readValue('o3'),
+        no2: readValue('no2'),
+        so2: readValue('so2'),
+        co: readValue('co'),
+        timestamp: new Date().toISOString(),
+      };
+    }
   }
 }
 
