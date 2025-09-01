@@ -18,23 +18,31 @@ import {
   Home
 } from 'lucide-react';
 import { AirQualityData, PredictionData } from '@/types';
-
-interface DataPanelProps {
-  cityName?: string;
-  airQuality: AirQualityData | null;
-  predictions: PredictionData[];
-  onForecastToggle: (scenario: 'current' | 'clean_energy' | 'no_action') => void;
-  isAnimating: boolean;
-  onAnimationToggle: () => void;
-  currentYear: number;
-  onYearChange: (direction: 'next' | 'prev') => void;
-  onBackToHome?: () => void;
-}
+ 
+ type QuantumForecast = {
+   model: { name: string; backend: string; horizonHours: number };
+   generatedAt: string;
+   hourly: Array<{ hourOffset: number; aqi: number; pm25: number; confidence: number }>;
+ };
+ 
+ interface DataPanelProps {
+   cityName?: string;
+   airQuality: AirQualityData | null;
+   predictions: PredictionData[];
+   quantumForecast?: QuantumForecast;
+   onForecastToggle: (scenario: 'current' | 'clean_energy' | 'no_action') => void;
+   isAnimating: boolean;
+   onAnimationToggle: () => void;
+   currentYear: number;
+   onYearChange: (direction: 'next' | 'prev') => void;
+   onBackToHome?: () => void;
+ }
 
 export const DataPanel = ({
   cityName,
   airQuality,
   predictions,
+  quantumForecast,
   onForecastToggle,
   isAnimating,
   onAnimationToggle,
@@ -186,6 +194,42 @@ export const DataPanel = ({
                 <Activity className="w-4 h-4 text-earth-blue" />
                 <span>SO₂: {airQuality.so2}μg/m³</span>
               </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Quantum 24h Forecast */}
+      {quantumForecast && (
+        <Card className="glass animate-fade-in-up">
+          <div className="p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Quantum 24h Forecast</h3>
+              <Badge variant="outline" className="border-current text-accent">
+                {quantumForecast.model.backend.includes('ibm') ? 'IBM-validated' : 'Simulator'}
+              </Badge>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Next hour AQI: <span className={getAQIColor(quantumForecast.hourly[0]?.aqi || 0)}>
+                {quantumForecast.hourly[0]?.aqi ?? '—'}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <div className="text-muted-foreground">Min AQI (24h)</div>
+                <div className="font-medium">
+                  {Math.min(...quantumForecast.hourly.map(h => h.aqi))}
+                </div>
+              </div>
+              <div>
+                <div className="text-muted-foreground">Max AQI (24h)</div>
+                <div className="font-medium">
+                  {Math.max(...quantumForecast.hourly.map(h => h.aqi))}
+                </div>
+              </div>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Horizon: {quantumForecast.model.horizonHours}h • Generated {new Date(quantumForecast.generatedAt).toLocaleTimeString()}
             </div>
           </div>
         </Card>

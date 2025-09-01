@@ -9,6 +9,7 @@ import HomeScreen from '@/components/HomeScreen';
 import { nasaService } from '@/services/nasaApi';
 import { geocodingService } from '@/services/geocoding';
 import { openaqService } from '@/services/openAq';
+import { quantumPredictor, type QuantumForecast } from '@/services/quantumPredictor';
 import { AirQualityData, PredictionData, CityData } from '@/types';
 
 const Index = () => {
@@ -16,6 +17,7 @@ const Index = () => {
   const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
   const [airQuality, setAirQuality] = useState<AirQualityData | null>(null);
   const [predictions, setPredictions] = useState<PredictionData[]>([]);
+  const [quantumForecast, setQuantumForecast] = useState<QuantumForecast | null>(null);
   const [pollutionData, setPollutionData] = useState<Array<{ lat: number; lng: number; value: number; color: string }>>([]);
   const [currentYear, setCurrentYear] = useState(0);
   const [currentScenario, setCurrentScenario] = useState<'current' | 'clean_energy' | 'no_action'>('current');
@@ -55,6 +57,13 @@ const Index = () => {
       // Fetch live air quality from OpenAQ and forecasts
       const aqData = await openaqService.getLatestAirQuality(city.lat, city.lng);
       const forecasts = await nasaService.getPollutionForecast(city.lat, city.lng);
+      // Quantum 24h forecast (simulator, IBM key validated in edge)
+      let qForecast: QuantumForecast | null = null;
+      try {
+        qForecast = await quantumPredictor.get24hForecast(city, aqData);
+      } catch (e) {
+        console.warn('Quantum predictor failed:', e);
+      }
 
       const cityData: CityData = {
         ...city,
@@ -69,6 +78,7 @@ const Index = () => {
       setSelectedCity(cityData);
       setAirQuality(aqData);
       setPredictions(forecasts);
+      setQuantumForecast(qForecast);
 
       // Generate pollution visualization data
       const pollutionPoints = [];
@@ -218,6 +228,7 @@ const Index = () => {
           cityName={`${selectedCity.name}, ${selectedCity.country}`}
           airQuality={airQuality}
           predictions={predictions}
+          quantumForecast={quantumForecast ?? undefined}
           onForecastToggle={handleForecastToggle}
           isAnimating={false}
           onAnimationToggle={() => handleYearChange('next')}
@@ -228,6 +239,7 @@ const Index = () => {
             setSelectedCity(null);
             setAirQuality(null);
             setPredictions([]);
+            setQuantumForecast(null);
             setPollutionData([]);
             setCurrentYear(0);
             setCurrentScenario('current');

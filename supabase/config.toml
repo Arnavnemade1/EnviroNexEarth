@@ -1,1 +1,4 @@
 project_id = "naaohlrbreowzrjdwxje"
+
+[functions.quantum-predictor]
+verify_jwt = false
