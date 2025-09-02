@@ -1,5 +1,6 @@
 // OpenAQ service: fetch nearest measurements and compute AQI (US EPA) based on PM2.5 when available
 import type { AirQualityData } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
 
 interface OpenAQLatestResponse {
   results: Array<{
@@ -17,41 +18,17 @@ class OpenAQService {
   private apiKey = '2e4753879800c5b4d925b6b8b46486b145b4ecbec17ce2dad4d8f4162045a390';
 
   private async fetchNearest(lat: number, lon: number, radius: number = 25000) {
-    try {
-      // Use CORS proxy to bypass browser restrictions
-      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-      const apiUrl = `https://api.openaq.org/v2/latest?coordinates=${lat},${lon}&radius=${radius}&limit=1&order_by=distance`;
-      const url = proxyUrl + apiUrl;
-      console.log('Fetching from OpenAQ via proxy:', apiUrl);
-      
-      const res = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'X-API-Key': this.apiKey,
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      });
-      
-      console.log('OpenAQ response status:', res.status);
-      
-      if (!res.ok) {
-        console.error('OpenAQ API error:', res.status, res.statusText);
-        throw new Error(`OpenAQ API error: ${res.status}`);
-      }
-      
-      const data: OpenAQLatestResponse = await res.json();
-      console.log('OpenAQ data:', data);
-      
-      if (!data.results || data.results.length === 0) {
-        throw new Error('No air quality stations found in this area');
-      }
-      
-      return data.results[0];
-    } catch (error) {
-      console.error('OpenAQ fetch failed:', error);
-      throw error; // Re-throw to be handled by caller
+    const { data, error } = await supabase.functions.invoke('openaq-proxy', {
+      body: { lat, lon, radius },
+    });
+    if (error) {
+      console.error('openaq-proxy failed:', error);
+      throw new Error(typeof error === 'string' ? error : (error.message ?? 'OpenAQ proxy error'));
     }
+    if (!data?.results || data.results.length === 0) {
+      throw new Error('No air quality stations found in this area');
+    }
+    return (data as OpenAQLatestResponse).results[0];
   }
 
   private generateFallbackData(lat: number, lon: number) {
@@ -142,32 +119,8 @@ class OpenAQService {
         timestamp: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('Failed to get real air quality data, using fallback:', error);
-      // Only fall back to generated data if real API fails completely
-      const fallback = this.generateFallbackData(lat, lon);
-      const map: Record<string, { value: number; unit: string }> = {};
-      for (const m of fallback.measurements) {
-        map[m.parameter.toLowerCase()] = { value: m.value, unit: m.unit };
-      }
-
-      const readValue = (key: string): number => {
-        const entry = map[key];
-        return entry ? Math.round(entry.value) : 0;
-      };
-
-      const pm25 = readValue('pm25');
-      const aqi = this.computeAQIFromPM25(pm25 || 0);
-
-      return {
-        aqi,
-        pm25: readValue('pm25'),
-        pm10: readValue('pm10'),
-        o3: readValue('o3'),
-        no2: readValue('no2'),
-        so2: readValue('so2'),
-        co: readValue('co'),
-        timestamp: new Date().toISOString(),
-      };
+      console.error('Failed to get air quality data:', error);
+      throw error;
     }
   }
 }
