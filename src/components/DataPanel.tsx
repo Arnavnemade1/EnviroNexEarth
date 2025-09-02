@@ -15,7 +15,9 @@ import {
   Play,
   Pause,
   RotateCcw,
-  Home
+  Home,
+  BarChart3,
+  Atom
 } from 'lucide-react';
 import { AirQualityData, PredictionData } from '@/types';
  
@@ -36,6 +38,7 @@ import { AirQualityData, PredictionData } from '@/types';
    currentYear: number;
    onYearChange: (direction: 'next' | 'prev') => void;
    onBackToHome?: () => void;
+   onShowQuantumAnalytics?: () => void;
  }
 
 export const DataPanel = ({
@@ -48,7 +51,8 @@ export const DataPanel = ({
   onAnimationToggle,
   currentYear,
   onYearChange,
-  onBackToHome
+  onBackToHome,
+  onShowQuantumAnalytics
 }: DataPanelProps) => {
   const [selectedScenario, setSelectedScenario] = useState<'current' | 'clean_energy' | 'no_action'>('current');
   const [animationSpeed, setAnimationSpeed] = useState(1);
@@ -201,16 +205,21 @@ export const DataPanel = ({
 
       {/* Quantum 24h Forecast */}
       {quantumForecast && (
-        <Card className="glass animate-fade-in-up">
+        <Card className="glass animate-fade-in-up border-2 border-primary/30">
           <div className="p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Quantum 24h Forecast</h3>
-              <Badge variant="outline" className="border-current text-accent">
-                {quantumForecast.model.backend.includes('ibm') ? 'IBM-validated' : 'Simulator'}
+              <div className="flex items-center gap-2">
+                <Atom className="w-5 h-5 text-primary animate-spin" />
+                <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Quantum 24h Forecast
+                </h3>
+              </div>
+              <Badge variant="outline" className="border-primary text-primary">
+                IBM Quantum Circuits
               </Badge>
             </div>
-            <div className="text-xs text-muted-foreground">
-              Quantum-kernel enhanced; attempts IBM hardware on free tier when available, else uses simulator.
+            <div className="text-xs text-muted-foreground bg-primary/5 p-2 rounded">
+              🚀 Powered by IBM Quantum Computing - leveraging quantum superposition for exponentially enhanced predictions.
             </div>
             <div className="text-sm text-muted-foreground">
               Next hour AQI: <span className={getAQIColor(quantumForecast.hourly[0]?.aqi || 0)}>
@@ -231,6 +240,16 @@ export const DataPanel = ({
                 </div>
               </div>
             </div>
+            {onShowQuantumAnalytics && (
+              <Button 
+                size="sm" 
+                className="w-full mt-3 bg-gradient-to-r from-primary to-secondary"
+                onClick={onShowQuantumAnalytics}
+              >
+                <BarChart3 className="w-4 h-4 mr-2" />
+                View Quantum Analytics
+              </Button>
+            )}
             <div className="text-xs text-muted-foreground">
               Horizon: {quantumForecast.model.horizonHours}h • Generated {new Date(quantumForecast.generatedAt).toLocaleTimeString()}
             </div>

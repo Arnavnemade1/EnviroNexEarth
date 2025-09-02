@@ -6,6 +6,7 @@ import DataPanel from '@/components/DataPanel';
 import NaturalDisasters from '@/components/NaturalDisasters';
 import Chatbot from '@/components/Chatbot';
 import HomeScreen from '@/components/HomeScreen';
+import QuantumAnalytics from '@/components/QuantumAnalytics';
 import { nasaService } from '@/services/nasaApi';
 import { geocodingService } from '@/services/geocoding';
 import { openaqService } from '@/services/openAq';
@@ -25,6 +26,7 @@ const Index = () => {
   const [globeHue, setGlobeHue] = useState<string>('none');
   const [showHomeScreen, setShowHomeScreen] = useState(true);
   const [showDisasters, setShowDisasters] = useState(false);
+  const [showQuantumAnalytics, setShowQuantumAnalytics] = useState(false);
 
   // Auto-hide intro after 5 seconds
   useEffect(() => {
@@ -48,6 +50,7 @@ const Index = () => {
       setShowHomeScreen(false);
       setShowIntro(false);
       setShowDisasters(false);
+      setShowQuantumAnalytics(false);
       
       toast({
         title: "Loading city data...",
@@ -160,6 +163,16 @@ const Index = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-space">
+      {/* Quantum Analytics */}
+      {showQuantumAnalytics && quantumForecast && selectedCity && airQuality && (
+        <QuantumAnalytics
+          quantumForecast={quantumForecast}
+          cityName={`${selectedCity.name}, ${selectedCity.country}`}
+          currentAQI={airQuality.aqi}
+          onBack={() => setShowQuantumAnalytics(false)}
+        />
+      )}
+
       {/* Home Screen */}
       {showHomeScreen && (
         <HomeScreen 
@@ -223,7 +236,7 @@ const Index = () => {
       </div>
 
       {/* Data Panel */}
-      {selectedCity && airQuality && predictions.length > 0 && (
+      {selectedCity && airQuality && predictions.length > 0 && !showQuantumAnalytics && (
         <DataPanel
           cityName={`${selectedCity.name}, ${selectedCity.country}`}
           airQuality={airQuality}
@@ -234,6 +247,7 @@ const Index = () => {
           onAnimationToggle={() => handleYearChange('next')}
           currentYear={currentYear}
           onYearChange={handleYearChange}
+          onShowQuantumAnalytics={quantumForecast ? () => setShowQuantumAnalytics(true) : undefined}
           onBackToHome={() => {
             setShowHomeScreen(true);
             setSelectedCity(null);

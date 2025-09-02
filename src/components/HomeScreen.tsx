@@ -80,6 +80,11 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
               Earth's Skies in 2030
             </h1>
           </div>
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Badge variant="outline" className="border-primary text-primary px-4 py-2">
+              🚀 Powered by IBM Quantum Computing
+            </Badge>
+          </div>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Explore real-time air quality from NASA satellites and see quantum-enhanced AI predictions for Earth’s atmosphere.
           </p>

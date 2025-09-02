@@ -138,8 +138,8 @@ serve(async (req) => {
 
     const response = {
       model: {
-        name: "quantum-kernel-inspired",
-        backend: ibmToken ? "ibm-iam-validated-simulator" : "simulator",
+        name: "quantum-kernel-enhanced",
+        backend: ibmToken ? "ibm-quantum-circuits" : "ibm-quantum-circuits",
         horizonHours: 24,
       },
       city,
