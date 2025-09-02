@@ -209,6 +209,9 @@ export const DataPanel = ({
                 {quantumForecast.model.backend.includes('ibm') ? 'IBM-validated' : 'Simulator'}
               </Badge>
             </div>
+            <div className="text-xs text-muted-foreground">
+              Quantum-kernel enhanced; attempts IBM hardware on free tier when available, else uses simulator.
+            </div>
             <div className="text-sm text-muted-foreground">
               Next hour AQI: <span className={getAQIColor(quantumForecast.hourly[0]?.aqi || 0)}>
                 {quantumForecast.hourly[0]?.aqi ?? '—'}

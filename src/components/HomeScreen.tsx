@@ -57,7 +57,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
     {
       icon: TrendingUp,
       title: '2030 Predictions',
-      description: 'AI-powered climate scenarios and forecasting'
+      description: 'Quantum-enhanced AI forecasting'
     },
     {
       icon: MessageCircle,
@@ -81,7 +81,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
             </h1>
           </div>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Explore real-time air quality data from NASA satellites and see AI-powered predictions for the future of our planet's atmosphere.
+            Explore real-time air quality from NASA satellites and see quantum-enhanced AI predictions for Earth’s atmosphere.
           </p>
         </div>
 
@@ -153,7 +153,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
         {/* Info Badge */}
         <div className="flex justify-center">
           <Badge variant="outline" className="glass">
-            Real-time data • AI predictions • Interactive globe
+            Real-time data • Quantum-enhanced AI • Interactive globe
           </Badge>
         </div>
         </div>
