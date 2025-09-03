@@ -40,57 +40,74 @@ serve(async (req) => {
       return JSON.parse(text);
     };
 
-    // 1) Try v3/latest directly (preferred)
-    const params = new URLSearchParams({
-      coordinates: `${lat},${lon}`,
-      radius: String(radius),
-      limit: "1",
-      sort: "distance",
-    });
-    const latestUrl = `https://api.openaq.org/v3/latest?${params.toString()}`;
+    // Find nearest location using v3/locations with geospatial query
+    const buildLocationsUrl = (coords: string) =>
+      `https://api.openaq.org/v3/locations?coordinates=${coords}&radius=${radius}&limit=1`;
 
-    let data: any | null = null;
+    let locationData: any | null = null;
     try {
-      data = await callOpenAQ(latestUrl);
+      const coordsLatLon = `${lat},${lon}`; // try latitude,longitude first
+      const locationsUrl1 = buildLocationsUrl(coordsLatLon);
+      console.log("OpenAQ locations URL #1:", locationsUrl1);
+      locationData = await callOpenAQ(locationsUrl1);
     } catch (e1) {
-      // Retry without sort param
-      const fallbackParams = new URLSearchParams({
-        coordinates: `${lat},${lon}`,
-        radius: String(radius),
-        limit: "1",
-      });
-      const latestFallbackUrl = `https://api.openaq.org/v3/latest?${fallbackParams.toString()}`;
-      data = await callOpenAQ(latestFallbackUrl);
+      // Try longitude,latitude ordering if first attempt failed
+      try {
+        const coordsLonLat = `${lon},${lat}`;
+        const locationsUrl2 = buildLocationsUrl(coordsLonLat);
+        console.log("OpenAQ locations URL #2:", locationsUrl2);
+        locationData = await callOpenAQ(locationsUrl2);
+      } catch (e2) {
+        throw e2; // bubble up last error
+      }
     }
 
-    if (!data?.results || data.results.length === 0) {
+    if (!locationData?.results || locationData.results.length === 0) {
       return new Response(
         JSON.stringify({ error: "No air quality stations found in this area" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const item = data.results[0];
+    const location = locationData.results[0];
+    const locationId = location.id;
 
-    // measurements may be in item.measurements (v3 latest) or item.parameters (v3 locations)
-    let measurements: Array<{ parameter: string; value: number; unit: string }> = [];
-    if (Array.isArray(item.measurements)) {
-      measurements = item.measurements.map((m: any) => ({
-        parameter: m.parameter,
-        value: Number(m.value),
-        unit: m.unit,
-      }));
-    } else if (Array.isArray(item.parameters)) {
-      measurements = item.parameters
-        .filter((p: any) => p?.lastValue != null)
-        .map((p: any) => ({
-          parameter: p.parameter,
-          value: Number(p.lastValue),
-          unit: p.unit ?? "µg/m³",
-        }));
+    // Fetch sensors metadata for this location to map sensor IDs -> parameter names/units
+    const locationDetailUrl = `https://api.openaq.org/v3/locations/${locationId}`;
+    console.log("OpenAQ location detail URL:", locationDetailUrl);
+    const locationDetail = await callOpenAQ(locationDetailUrl);
+
+    const sensors: Array<{ id: number; parameter?: { name?: string; units?: string } }> =
+      locationDetail?.results?.[0]?.sensors ?? [];
+
+    const sensorMeta = new Map<number, { parameter: string; unit: string }>();
+    for (const s of sensors) {
+      if (s?.id != null) {
+        sensorMeta.set(s.id, {
+          parameter: s.parameter?.name ?? "unknown",
+          unit: s.parameter?.units ?? "µg/m³",
+        });
+      }
     }
 
-    const coordinates = item.coordinates ?? item.location?.coordinates ?? { latitude: lat, longitude: lon };
+    // Fetch latest measurements for this location
+    const latestByLocationUrl = `https://api.openaq.org/v3/locations/${locationId}/latest`;
+    console.log("OpenAQ latest-by-location URL:", latestByLocationUrl);
+    const latestData = await callOpenAQ(latestByLocationUrl);
+
+    const latestResults: Array<{ value: number; sensorsId: number }> = latestData?.results ?? [];
+
+    // Transform into the structure the frontend expects
+    const measurements = latestResults.map((r: any) => {
+      const meta = sensorMeta.get(Number(r.sensorsId));
+      return {
+        parameter: meta?.parameter ?? "unknown",
+        value: Number(r.value),
+        unit: meta?.unit ?? "µg/m³",
+      };
+    });
+
+    const coordinates = location.coordinates ?? { latitude: lat, longitude: lon };
 
     const transformedData = {
       results: [
