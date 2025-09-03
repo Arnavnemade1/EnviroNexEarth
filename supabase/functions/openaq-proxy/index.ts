@@ -23,70 +23,82 @@ serve(async (req) => {
 
     const apiKey = Deno.env.get("OPENAQ_API_KEY") ?? "";
 
-    // OpenAQ v3 API: First get locations near the coordinates
-    const locationsUrl = `https://api.openaq.org/v3/locations?coordinates=${lat},${lon}&radius=${radius}&limit=5&order_by=distance`;
+    // Helper to call OpenAQ with proper headers
+    const callOpenAQ = async (url: string) => {
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          ...(apiKey ? { "X-API-Key": apiKey } : {}),
+        },
+      });
+      const text = await res.text();
+      if (!res.ok) {
+        console.error("OpenAQ API error:", res.status, text);
+        throw new Error(`OpenAQ API error ${res.status}: ${text}`);
+      }
+      return JSON.parse(text);
+    };
 
-    const locRes = await fetch(locationsUrl, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        ...(apiKey ? { "X-API-Key": apiKey } : {}),
-      },
+    // 1) Try v3/latest directly (preferred)
+    const params = new URLSearchParams({
+      coordinates: `${lat},${lon}`,
+      radius: String(radius),
+      limit: "1",
+      sort: "distance",
     });
+    const latestUrl = `https://api.openaq.org/v3/latest?${params.toString()}`;
 
-    if (!locRes.ok) {
-      const text = await locRes.text();
-      console.error("OpenAQ locations API error:", locRes.status, text);
-      return new Response(
-        JSON.stringify({ error: `OpenAQ locations API error: ${locRes.status}`, details: text }),
-        { status: locRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    let data: any | null = null;
+    try {
+      data = await callOpenAQ(latestUrl);
+    } catch (e1) {
+      // Retry without sort param
+      const fallbackParams = new URLSearchParams({
+        coordinates: `${lat},${lon}`,
+        radius: String(radius),
+        limit: "1",
+      });
+      const latestFallbackUrl = `https://api.openaq.org/v3/latest?${fallbackParams.toString()}`;
+      data = await callOpenAQ(latestFallbackUrl);
     }
 
-    const locData = await locRes.json();
-    
-    if (!locData.results || locData.results.length === 0) {
+    if (!data?.results || data.results.length === 0) {
       return new Response(
         JSON.stringify({ error: "No air quality stations found in this area" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Get the first location and fetch its latest measurements
-    const location = locData.results[0];
-    const locationId = location.id;
+    const item = data.results[0];
 
-    const measurementsUrl = `https://api.openaq.org/v3/locations/${locationId}/latest`;
-
-    const measRes = await fetch(measurementsUrl, {
-      method: "GET", 
-      headers: {
-        Accept: "application/json",
-        ...(apiKey ? { "X-API-Key": apiKey } : {}),
-      },
-    });
-
-    if (!measRes.ok) {
-      const text = await measRes.text();
-      console.error("OpenAQ measurements API error:", measRes.status, text);
-      return new Response(
-        JSON.stringify({ error: `OpenAQ measurements API error: ${measRes.status}`, details: text }),
-        { status: measRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    // measurements may be in item.measurements (v3 latest) or item.parameters (v3 locations)
+    let measurements: Array<{ parameter: string; value: number; unit: string }> = [];
+    if (Array.isArray(item.measurements)) {
+      measurements = item.measurements.map((m: any) => ({
+        parameter: m.parameter,
+        value: Number(m.value),
+        unit: m.unit,
+      }));
+    } else if (Array.isArray(item.parameters)) {
+      measurements = item.parameters
+        .filter((p: any) => p?.lastValue != null)
+        .map((p: any) => ({
+          parameter: p.parameter,
+          value: Number(p.lastValue),
+          unit: p.unit ?? "µg/m³",
+        }));
     }
 
-    const measData = await measRes.json();
+    const coordinates = item.coordinates ?? item.location?.coordinates ?? { latitude: lat, longitude: lon };
 
-    // Transform v3 format to match v2 format expected by frontend
     const transformedData = {
-      results: [{
-        coordinates: location.coordinates,
-        measurements: measData.results?.map((m: any) => ({
-          parameter: m.parameter,
-          value: m.value,
-          unit: m.unit
-        })) || []
-      }]
+      results: [
+        {
+          coordinates,
+          measurements,
+        },
+      ],
     };
 
     return new Response(JSON.stringify(transformedData), {
