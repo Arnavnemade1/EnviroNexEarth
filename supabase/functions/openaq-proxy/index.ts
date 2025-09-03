@@ -23,9 +23,10 @@ serve(async (req) => {
 
     const apiKey = Deno.env.get("OPENAQ_API_KEY") ?? "";
 
-    const url = `https://api.openaq.org/v2/latest?coordinates=${lat},${lon}&radius=${radius}&limit=1&order_by=distance`;
+    // OpenAQ v3 API: First get locations near the coordinates
+    const locationsUrl = `https://api.openaq.org/v3/locations?coordinates=${lat},${lon}&radius=${radius}&limit=5&order_by=distance`;
 
-    const res = await fetch(url, {
+    const locRes = await fetch(locationsUrl, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -33,19 +34,62 @@ serve(async (req) => {
       },
     });
 
-    const text = await res.text();
-
-    if (!res.ok) {
-      console.error("OpenAQ API error:", res.status, text);
+    if (!locRes.ok) {
+      const text = await locRes.text();
+      console.error("OpenAQ locations API error:", locRes.status, text);
       return new Response(
-        JSON.stringify({ error: `OpenAQ API error: ${res.status}`, details: text }),
-        { status: res.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: `OpenAQ locations API error: ${locRes.status}`, details: text }),
+        { status: locRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const data = JSON.parse(text);
+    const locData = await locRes.json();
+    
+    if (!locData.results || locData.results.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "No air quality stations found in this area" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
-    return new Response(JSON.stringify(data), {
+    // Get the first location and fetch its latest measurements
+    const location = locData.results[0];
+    const locationId = location.id;
+
+    const measurementsUrl = `https://api.openaq.org/v3/locations/${locationId}/latest`;
+
+    const measRes = await fetch(measurementsUrl, {
+      method: "GET", 
+      headers: {
+        Accept: "application/json",
+        ...(apiKey ? { "X-API-Key": apiKey } : {}),
+      },
+    });
+
+    if (!measRes.ok) {
+      const text = await measRes.text();
+      console.error("OpenAQ measurements API error:", measRes.status, text);
+      return new Response(
+        JSON.stringify({ error: `OpenAQ measurements API error: ${measRes.status}`, details: text }),
+        { status: measRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const measData = await measRes.json();
+
+    // Transform v3 format to match v2 format expected by frontend
+    const transformedData = {
+      results: [{
+        coordinates: location.coordinates,
+        measurements: measData.results?.map((m: any) => ({
+          parameter: m.parameter,
+          value: m.value,
+          unit: m.unit
+        })) || []
+      }]
+    };
+
+    return new Response(JSON.stringify(transformedData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
