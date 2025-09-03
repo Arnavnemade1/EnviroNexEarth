@@ -18,15 +18,15 @@ class OpenAQService {
   private apiKey = '2e4753879800c5b4d925b6b8b46486b145b4ecbec17ce2dad4d8f4162045a390';
 
   private async fetchNearest(lat: number, lon: number, radius: number = 25000) {
-    const { data, error } = await supabase.functions.invoke('openaq-proxy', {
+    const { data, error } = await supabase.functions.invoke('airquality-openmeteo', {
       body: { lat, lon, radius },
     });
     if (error) {
-      console.error('openaq-proxy failed:', error);
-      throw new Error(typeof error === 'string' ? error : (error.message ?? 'OpenAQ proxy error'));
+      console.error('airquality-openmeteo failed:', error);
+      throw new Error(typeof error === 'string' ? error : (error.message ?? 'Air quality proxy error'));
     }
     if (!data?.results || data.results.length === 0) {
-      throw new Error('No air quality stations found in this area');
+      throw new Error('No air quality data available for this location');
     }
     return (data as OpenAQLatestResponse).results[0];
   }
