@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useNavigate } from 'react-router-dom';
 import { 
   Wind, 
   Thermometer, 
@@ -38,7 +38,8 @@ import { AirQualityData, PredictionData } from '@/types';
    currentYear: number;
    onYearChange: (direction: 'next' | 'prev') => void;
    onBackToHome?: () => void;
-   onShowQuantumAnalytics?: () => void;
+  onShowQuantumAnalytics?: () => void;
+  onShowHealth?: () => void;
  }
 
 export const DataPanel = ({
@@ -52,10 +53,12 @@ export const DataPanel = ({
   currentYear,
   onYearChange,
   onBackToHome,
-  onShowQuantumAnalytics
+  onShowQuantumAnalytics,
+  onShowHealth
 }: DataPanelProps) => {
   const [selectedScenario, setSelectedScenario] = useState<'current' | 'clean_energy' | 'no_action'>('current');
   const [animationSpeed, setAnimationSpeed] = useState(1);
+  const navigate = useNavigate();
 
   const getAQIColor = (aqi: number) => {
     if (aqi <= 50) return 'text-clean-green';
@@ -136,6 +139,18 @@ export const DataPanel = ({
 
   const currentPrediction = getCurrentPrediction();
   const healthImpact = calculateHealthImpact();
+
+  const handleHealthNavigation = () => {
+    if (cityName && airQuality) {
+      navigate('/health', {
+        state: {
+          cityName,
+          airQuality,
+          forecast: quantumForecast?.hourly
+        }
+      });
+    }
+  };
 
   return (
     <div className="fixed top-6 left-6 w-80 space-y-4 z-40 max-h-[calc(100vh-3rem)] overflow-y-auto">
@@ -248,6 +263,17 @@ export const DataPanel = ({
               >
                 <BarChart3 className="w-4 h-4 mr-2" />
                 View Quantum Analytics
+              </Button>
+            )}
+            {cityName && airQuality && (
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="w-full mt-2 glass"
+                onClick={handleHealthNavigation}
+              >
+                <Heart className="w-4 h-4 mr-2" />
+                Health Analysis
               </Button>
             )}
             <div className="text-xs text-muted-foreground">
