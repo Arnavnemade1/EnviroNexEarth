@@ -114,25 +114,55 @@ serve(async (req) => {
     const sims = support.map((s) => kernelOverlap(x0, s));
     const avgSim = sims.reduce((a, b) => a + b, 0) / sims.length;
 
-    // Use similarity to modulate volatility/amplitude and confidence
-    const volatility = Math.max(0.05, 0.35 - 0.25 * avgSim); // higher sim -> lower volatility
-    const dailyAmp = Math.max(2, Math.min(25, pm25 * (0.15 + (1 - avgSim) * 0.25)));
-    const meanRevert = 0.02 + (1 - avgSim) * 0.05;
-
+    // Enhanced quantum-inspired modeling with realistic environmental factors
+    const volatility = Math.max(0.08, 0.4 - 0.3 * avgSim);
+    const dailyAmp = Math.max(3, Math.min(30, pm25 * (0.2 + (1 - avgSim) * 0.3)));
+    const meanRevert = 0.03 + (1 - avgSim) * 0.07;
+    
+    // Environmental factors based on location and pollutants
+    const latFactor = Math.abs(city.lat) / 90; // Latitude influence
+    const urbanFactor = Math.min(1, pm25 / 15); // Urban pollution factor
+    const seasonalPhase = (2 * Math.PI * (new Date().getMonth() + 1)) / 12;
+    
     const hourly = [] as Array<{ hourOffset: number; aqi: number; pm25: number; confidence: number }>;
     let prev = pm25;
+    let momentum = 0;
 
     for (let h = 1; h <= 24; h++) {
       const t = (hour + h) % 24;
-      const cyc = dailyAmp * Math.sin((2 * Math.PI * t) / 24 + 0.3);
-      // mean reversion towards current pm25 with small random walk scaled by volatility
-      const drift = -meanRevert * (prev - pm25);
-      const noise = (Math.random() - 0.5) * 2 * volatility * (5 + pm25 * 0.05);
-      const nextPM25 = Math.max(1, prev + drift + cyc * 0.1 + noise);
+      
+      // Multi-factor environmental modeling
+      const dailyCycle = dailyAmp * Math.sin((2 * Math.PI * t) / 24 + 0.3);
+      const trafficPeak = t >= 7 && t <= 9 || t >= 17 && t <= 19 ? 1.2 : 0.8;
+      const industrialBase = t >= 9 && t <= 17 ? 1.1 : 0.9;
+      const atmosphericStability = 0.9 + 0.2 * Math.sin(seasonalPhase + t * 0.1);
+      
+      // Quantum-enhanced prediction with environmental correlation
+      const envFactor = trafficPeak * industrialBase * atmosphericStability;
+      const quantumCorrelation = avgSim * kernelOverlap([t, prev, latFactor], [hour, pm25, urbanFactor]);
+      
+      // Enhanced drift with momentum and environmental factors
+      const drift = -meanRevert * (prev - pm25) + momentum * 0.3;
+      const envNoise = (Math.random() - 0.5) * volatility * (8 + pm25 * 0.08) * envFactor;
+      const quantumFluctuation = (Math.random() - 0.5) * quantumCorrelation * 3;
+      
+      const nextPM25 = Math.max(1, prev + drift + dailyCycle * 0.12 + envNoise + quantumFluctuation);
+      momentum = (nextPM25 - prev) * 0.7 + momentum * 0.3; // Update momentum
+      
       const aqi = aqiFromPM25(nextPM25);
-      // confidence increases slightly for near-term, scaled by similarity
-      const confidence = Math.min(0.95, Math.max(0.55, 0.60 + avgSim * 0.25 - h * 0.01));
-      hourly.push({ hourOffset: h, aqi, pm25: Math.round(nextPM25), confidence: Number(confidence.toFixed(2)) });
+      
+      // Dynamic confidence based on multiple factors
+      const timeFactor = Math.max(0.3, 1 - h * 0.025); // Decreases with time
+      const stabilityFactor = Math.max(0.5, 1 - Math.abs(momentum) * 0.1);
+      const quantumFactor = 0.5 + quantumCorrelation * 0.4;
+      const confidence = Math.min(0.94, Math.max(0.52, timeFactor * stabilityFactor * quantumFactor * 0.85));
+      
+      hourly.push({ 
+        hourOffset: h, 
+        aqi: Math.round(aqi), 
+        pm25: Math.round(nextPM25 * 10) / 10, 
+        confidence: Number(confidence.toFixed(3)) 
+      });
       prev = nextPM25;
     }
 
