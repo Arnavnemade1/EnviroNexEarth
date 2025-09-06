@@ -96,27 +96,78 @@ export function calculateQuantumHealthRisk(
 
   const riskLevel = getRiskLevel(adjustedRisk);
 
-  // Generate quantum-enhanced recommendations
+  // Generate quantum-enhanced recommendations based on real data
   const recommendations: string[] = [];
   
+  // High risk recommendations
   if (adjustedRisk > 60) {
-    recommendations.push("Consider staying indoors during peak pollution hours (7-9 AM, 5-7 PM)");
-    recommendations.push("Use air purifiers indoors and keep windows closed");
+    recommendations.push("🏠 Stay indoors during peak pollution hours (7-9 AM, 5-7 PM)");
+    recommendations.push("💨 Use air purifiers and keep windows closed");
+    recommendations.push("😷 Wear N95 masks when going outside");
   }
   
-  if (profile?.hasAsthma && adjustedRisk > 40) {
-    recommendations.push("Keep rescue inhaler readily available");
-    recommendations.push("Consider pre-medication before outdoor activities");
+  // Medium risk recommendations
+  if (adjustedRisk > 35 && adjustedRisk <= 60) {
+    recommendations.push("⏰ Limit outdoor time to essential activities");
+    recommendations.push("🌬️ Check hourly air quality before going outside");
+    recommendations.push("🏃‍♂️ Move exercise indoors or to early morning hours");
   }
   
-  if (profile?.hasHeartCondition && adjustedRisk > 35) {
-    recommendations.push("Monitor heart rate during any physical activity");
-    recommendations.push("Consult cardiologist about air quality precautions");
+  // Condition-specific recommendations
+  if (profile?.hasAsthma) {
+    if (adjustedRisk > 40) {
+      recommendations.push("💊 Keep rescue inhaler readily available");
+      recommendations.push("🔔 Consider pre-medication before outdoor activities");
+    }
+    if (pm25 > 25) {
+      recommendations.push("⚠️ PM2.5 levels may trigger asthma symptoms - be extra cautious");
+    }
+  }
+  
+  if (profile?.hasHeartCondition) {
+    if (adjustedRisk > 35) {
+      recommendations.push("❤️ Monitor heart rate during any physical activity");
+      recommendations.push("👨‍⚕️ Consult cardiologist about air quality precautions");
+    }
+    if (adjustedRisk > 50) {
+      recommendations.push("🚫 Avoid strenuous outdoor activities completely");
+    }
   }
 
+  if (profile?.hasLungCondition && adjustedRisk > 30) {
+    recommendations.push("🫁 Monitor breathing closely and avoid outdoor exertion");
+    recommendations.push("💨 Use bronchodilators as prescribed before exposure");
+  }
+
+  // Age-specific recommendations
+  if (profile && profile.age > 65 && adjustedRisk > 40) {
+    recommendations.push("👴 Seniors: Consider avoiding all outdoor activities");
+    recommendations.push("🏥 Stay close to medical facilities if symptoms develop");
+  }
+
+  if (profile && profile.age < 18 && adjustedRisk > 45) {
+    recommendations.push("🧒 Keep children indoors during high pollution periods");
+    recommendations.push("🎮 Plan indoor activities and games");
+  }
+
+  // Smoking-related recommendations
+  if (profile?.smokingStatus === 'current' && adjustedRisk > 30) {
+    recommendations.push("🚭 Avoid smoking - it amplifies pollution effects significantly");
+    recommendations.push("💔 Your smoking status increases health risks by 60%");
+  }
+
+  // Low risk recommendations
   if (adjustedRisk < 25) {
-    recommendations.push("Air quality is good for outdoor activities");
-    recommendations.push("Great time for exercise and recreational activities");
+    recommendations.push("✅ Air quality is good for all outdoor activities");
+    recommendations.push("🏃‍♂️ Great time for exercise and recreational activities");
+    recommendations.push("🌳 Perfect for walks in parks and outdoor sports");
+  }
+
+  // Always provide at least some recommendations
+  if (recommendations.length === 0) {
+    recommendations.push("📊 Monitoring air quality - check back for updates");
+    recommendations.push("💧 Stay hydrated and maintain healthy indoor air");
+    recommendations.push("🌿 Consider indoor plants to improve air quality");
   }
 
   // Activity safety assessment

@@ -79,6 +79,8 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
   });
   const [healthAnalysis, setHealthAnalysis] = useState<QuantumHealthAnalysisType | null>(null);
   const [healthTrend, setHealthTrend] = useState<Array<{ hour: number; riskScore: number; trend: string }>>([]);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   // Calculate quantum health analysis when data changes or health profile is submitted
   useEffect(() => {
@@ -90,6 +92,7 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
       healthProfile
     );
     setHealthAnalysis(analysis);
+    setLastUpdated(new Date());
 
     if (forecast) {
       const trend = predictHealthTrend(analysis, forecast, airQuality.o3, airQuality.no2);
@@ -97,8 +100,14 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
     }
   }, [airQuality, healthProfile, forecast]);
 
-  const handleProfileSubmit = () => {
+  const handleProfileSubmit = async () => {
+    setIsUpdating(true);
+    
+    // Add a brief delay to show loading state
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
     setHealthProfile(tempHealthProfile);
+    setIsUpdating(false);
   };
 
   const getRiskColor = (risk: string) => {
@@ -146,7 +155,12 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
             </div>
             <div>
               <h2 className="text-2xl font-bold">Quantum Health Analysis</h2>
-              <p className="text-muted-foreground">{cityName} • Real-time Risk Assessment</p>
+              <p className="text-muted-foreground">
+                {cityName} • Real-time Risk Assessment
+                <span className="text-xs block mt-1">
+                  Last updated: {lastUpdated.toLocaleTimeString()}
+                </span>
+              </p>
             </div>
           </div>
           <Badge 
@@ -427,12 +441,25 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
                 onClick={handleProfileSubmit}
                 className="w-full"
                 size="lg"
+                disabled={isUpdating}
               >
-                <Activity className="w-4 h-4 mr-2" />
-                Update Health Analysis
+                {isUpdating ? (
+                  <>
+                    <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Activity className="w-4 h-4 mr-2" />
+                    Update Health Analysis
+                  </>
+                )}
               </Button>
               <p className="text-xs text-muted-foreground text-center mt-2">
-                Click to recalculate your personalized health recommendations
+                {isUpdating ? 
+                  "Processing quantum health calculations..." : 
+                  "Click to recalculate your personalized health recommendations"
+                }
               </p>
             </div>
           </Card>
