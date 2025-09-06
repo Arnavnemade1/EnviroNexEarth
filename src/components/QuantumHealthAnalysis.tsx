@@ -69,10 +69,18 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
     activityLevel: 'moderate',
     smokingStatus: 'never'
   });
+  const [tempHealthProfile, setTempHealthProfile] = useState<HealthProfile>({
+    age: 30,
+    hasAsthma: false,
+    hasHeartCondition: false,
+    hasLungCondition: false,
+    activityLevel: 'moderate',
+    smokingStatus: 'never'
+  });
   const [healthAnalysis, setHealthAnalysis] = useState<QuantumHealthAnalysisType | null>(null);
   const [healthTrend, setHealthTrend] = useState<Array<{ hour: number; riskScore: number; trend: string }>>([]);
 
-  // Calculate quantum health analysis when data changes
+  // Calculate quantum health analysis when data changes or health profile is submitted
   useEffect(() => {
     const analysis = calculateQuantumHealthRisk(
       airQuality.aqi,
@@ -88,6 +96,10 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
       setHealthTrend(trend);
     }
   }, [airQuality, healthProfile, forecast]);
+
+  const handleProfileSubmit = () => {
+    setHealthProfile(tempHealthProfile);
+  };
 
   const getRiskColor = (risk: string) => {
     const colors = {
@@ -228,12 +240,19 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
             <Card className="glass p-6">
               <h3 className="text-lg font-semibold mb-4">Quantum-Enhanced Recommendations</h3>
               <div className="space-y-3">
-                {healthAnalysis.recommendations.map((rec, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 bg-muted/10 rounded-lg">
-                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm">{rec}</p>
+                {healthAnalysis.recommendations.length > 0 ? (
+                  healthAnalysis.recommendations.map((rec, index) => (
+                    <div key={index} className="flex items-start gap-3 p-3 bg-muted/10 rounded-lg">
+                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <p className="text-sm">{rec}</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center text-muted-foreground p-4">
+                    <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Analyzing air quality data to generate personalized recommendations...</p>
                   </div>
-                ))}
+                )}
               </div>
             </Card>
           </div>
@@ -312,8 +331,8 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
                 <div>
                   <label className="text-sm font-medium mb-2 block">Age</label>
                   <Select 
-                    value={healthProfile.age.toString()} 
-                    onValueChange={(value) => setHealthProfile(prev => ({ ...prev, age: parseInt(value) }))}
+                    value={tempHealthProfile.age.toString()} 
+                    onValueChange={(value) => setTempHealthProfile(prev => ({ ...prev, age: parseInt(value) }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -332,9 +351,9 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
                 <div>
                   <label className="text-sm font-medium mb-2 block">Activity Level</label>
                   <Select 
-                    value={healthProfile.activityLevel} 
+                    value={tempHealthProfile.activityLevel} 
                     onValueChange={(value: 'low' | 'moderate' | 'high') => 
-                      setHealthProfile(prev => ({ ...prev, activityLevel: value }))}
+                      setTempHealthProfile(prev => ({ ...prev, activityLevel: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -350,9 +369,9 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
                 <div>
                   <label className="text-sm font-medium mb-2 block">Smoking Status</label>
                   <Select 
-                    value={healthProfile.smokingStatus} 
+                    value={tempHealthProfile.smokingStatus} 
                     onValueChange={(value: 'never' | 'former' | 'current') => 
-                      setHealthProfile(prev => ({ ...prev, smokingStatus: value }))}
+                      setTempHealthProfile(prev => ({ ...prev, smokingStatus: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -373,33 +392,48 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
                     <div className="flex items-center space-x-2">
                       <Checkbox 
                         id="asthma"
-                        checked={healthProfile.hasAsthma}
+                        checked={tempHealthProfile.hasAsthma}
                         onCheckedChange={(checked) => 
-                          setHealthProfile(prev => ({ ...prev, hasAsthma: !!checked }))}
+                          setTempHealthProfile(prev => ({ ...prev, hasAsthma: !!checked }))}
                       />
                       <label htmlFor="asthma" className="text-sm">Asthma</label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox 
                         id="heart"
-                        checked={healthProfile.hasHeartCondition}
+                        checked={tempHealthProfile.hasHeartCondition}
                         onCheckedChange={(checked) => 
-                          setHealthProfile(prev => ({ ...prev, hasHeartCondition: !!checked }))}
+                          setTempHealthProfile(prev => ({ ...prev, hasHeartCondition: !!checked }))}
                       />
                       <label htmlFor="heart" className="text-sm">Heart Condition</label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox 
                         id="lung"
-                        checked={healthProfile.hasLungCondition}
+                        checked={tempHealthProfile.hasLungCondition}
                         onCheckedChange={(checked) => 
-                          setHealthProfile(prev => ({ ...prev, hasLungCondition: !!checked }))}
+                          setTempHealthProfile(prev => ({ ...prev, hasLungCondition: !!checked }))}
                       />
                       <label htmlFor="lung" className="text-sm">Lung Condition</label>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
+            
+            {/* Submit Button */}
+            <div className="pt-4 border-t">
+              <Button 
+                onClick={handleProfileSubmit}
+                className="w-full"
+                size="lg"
+              >
+                <Activity className="w-4 h-4 mr-2" />
+                Update Health Analysis
+              </Button>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Click to recalculate your personalized health recommendations
+              </p>
             </div>
           </Card>
         </TabsContent>
