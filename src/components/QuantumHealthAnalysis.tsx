@@ -37,7 +37,6 @@ import {
   Baby,
   User
 } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   calculateQuantumHealthRisk, 
   predictHealthTrend, 
@@ -124,8 +123,8 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
   ];
 
   return (
-    <ScrollArea className="h-[calc(100vh-12rem)]">
-      <div className="space-y-6 pr-4">
+    <div className="h-[calc(100vh-12rem)] overflow-auto">
+      <div className="space-y-6 pr-4 pb-8">
       {/* Header with Overall Risk */}
       <Card className="glass p-6">
         <div className="flex items-center justify-between mb-4">
@@ -267,11 +266,14 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
           {healthTrend.length > 0 && (
             <Card className="glass p-6">
               <h3 className="text-lg font-semibold mb-4">12-Hour Activity Safety Forecast</h3>
-              <div className="h-64">
+              <div className="h-80 mb-4">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={healthTrend}>
+                  <AreaChart data={healthTrend} margin={{ top: 5, right: 30, left: 20, bottom: 50 }}>
                     <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                    <XAxis dataKey="hour" label={{ value: 'Hours ahead', position: 'insideBottom', offset: -10 }} />
+                    <XAxis 
+                      dataKey="hour" 
+                      label={{ value: 'Hours ahead', position: 'insideBottom', offset: -5 }} 
+                    />
                     <YAxis label={{ value: 'Risk Score', angle: -90, position: 'insideLeft' }} />
                     <Tooltip 
                       content={({ active, payload, label }) => {
@@ -406,11 +408,14 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
           {healthTrend.length > 0 ? (
             <Card className="glass p-6">
               <h3 className="text-lg font-semibold mb-4">Health Risk Trend Analysis</h3>
-              <div className="h-80">
+              <div className="h-96 mb-4">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={healthTrend}>
+                  <LineChart data={healthTrend} margin={{ top: 5, right: 30, left: 20, bottom: 50 }}>
                     <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                    <XAxis dataKey="hour" label={{ value: 'Hours ahead', position: 'insideBottom', offset: -10 }} />
+                    <XAxis 
+                      dataKey="hour" 
+                      label={{ value: 'Hours ahead', position: 'insideBottom', offset: -5 }} 
+                    />
                     <YAxis label={{ value: 'Risk Score', angle: -90, position: 'insideLeft' }} />
                     <Tooltip />
                     <Line 
@@ -435,7 +440,7 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
         </TabsContent>
       </Tabs>
       </div>
-    </ScrollArea>
+    </div>
   );
 };
 
