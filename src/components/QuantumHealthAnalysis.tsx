@@ -37,6 +37,7 @@ import {
   Baby,
   User
 } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   calculateQuantumHealthRisk, 
   predictHealthTrend, 
@@ -84,7 +85,7 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
     setHealthAnalysis(analysis);
 
     if (forecast) {
-      const trend = predictHealthTrend(analysis, forecast);
+      const trend = predictHealthTrend(analysis, forecast, airQuality.o3, airQuality.no2);
       setHealthTrend(trend);
     }
   }, [airQuality, healthProfile, forecast]);
@@ -123,7 +124,8 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
   ];
 
   return (
-    <div className="space-y-6">
+    <ScrollArea className="h-[calc(100vh-12rem)]">
+      <div className="space-y-6 pr-4">
       {/* Header with Overall Risk */}
       <Card className="glass p-6">
         <div className="flex items-center justify-between mb-4">
@@ -432,7 +434,8 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
           )}
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </ScrollArea>
   );
 };
 
