@@ -27,24 +27,24 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
       title: 'Search a City',
       description: 'Enter any city name to see its air quality and future predictions',
       icon: Search,
-      color: 'text-primary',
-      bgColor: 'bg-primary/10'
+      gradient: 'from-primary to-primary/60',
+      shadowColor: 'shadow-primary/20'
     },
     {
       id: 'globe',
       title: 'Explore the Globe',
       description: 'Click anywhere on Earth to discover local air quality data',
       icon: Globe,
-      color: 'text-secondary',
-      bgColor: 'bg-secondary/10'
+      gradient: 'from-secondary to-secondary/60',
+      shadowColor: 'shadow-secondary/20'
     },
     {
       id: 'disasters',
       title: 'Natural Disasters',
       description: 'View current natural disasters affecting air quality worldwide',
       icon: AlertTriangle,
-      color: 'text-accent',
-      bgColor: 'bg-accent/10'
+      gradient: 'from-accent to-accent/60',
+      shadowColor: 'shadow-accent/20'
     }
   ];
 
@@ -52,24 +52,27 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
     {
       icon: Satellite,
       title: 'Live Satellites',
-      description: 'Interactive ISS and Earth observation satellites'
+      description: 'Interactive ISS and Earth observation satellites',
+      highlight: 'Real-time tracking'
     },
     {
       icon: TrendingUp,
       title: '2030 Predictions',
-      description: 'Quantum-enhanced AI forecasting'
+      description: 'Quantum-enhanced AI forecasting',
+      highlight: 'IBM Quantum'
     },
     {
       icon: MessageCircle,
       title: 'AI Assistant',
-      description: 'Ask questions about air quality and climate data'
+      description: 'Ask questions about air quality and climate data',
+      highlight: 'Powered by Gemini'
     }
   ];
 
   return (
-    <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-      <div className="max-w-4xl w-full h-full overflow-y-auto">
-        <div className="max-w-4xl w-full space-y-8 animate-fade-in-up py-8">
+    <div className="fixed inset-0 bg-gradient-to-br from-background via-background/98 to-primary/5 backdrop-blur-xl z-50 flex items-center justify-center p-4 md:p-6">
+      <div className="w-full max-w-6xl h-full overflow-y-auto scrollbar-hide">
+        <div className="min-h-full flex flex-col justify-center space-y-12 py-8 animate-fade-in-up">
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3 mb-6">
@@ -91,27 +94,29 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
         </div>
 
         {/* Quick Start Options */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-8">
           {quickStartOptions.map((option) => (
             <Card 
               key={option.id}
-              className={`glass p-6 cursor-pointer transition-all duration-300 hover:scale-105 border-2 ${
-                hoveredCard === option.id ? 'border-primary/50' : 'border-transparent'
+              className={`group glass p-8 cursor-pointer transition-all duration-500 hover:scale-105 hover:rotate-1 border-2 backdrop-blur-md ${
+                hoveredCard === option.id 
+                  ? 'border-primary/50 shadow-2xl shadow-primary/20' 
+                  : 'border-white/10 hover:border-white/20'
               }`}
               onClick={() => onQuickStart(option.id as 'search' | 'globe' | 'disasters')}
               onMouseEnter={() => setHoveredCard(option.id)}
               onMouseLeave={() => setHoveredCard(null)}
             >
-              <div className="space-y-4">
-                <div className={`w-12 h-12 rounded-lg ${option.bgColor} flex items-center justify-center`}>
-                  <option.icon className={`w-6 h-6 ${option.color}`} />
+              <div className="space-y-6">
+                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${option.gradient} flex items-center justify-center shadow-xl ${option.shadowColor} backdrop-blur-sm border border-white/30 group-hover:scale-110 transition-transform duration-300`}>
+                  <option.icon className="w-8 h-8 text-white drop-shadow-lg" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">{option.title}</h3>
-                  <p className="text-sm text-muted-foreground">{option.description}</p>
+                  <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">{option.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{option.description}</p>
                 </div>
-                <div className="flex items-center text-primary text-sm font-medium">
-                  Get started <ChevronRight className="w-4 h-4 ml-1" />
+                <div className="flex items-center text-primary text-sm font-semibold group-hover:text-primary-foreground transition-colors">
+                  Get started <ChevronRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
                 </div>
               </div>
             </Card>
@@ -119,15 +124,27 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
         </div>
 
         {/* Features Grid */}
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-center text-foreground">Powered by NASA EarthData</h2>
-          <div className="grid md:grid-cols-3 gap-4">
+        <div className="space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+              Powered by NASA EarthData
+            </h2>
+            <p className="text-muted-foreground">Advanced satellite technology meets AI innovation</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
             {features.map((feature, index) => (
-              <div key={index} className="flex items-center gap-3 glass p-4 rounded-lg">
-                <feature.icon className="w-8 h-8 text-primary flex-shrink-0" />
-                <div>
-                  <h4 className="font-medium text-foreground">{feature.title}</h4>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
+              <div key={index} className="group flex items-start gap-4 glass p-6 rounded-xl hover:scale-105 transition-all duration-300 border border-white/10 hover:border-white/20">
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <feature.icon className="w-6 h-6 text-primary flex-shrink-0" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-semibold text-foreground">{feature.title}</h4>
+                    <Badge variant="outline" className="text-xs px-2 py-0 border-primary/30 text-primary">
+                      {feature.highlight}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
                 </div>
               </div>
             ))}
@@ -135,10 +152,10 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
           <Button 
             size="lg" 
-            className="text-lg px-8 py-6 glow hover:scale-105 transition-transform"
+            className="text-lg px-10 py-6 glow hover:scale-110 transition-all duration-300 bg-gradient-to-r from-primary to-secondary shadow-xl"
             onClick={onStartExploring}
           >
             <Play className="w-5 h-5 mr-2" />
@@ -147,7 +164,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
           <Button 
             size="lg" 
             variant="outline" 
-            className="text-lg px-8 py-6 glass hover:scale-105 transition-transform"
+            className="text-lg px-10 py-6 glass hover:scale-110 transition-all duration-300 border-2 border-primary/30 hover:border-primary/50"
             onClick={() => onQuickStart('search')}
           >
             <Search className="w-5 h-5 mr-2" />
@@ -157,8 +174,8 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
 
         {/* Info Badge */}
         <div className="flex justify-center">
-          <Badge variant="outline" className="glass">
-            Real-time data • Quantum-enhanced AI • Interactive globe
+          <Badge variant="outline" className="glass text-sm px-6 py-2 border-primary/30">
+            🌍 Real-time data • 🚀 Quantum-enhanced AI • 🛰️ Interactive globe
           </Badge>
         </div>
         </div>
