@@ -1,20 +1,28 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import GlobeComponent from '@/components/Globe';
+import EnhancedGlobe from '@/components/EnhancedGlobe';
 import CitySearch from '@/components/CitySearch';
 import DataPanel from '@/components/DataPanel';
 import NaturalDisasters from '@/components/NaturalDisasters';
 import Chatbot from '@/components/Chatbot';
 import HomeScreen from '@/components/HomeScreen';
+import UserProfile from '@/components/UserProfile';
 import QuantumAnalytics from '@/components/QuantumAnalytics';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { User, Settings } from 'lucide-react';
 import { nasaService } from '@/services/nasaApi';
 import { geocodingService } from '@/services/geocoding';
 import { openaqService } from '@/services/openAq';
 import { quantumPredictor, type QuantumForecast } from '@/services/quantumPredictor';
+import { supabase } from '@/integrations/supabase/client';
 import { AirQualityData, PredictionData, CityData } from '@/types';
 
 const Index = () => {
   const { toast } = useToast();
+  const { user, userProfile, loading: authLoading } = useAuth();
   const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
   const [airQuality, setAirQuality] = useState<AirQualityData | null>(null);
   const [predictions, setPredictions] = useState<PredictionData[]>([]);
@@ -27,6 +35,9 @@ const Index = () => {
   const [showHomeScreen, setShowHomeScreen] = useState(true);
   const [showDisasters, setShowDisasters] = useState(false);
   const [showQuantumAnalytics, setShowQuantumAnalytics] = useState(false);
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [useEnhancedGlobe, setUseEnhancedGlobe] = useState(false);
+  const [timelapseMode, setTimelapseMode] = useState(false);
 
   // Auto-hide intro after 5 seconds
   useEffect(() => {
@@ -183,12 +194,24 @@ const Index = () => {
 
       {/* Globe Container */}
       <div className="absolute inset-0">
-        <GlobeComponent
-          onCityClick={handleGlobeClick}
-          selectedCity={selectedCity ? { lat: selectedCity.lat, lng: selectedCity.lng } : null}
-          pollutionData={pollutionData}
-          showSatellites={true}
-        />
+        {useEnhancedGlobe ? (
+          <EnhancedGlobe
+            onCityClick={handleGlobeClick}
+            selectedCity={selectedCity ? { lat: selectedCity.lat, lng: selectedCity.lng } : null}
+            pollutionData={pollutionData}
+            showSatellites={true}
+            timelapseMode={timelapseMode}
+            currentYear={currentYear}
+            onYearChange={(year) => setCurrentYear(year)}
+          />
+        ) : (
+          <GlobeComponent
+            onCityClick={handleGlobeClick}
+            selectedCity={selectedCity ? { lat: selectedCity.lat, lng: selectedCity.lng } : null}
+            pollutionData={pollutionData}
+            showSatellites={true}
+          />
+        )}
         {/* Globe Hue Overlay */}
         <div 
           className={`absolute inset-0 pointer-events-none transition-all duration-1000 ${
@@ -198,6 +221,47 @@ const Index = () => {
           }`} 
         />
       </div>
+
+      {/* User Profile Modal */}
+      {showUserProfile && (
+        <UserProfile onClose={() => setShowUserProfile(false)} />
+      )}
+
+      {/* Globe Enhancement Toggle */}
+      {!showHomeScreen && (
+        <div className="absolute top-6 right-6 z-40 space-y-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setUseEnhancedGlobe(!useEnhancedGlobe)}
+            className="glass"
+          >
+            {useEnhancedGlobe ? 'Classic Globe' : 'Enhanced Globe'}
+          </Button>
+          {user && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowUserProfile(true)}
+              className="glass block"
+            >
+              <User className="w-4 h-4 mr-2" />
+              Profile
+            </Button>
+          )}
+          {!user && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => window.location.href = '/auth'}
+              className="glass block"
+            >
+              <User className="w-4 h-4 mr-2" />
+              Sign In
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Natural Disasters Sidebar - Only show when requested */}
       {showDisasters && (

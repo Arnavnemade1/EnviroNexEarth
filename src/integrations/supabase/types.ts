@@ -14,7 +14,128 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      air_quality_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          location_id: string | null
+          threshold_value: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          location_id?: string | null
+          threshold_value?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          location_id?: string | null
+          threshold_value?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "air_quality_alerts_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "saved_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          favorite_cities: Json | null
+          full_name: string | null
+          health_profile: Json | null
+          id: string
+          preferences: Json | null
+          updated_at: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          favorite_cities?: Json | null
+          full_name?: string | null
+          health_profile?: Json | null
+          id?: string
+          preferences?: Json | null
+          updated_at?: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          favorite_cities?: Json | null
+          full_name?: string | null
+          health_profile?: Json | null
+          id?: string
+          preferences?: Json | null
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      saved_locations: {
+        Row: {
+          city: string
+          country: string
+          created_at: string
+          id: string
+          is_favorite: boolean | null
+          latitude: number
+          longitude: number
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          city: string
+          country: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean | null
+          latitude: number
+          longitude: number
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          city?: string
+          country?: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean | null
+          latitude?: number
+          longitude?: number
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
