@@ -86,7 +86,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
           </div>
           <div className="flex items-center justify-center gap-2 mb-4">
             <Badge variant="outline" className="border-primary text-primary px-4 py-2">
-              🚀 Powered by IBM Quantum Computing
+              Powered by IBM Quantum Computing
             </Badge>
           </div>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
