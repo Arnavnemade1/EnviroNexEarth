@@ -81,7 +81,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
               <Globe className="w-6 h-6 text-primary-foreground" />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold bg-gradient-earth bg-clip-text text-transparent">
-              Earth's Skies in 2030
+              EnviroNex
             </h1>
           </div>
           <div className="flex items-center justify-center gap-2 mb-4">
