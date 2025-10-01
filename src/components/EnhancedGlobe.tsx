@@ -35,45 +35,55 @@ export const EnhancedGlobe = ({
   currentYear = 0,
   onYearChange
 }: EnhancedGlobeProps) => {
-  const globeEl = useRef<any>();
+  const globeEl = useRef<HTMLDivElement>(null);
   const [globe, setGlobe] = useState<any>(null);
+  const [isReady, setIsReady] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationSpeed, setAnimationSpeed] = useState([1]);
   const [showPollutionParticles, setShowPollutionParticles] = useState(true);
   const [show3DTerrain, setShow3DTerrain] = useState(false);
   const [particleSystem, setParticleSystem] = useState<THREE.Group | null>(null);
 
-  // Initialize globe - only once
+  // Initialize globe - only once with proper timing
   useEffect(() => {
-    if (!globeEl.current || globe) return; // Prevent multiple initializations
+    // Wait for next tick to ensure DOM is ready
+    const timeoutId = setTimeout(() => {
+      if (!globeEl.current || globe) return;
 
-    const globeInstance = new Globe(globeEl.current)
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
-      .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-      .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
-      .width(window.innerWidth)
-      .height(window.innerHeight)
-      .showGlobe(true)
-      .showAtmosphere(true)
-      .atmosphereColor('#4A90E2')
-      .atmosphereAltitude(0.25)
-      .enablePointerInteraction(true);
+      try {
+        const globeInstance = new Globe(globeEl.current)
+          .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+          .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+          .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+          .width(window.innerWidth)
+          .height(window.innerHeight)
+          .showGlobe(true)
+          .showAtmosphere(true)
+          .atmosphereColor('#4A90E2')
+          .atmosphereAltitude(0.25)
+          .enablePointerInteraction(true);
 
-    setGlobe(globeInstance);
+        setGlobe(globeInstance);
+        setIsReady(true);
 
-    // Add click handler
-    globeInstance.onGlobeClick((event: any) => {
-      if (event.lat && event.lng) {
-        onCityClick(event.lat, event.lng);
+        // Add click handler
+        globeInstance.onGlobeClick((event: any) => {
+          if (event.lat && event.lng) {
+            onCityClick(event.lat, event.lng);
+          }
+        });
+      } catch (error) {
+        console.error('Globe initialization failed:', error);
       }
-    });
+    }, 100);
 
     return () => {
-      if (globeInstance) {
-        globeInstance._destructor?.();
+      clearTimeout(timeoutId);
+      if (globe) {
+        globe._destructor?.();
       }
     };
-  }, []); // Empty dependency array to run only once
+  }, [])
 
   // Add pollution particles
   useEffect(() => {
@@ -222,8 +232,19 @@ export const EnhancedGlobe = ({
       {/* Globe container */}
       <div ref={globeEl} className="w-full h-full" />
       
-      {/* Enhanced Controls */}
-      <div className="absolute top-6 left-6 space-y-4 z-30">
+      {/* Loading state */}
+      {!isReady && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-muted-foreground">Initializing Globe...</p>
+          </div>
+        </div>
+      )}
+      
+      {/* Enhanced Controls - Only show when ready */}
+      {isReady && (
+        <div className="absolute top-6 left-6 space-y-4 z-30">
         <Card className="glass p-4 space-y-3 bg-transparent border-white/10">
           <div className="flex items-center gap-2 mb-2">
             <Settings className="w-4 h-4 text-primary" />
@@ -342,10 +363,11 @@ export const EnhancedGlobe = ({
             </Badge>
           )}
         </div>
-      </div>
+        </div>
+      )}
 
-      {/* Selected City Indicator */}
-      {selectedCity && (
+      {/* Selected City Indicator - Only show when ready */}
+      {isReady && selectedCity && (
         <div className="absolute bottom-6 left-6 z-30">
           <Card className="glass p-3 bg-transparent border-white/10">
             <div className="text-sm">
