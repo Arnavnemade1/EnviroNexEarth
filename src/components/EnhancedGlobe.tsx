@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import Globe from 'globe.gl';
 import * as THREE from 'three';
 import { Button } from '@/components/ui/button';
@@ -35,8 +35,7 @@ export const EnhancedGlobe = ({
   currentYear = 0,
   onYearChange
 }: EnhancedGlobeProps) => {
-  const globeEl = useRef<HTMLDivElement>(null);
-  const [globe, setGlobe] = useState<any>(null);
+  const globeInstanceRef = useRef<any>(null);
   const [isReady, setIsReady] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationSpeed, setAnimationSpeed] = useState([1]);
@@ -44,50 +43,55 @@ export const EnhancedGlobe = ({
   const [show3DTerrain, setShow3DTerrain] = useState(false);
   const [particleSystem, setParticleSystem] = useState<THREE.Group | null>(null);
 
-  // Initialize globe - only once with proper timing
+  // Use callback ref to ensure DOM is ready before initializing Globe
+  const globeElRef = useCallback((node: HTMLDivElement | null) => {
+    if (!node || globeInstanceRef.current) return;
+
+    try {
+      console.log('Initializing Globe with node:', node);
+      const globeInstance = new Globe(node)
+        .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+        .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+        .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+        .width(window.innerWidth)
+        .height(window.innerHeight)
+        .showGlobe(true)
+        .showAtmosphere(true)
+        .atmosphereColor('#4A90E2')
+        .atmosphereAltitude(0.25)
+        .enablePointerInteraction(true);
+
+      globeInstanceRef.current = globeInstance;
+      setIsReady(true);
+
+      // Add click handler
+      globeInstance.onGlobeClick((event: any) => {
+        if (event.lat && event.lng) {
+          onCityClick(event.lat, event.lng);
+        }
+      });
+    } catch (error) {
+      console.error('Globe initialization failed:', error);
+    }
+  }, [onCityClick]);
+
+  // Cleanup on unmount
   useEffect(() => {
-    // Wait for next tick to ensure DOM is ready
-    const timeoutId = setTimeout(() => {
-      if (!globeEl.current || globe) return;
-
-      try {
-        const globeInstance = new Globe(globeEl.current)
-          .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
-          .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-          .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
-          .width(window.innerWidth)
-          .height(window.innerHeight)
-          .showGlobe(true)
-          .showAtmosphere(true)
-          .atmosphereColor('#4A90E2')
-          .atmosphereAltitude(0.25)
-          .enablePointerInteraction(true);
-
-        setGlobe(globeInstance);
-        setIsReady(true);
-
-        // Add click handler
-        globeInstance.onGlobeClick((event: any) => {
-          if (event.lat && event.lng) {
-            onCityClick(event.lat, event.lng);
-          }
-        });
-      } catch (error) {
-        console.error('Globe initialization failed:', error);
-      }
-    }, 100);
-
     return () => {
-      clearTimeout(timeoutId);
-      if (globe) {
-        globe._destructor?.();
+      if (globeInstanceRef.current) {
+        try {
+          globeInstanceRef.current._destructor?.();
+        } catch (e) {
+          console.error('Globe cleanup error:', e);
+        }
+        globeInstanceRef.current = null;
       }
     };
   }, [])
 
   // Add pollution particles
   useEffect(() => {
-    if (!globe || !showPollutionParticles) return;
+    if (!globeInstanceRef.current || !showPollutionParticles) return;
 
     const particles = new THREE.Group();
     
@@ -118,15 +122,15 @@ export const EnhancedGlobe = ({
       particles.add(particle);
     });
 
-    globe.scene().add(particles);
+    globeInstanceRef.current.scene().add(particles);
     setParticleSystem(particles);
 
     return () => {
-      if (particles) {
-        globe.scene().remove(particles);
+      if (particles && globeInstanceRef.current) {
+        globeInstanceRef.current.scene().remove(particles);
       }
     };
-  }, [globe, pollutionData, showPollutionParticles]);
+  }, [globeInstanceRef.current, pollutionData, showPollutionParticles]);
 
   // Animate particles
   useEffect(() => {
@@ -149,7 +153,7 @@ export const EnhancedGlobe = ({
 
   // Add satellites
   useEffect(() => {
-    if (!globe || !showSatellites) return;
+    if (!globeInstanceRef.current || !showSatellites) return;
 
     // Sample satellite data (ISS and other Earth observation satellites)
     const satellites = [
@@ -179,7 +183,7 @@ export const EnhancedGlobe = ({
       }
     ];
 
-    globe
+    globeInstanceRef.current
       .pointsData(satellites)
       .pointAltitude('alt')
       .pointColor('color')
@@ -188,40 +192,41 @@ export const EnhancedGlobe = ({
 
     // Animate satellite orbits
     const animateSatellites = () => {
+      if (!globeInstanceRef.current) return;
       const updatedSatellites = satellites.map(sat => ({
         ...sat,
         lng: (sat.lng + 0.5) % 360
       }));
-      globe.pointsData(updatedSatellites);
+      globeInstanceRef.current.pointsData(updatedSatellites);
     };
 
     const satelliteInterval = setInterval(animateSatellites, 100);
     
     return () => clearInterval(satelliteInterval);
-  }, [globe, showSatellites]);
+  }, [globeInstanceRef.current, showSatellites]);
 
   // Add 3D terrain
   useEffect(() => {
-    if (!globe) return;
+    if (!globeInstanceRef.current) return;
 
     if (show3DTerrain) {
-      globe
+      globeInstanceRef.current
         .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
         .globeMaterial(new THREE.MeshPhongMaterial({ bumpScale: 10 }));
     } else {
-      globe
+      globeInstanceRef.current
         .bumpImageUrl(null)
         .globeMaterial(new THREE.MeshPhongMaterial({ bumpScale: 1 }));
     }
-  }, [globe, show3DTerrain]);
+  }, [globeInstanceRef.current, show3DTerrain]);
 
   const handlePlayPause = () => {
     setIsAnimating(!isAnimating);
   };
 
   const handleReset = () => {
-    if (globe) {
-      globe.pointOfView({ lat: 0, lng: 0, altitude: 2 });
+    if (globeInstanceRef.current) {
+      globeInstanceRef.current.pointOfView({ lat: 0, lng: 0, altitude: 2 });
     }
     setIsAnimating(false);
     onYearChange?.(0);
@@ -230,7 +235,7 @@ export const EnhancedGlobe = ({
   return (
     <div className="relative w-full h-full">
       {/* Globe container */}
-      <div ref={globeEl} className="w-full h-full" />
+      <div ref={globeElRef} className="w-full h-full" />
       
       {/* Loading state */}
       {!isReady && (
