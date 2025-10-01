@@ -153,14 +153,14 @@ export const DataPanel = ({
   };
 
   return (
-    <div className="fixed top-6 left-6 w-80 space-y-4 z-40 max-h-[calc(100vh-3rem)] overflow-y-auto">
+    <div className="fixed top-6 left-6 w-80 space-y-4 z-40 max-h-[calc(100vh-3rem)] overflow-y-auto scrollbar-thin">
       {/* Back to Home Button */}
       {onBackToHome && (
         <Button
           size="sm"
           variant="outline"
           onClick={onBackToHome}
-          className="glass mb-2"
+          className="glass bg-transparent border-white/10 mb-2"
         >
           <Home className="w-4 h-4 mr-2" />
           Back to Home
@@ -168,7 +168,7 @@ export const DataPanel = ({
       )}
       {/* City Info Card */}
       {cityName && airQuality && (
-        <Card className="glass animate-fade-in-up">
+        <Card className="glass bg-transparent border-white/10 animate-fade-in-up">
           <div className="p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -220,7 +220,7 @@ export const DataPanel = ({
 
       {/* Quantum 24h Forecast */}
       {quantumForecast && (
-        <Card className="glass animate-fade-in-up border-2 border-primary/30">
+        <Card className="glass bg-transparent border-white/10 animate-fade-in-up border-2 border-primary/30">
           <div className="p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -285,7 +285,7 @@ export const DataPanel = ({
 
       {/* Forecast Controls */}
       {predictions.length > 0 && (
-        <Card className="glass animate-fade-in-up">
+        <Card className="glass bg-transparent border-white/10 animate-fade-in-up">
           <div className="p-4 border-b border-primary/20">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">2030 Forecast</h3>

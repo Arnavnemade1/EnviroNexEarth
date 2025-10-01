@@ -112,20 +112,7 @@ export const GlobeComponent = ({
     };
   }, []); // Empty dependency array - only initialize once
 
-  // Update pollution data
-  useEffect(() => {
-    if (!globeInstanceRef.current || !pollutionData.length) return;
-
-    globeInstanceRef.current
-      .hexBinPointsData(pollutionData)
-      .hexBinPointLat((d: any) => d.lat)
-      .hexBinPointLng((d: any) => d.lng)
-      .hexBinPointWeight((d: any) => d.value)
-      .hexTopColor((d: any) => interpolateRdYlBu(1 - d.sumWeight / d.points.length))
-      .hexSideColor((d: any) => interpolateRdYlBu(1 - d.sumWeight / d.points.length))
-      .hexBinResolution(4)
-      .hexMargin(0.1);
-  }, [pollutionData]);
+  // Removed hex towers - they don't look good
 
   // Update selected city
   useEffect(() => {
@@ -286,8 +273,8 @@ export const GlobeComponent = ({
       <div className="absolute bottom-4 right-4 z-40 glass rounded-lg px-3 py-2 text-xs text-muted-foreground bg-transparent border-white/10">
         <div className="font-medium text-foreground mb-1">Map Legend</div>
         <ul className="space-y-1 list-disc pl-4">
-          <li>Hex towers show pollution intensity (green clean → red polluted)</li>
-          <li>Orbiting shapes are satellites; red panels are solar arrays (click for info)</li>
+          <li>Orbiting shapes are satellites with solar arrays (click for info)</li>
+          <li>Click anywhere on the globe to explore air quality</li>
         </ul>
       </div>
     </div>

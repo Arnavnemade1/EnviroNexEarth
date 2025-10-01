@@ -8,3 +8,7 @@ verify_jwt = false
 
 [functions.airquality-openmeteo]
 verify_jwt = false
+
+[functions.disaster-impact-ai]
+verify_jwt = false
+

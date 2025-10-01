@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import GlobeComponent from '@/components/Globe';
-import EnhancedGlobe from '@/components/EnhancedGlobe';
 import CitySearch from '@/components/CitySearch';
 import DataPanel from '@/components/DataPanel';
 import NaturalDisasters from '@/components/NaturalDisasters';
@@ -37,8 +36,6 @@ const Index = () => {
   const [showDisasters, setShowDisasters] = useState(false);
   const [showQuantumAnalytics, setShowQuantumAnalytics] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
-  const [useEnhancedGlobe, setUseEnhancedGlobe] = useState(false);
-  const [timelapseMode, setTimelapseMode] = useState(false);
 
   // Auto-hide intro after 5 seconds
   useEffect(() => {
@@ -211,24 +208,12 @@ const Index = () => {
 
       {/* Globe Container */}
       <div className="absolute inset-0">
-        {useEnhancedGlobe ? (
-          <EnhancedGlobe
-            onCityClick={handleGlobeClick}
-            selectedCity={selectedCity ? { lat: selectedCity.lat, lng: selectedCity.lng } : null}
-            pollutionData={pollutionData}
-            showSatellites={true}
-            timelapseMode={timelapseMode}
-            currentYear={currentYear}
-            onYearChange={(year) => setCurrentYear(year)}
-          />
-        ) : (
-          <GlobeComponent
-            onCityClick={handleGlobeClick}
-            selectedCity={selectedCity ? { lat: selectedCity.lat, lng: selectedCity.lng } : null}
-            pollutionData={pollutionData}
-            showSatellites={true}
-          />
-        )}
+        <GlobeComponent
+          onCityClick={handleGlobeClick}
+          selectedCity={selectedCity ? { lat: selectedCity.lat, lng: selectedCity.lng } : null}
+          pollutionData={pollutionData}
+          showSatellites={true}
+        />
         {/* Globe Hue Overlay */}
         <div 
           className={`absolute inset-0 pointer-events-none transition-all duration-1000 ${
@@ -244,17 +229,9 @@ const Index = () => {
         <UserProfile onClose={() => setShowUserProfile(false)} />
       )}
 
-      {/* Globe Enhancement Toggle */}
+      {/* User Controls */}
       {!showHomeScreen && (
         <div className="absolute top-6 right-6 z-40 flex flex-col gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setUseEnhancedGlobe(!useEnhancedGlobe)}
-            className="glass bg-transparent border-white/10"
-          >
-            {useEnhancedGlobe ? 'Classic Globe' : 'Enhanced Globe'}
-          </Button>
           {user && (
             <Button
               size="sm"

@@ -143,47 +143,53 @@ const Auth = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/98 to-primary/5 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="w-full max-w-md space-y-6">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/')}
-          className="mb-4 glass hover:bg-white/10"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Globe
-        </Button>
-
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center glow">
-              <Globe className="w-6 h-6 text-primary-foreground" />
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/98 to-primary/5 flex items-center justify-center p-6 overflow-y-auto">
+      <div className="w-full max-w-lg space-y-8 my-8">
+        {/* Header with Back */}
+        <div className="text-center space-y-6">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/')}
+            className="glass bg-transparent border-white/10 hover:bg-white/10 mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Globe
+          </Button>
+          
+          <div className="flex items-center justify-center gap-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-xl glow">
+              <Globe className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-earth bg-clip-text text-transparent">
-              EnviroNex
-            </h1>
+            <div className="text-left">
+              <h1 className="text-4xl font-bold bg-gradient-earth bg-clip-text text-transparent">
+                EnviroNex
+              </h1>
+              <p className="text-sm text-muted-foreground">Quantum Air Quality Platform</p>
+            </div>
           </div>
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Badge variant="outline" className="border-primary text-primary px-4 py-2 glass bg-transparent border-white/10">
-              🚀 Quantum-Enhanced Air Quality Platform
+          
+          <div className="space-y-2">
+            <Badge variant="outline" className="border-primary/30 text-primary px-4 py-2 glass bg-transparent">
+              🚀 IBM Quantum Computing Powered
             </Badge>
+            <p className="text-muted-foreground text-sm max-w-md mx-auto">
+              Join thousands exploring real-time air quality data with quantum-enhanced predictions
+            </p>
           </div>
         </div>
 
         {/* Auth Form */}
-        <Card className="glass p-6 backdrop-blur-xl border-white/20">
+        <Card className="glass bg-transparent border-white/10 p-8 backdrop-blur-xl shadow-2xl">
           <Tabs defaultValue="signin" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 glass bg-transparent p-1">
+              <TabsTrigger value="signin" className="data-[state=active]:bg-primary/20">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="data-[state=active]:bg-primary/20">Sign Up</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="signin" className="space-y-4">
-              <div className="text-center mb-4">
-                <h2 className="text-xl font-semibold text-foreground">Welcome Back</h2>
-                <p className="text-sm text-muted-foreground">Sign in to access your air quality dashboard</p>
+            <TabsContent value="signin" className="space-y-5">
+              <div className="text-center mb-2">
+                <h2 className="text-2xl font-bold text-foreground">Welcome Back</h2>
+                <p className="text-sm text-muted-foreground mt-1">Continue your air quality journey</p>
               </div>
 
               <form onSubmit={handleSignIn} className="space-y-4">
@@ -247,10 +253,10 @@ const Auth = () => {
               </form>
             </TabsContent>
 
-            <TabsContent value="signup" className="space-y-4">
-              <div className="text-center mb-4">
-                <h2 className="text-xl font-semibold text-foreground">Join Earth's Skies</h2>
-                <p className="text-sm text-muted-foreground">Create your account to save locations and get personalized insights</p>
+            <TabsContent value="signup" className="space-y-5">
+              <div className="text-center mb-2">
+                <h2 className="text-2xl font-bold text-foreground">Create Account</h2>
+                <p className="text-sm text-muted-foreground mt-1">Start monitoring air quality in your favorite cities</p>
               </div>
 
               <form onSubmit={handleSignUp} className="space-y-4">
@@ -336,23 +342,32 @@ const Auth = () => {
         </Card>
 
         {/* Features */}
-        <div className="text-center space-y-3">
-          <p className="text-sm text-muted-foreground">Why create an account?</p>
-          <div className="grid grid-cols-1 gap-2 text-xs text-muted-foreground">
-            <div className="flex items-center justify-center gap-2">
-              <Globe className="w-3 h-3 text-primary" />
-              Save favorite cities and locations
+        <Card className="glass bg-transparent border-white/10 p-6">
+          <p className="text-center text-sm font-medium text-foreground mb-4">Member Benefits</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex flex-col items-center text-center gap-2 p-3 rounded-lg hover:bg-primary/5 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Globe className="w-5 h-5 text-primary" />
+              </div>
+              <span className="text-sm font-medium">Save Locations</span>
+              <span className="text-xs text-muted-foreground">Track multiple cities</span>
             </div>
-            <div className="flex items-center justify-center gap-2">
-              <User className="w-3 h-3 text-secondary" />
-              Personalized health analysis
+            <div className="flex flex-col items-center text-center gap-2 p-3 rounded-lg hover:bg-secondary/5 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
+                <User className="w-5 h-5 text-secondary" />
+              </div>
+              <span className="text-sm font-medium">Health Insights</span>
+              <span className="text-xs text-muted-foreground">Personalized analysis</span>
             </div>
-            <div className="flex items-center justify-center gap-2">
-              <Mail className="w-3 h-3 text-accent" />
-              Air quality alerts and notifications
+            <div className="flex flex-col items-center text-center gap-2 p-3 rounded-lg hover:bg-accent/5 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+                <Mail className="w-5 h-5 text-accent" />
+              </div>
+              <span className="text-sm font-medium">Smart Alerts</span>
+              <span className="text-xs text-muted-foreground">Real-time notifications</span>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );
