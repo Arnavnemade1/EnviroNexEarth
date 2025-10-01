@@ -85,7 +85,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
             </h1>
           </div>
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Badge variant="outline" className="border-primary text-primary px-4 py-2">
+            <Badge variant="outline" className="border-primary text-primary px-4 py-2 glass bg-transparent border-white/10">
               Powered by IBM Quantum Computing
             </Badge>
           </div>
@@ -188,7 +188,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
 
         {/* Info Badge */}
         <div className="flex justify-center">
-          <Badge variant="outline" className="glass text-sm px-6 py-2 border-primary/30">
+          <Badge variant="outline" className="glass text-sm px-6 py-2 border-primary/30 bg-transparent border-white/10">
             🌍 Real-time data • 🚀 Quantum-enhanced AI • 🛰️ Interactive globe
           </Badge>
         </div>

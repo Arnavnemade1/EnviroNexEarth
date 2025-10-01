@@ -72,7 +72,7 @@ export const GlobeComponent = ({
   }, []);
 
   useEffect(() => {
-    if (!globeRef.current) return;
+    if (!globeRef.current || globeInstanceRef.current) return; // Prevent re-initialization
 
     // Initialize Globe
     const globe = new Globe(globeRef.current)
@@ -107,9 +107,10 @@ export const GlobeComponent = ({
     return () => {
       if (globeInstanceRef.current) {
         globeInstanceRef.current._destructor();
+        globeInstanceRef.current = null;
       }
     };
-  }, [onCityClick]);
+  }, []); // Empty dependency array - only initialize once
 
   // Update pollution data
   useEffect(() => {
@@ -257,7 +258,7 @@ export const GlobeComponent = ({
 
       {/* Satellite Info Modal */}
       {selectedSatellite && (
-        <div className="absolute top-4 right-4 z-50 glass rounded-xl max-w-sm max-h-64 overflow-hidden">
+        <div className="absolute top-4 right-4 z-50 glass rounded-xl max-w-sm max-h-64 overflow-hidden bg-transparent border-white/10">
           <ScrollArea className="h-full p-4">
             <button 
               onClick={() => setSelectedSatellite(null)}
@@ -282,7 +283,7 @@ export const GlobeComponent = ({
       )}
 
       {/* Legend */}
-      <div className="absolute bottom-4 right-4 z-40 glass rounded-lg px-3 py-2 text-xs text-muted-foreground">
+      <div className="absolute bottom-4 right-4 z-40 glass rounded-lg px-3 py-2 text-xs text-muted-foreground bg-transparent border-white/10">
         <div className="font-medium text-foreground mb-1">Map Legend</div>
         <ul className="space-y-1 list-disc pl-4">
           <li>Hex towers show pollution intensity (green clean → red polluted)</li>

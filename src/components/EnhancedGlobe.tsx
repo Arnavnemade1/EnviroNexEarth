@@ -43,9 +43,9 @@ export const EnhancedGlobe = ({
   const [show3DTerrain, setShow3DTerrain] = useState(false);
   const [particleSystem, setParticleSystem] = useState<THREE.Group | null>(null);
 
-  // Initialize globe
+  // Initialize globe - only once
   useEffect(() => {
-    if (!globeEl.current) return;
+    if (!globeEl.current || globe) return; // Prevent multiple initializations
 
     const globeInstance = new Globe(globeEl.current)
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
@@ -73,7 +73,7 @@ export const EnhancedGlobe = ({
         globeInstance._destructor?.();
       }
     };
-  }, [onCityClick]);
+  }, []); // Empty dependency array to run only once
 
   // Add pollution particles
   useEffect(() => {
@@ -224,7 +224,7 @@ export const EnhancedGlobe = ({
       
       {/* Enhanced Controls */}
       <div className="absolute top-6 left-6 space-y-4 z-30">
-        <Card className="glass p-4 space-y-3">
+        <Card className="glass p-4 space-y-3 bg-transparent border-white/10">
           <div className="flex items-center gap-2 mb-2">
             <Settings className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium">Globe Controls</span>
@@ -329,14 +329,14 @@ export const EnhancedGlobe = ({
         {/* Status Indicators */}
         <div className="space-y-2">
           {isAnimating && (
-            <Badge variant="outline" className="glass">
+            <Badge variant="outline" className="glass bg-transparent border-white/10">
               <Zap className="w-3 h-3 mr-1" />
               Animating
             </Badge>
           )}
           
           {showPollutionParticles && (
-            <Badge variant="outline" className="glass">
+            <Badge variant="outline" className="glass bg-transparent border-white/10">
               <Wind className="w-3 h-3 mr-1" />
               {pollutionData.length} Particles
             </Badge>
@@ -347,7 +347,7 @@ export const EnhancedGlobe = ({
       {/* Selected City Indicator */}
       {selectedCity && (
         <div className="absolute bottom-6 left-6 z-30">
-          <Card className="glass p-3">
+          <Card className="glass p-3 bg-transparent border-white/10">
             <div className="text-sm">
               <div className="text-muted-foreground">Selected Location</div>
               <div className="font-medium">

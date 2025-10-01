@@ -72,9 +72,11 @@ const Auth = () => {
         }
       } else {
         toast({
-          title: "Welcome to Earth's Skies!",
-          description: "Check your email to confirm your account, then you can sign in.",
+          title: "Welcome to EnviroNex!",
+          description: "Check your email to confirm your account.",
         });
+        // Redirect to home after successful signup
+        setTimeout(() => navigate('/'), 2000);
       }
     } catch (error) {
       toast({
@@ -141,7 +143,7 @@ const Auth = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/98 to-primary/5 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/98 to-primary/5 flex items-center justify-center p-4 overflow-y-auto">
       <div className="w-full max-w-md space-y-6">
         {/* Back Button */}
         <Button
@@ -160,11 +162,11 @@ const Auth = () => {
               <Globe className="w-6 h-6 text-primary-foreground" />
             </div>
             <h1 className="text-3xl font-bold bg-gradient-earth bg-clip-text text-transparent">
-              Earth's Skies
+              EnviroNex
             </h1>
           </div>
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Badge variant="outline" className="border-primary text-primary px-4 py-2">
+            <Badge variant="outline" className="border-primary text-primary px-4 py-2 glass bg-transparent border-white/10">
               🚀 Quantum-Enhanced Air Quality Platform
             </Badge>
           </div>
