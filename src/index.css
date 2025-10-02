@@ -120,6 +120,7 @@ All colors MUST be HSL.
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
@@ -133,5 +134,44 @@ All colors MUST be HSL.
 
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--primary) / 0.7);
+  }
+
+  /* Scrollbar utilities */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary) / 0.5) transparent;
+  }
+
+  .scrollbar-track-transparent {
+    scrollbar-color: hsl(var(--primary) / 0.5) transparent;
+  }
+
+  .scrollbar-thumb-primary\/20 {
+    scrollbar-color: hsl(var(--primary) / 0.2) transparent;
+  }
+
+  .scrollbar-thumb-primary\/30 {
+    scrollbar-color: hsl(var(--primary) / 0.3) transparent;
+  }
+
+  .scrollbar-thumb-primary\/50 {
+    scrollbar-color: hsl(var(--primary) / 0.5) transparent;
+  }
+
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Text utilities */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }

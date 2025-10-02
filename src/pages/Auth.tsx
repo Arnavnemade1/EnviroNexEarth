@@ -22,6 +22,7 @@ import {
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState('signin');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -143,8 +144,9 @@ const Auth = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/98 to-primary/5 flex items-center justify-center p-6 overflow-y-auto overflow-x-hidden">
-      <div className="w-full max-w-lg space-y-8 my-8 max-h-full overflow-y-auto scrollbar-hide">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/98 to-primary/5 flex items-center justify-center p-4 md:p-6">
+      <div className="w-full max-w-lg max-h-[95vh] overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/30 hover:scrollbar-thumb-primary/50">
+        <div className="space-y-6 py-4">
         {/* Header with Back */}
         <div className="text-center space-y-6">
           <Button
@@ -179,15 +181,15 @@ const Auth = () => {
         </div>
 
         {/* Auth Form */}
-        <Card className="glass bg-transparent border-white/10 p-8 backdrop-blur-xl shadow-2xl">
-          <Tabs defaultValue="signin" className="space-y-6">
+        <Card className="glass bg-transparent border-white/10 p-6 md:p-8 backdrop-blur-xl shadow-2xl">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-2 glass bg-transparent p-1">
               <TabsTrigger value="signin" className="data-[state=active]:bg-primary/20">Sign In</TabsTrigger>
               <TabsTrigger value="signup" className="data-[state=active]:bg-primary/20">Sign Up</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin" className="space-y-5">
-              <div className="text-center mb-2">
+              <div className="text-center mb-4">
                 <h2 className="text-2xl font-bold text-foreground">Welcome Back</h2>
                 <p className="text-sm text-muted-foreground mt-1">Continue your air quality journey</p>
               </div>
@@ -254,7 +256,7 @@ const Auth = () => {
             </TabsContent>
 
             <TabsContent value="signup" className="space-y-5">
-              <div className="text-center mb-2">
+              <div className="text-center mb-4">
                 <h2 className="text-2xl font-bold text-foreground">Create Account</h2>
                 <p className="text-sm text-muted-foreground mt-1">Start monitoring air quality in your favorite cities</p>
               </div>
@@ -342,9 +344,9 @@ const Auth = () => {
         </Card>
 
         {/* Features */}
-        <Card className="glass bg-transparent border-white/10 p-6">
+        <Card className="glass bg-transparent border-white/10 p-4 md:p-6">
           <p className="text-center text-sm font-medium text-foreground mb-4">Member Benefits</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
             <div className="flex flex-col items-center text-center gap-2 p-3 rounded-lg hover:bg-primary/5 transition-colors">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <Globe className="w-5 h-5 text-primary" />
@@ -368,6 +370,7 @@ const Auth = () => {
             </div>
           </div>
         </Card>
+        </div>
       </div>
     </div>
   );
