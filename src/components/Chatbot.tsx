@@ -27,7 +27,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
     {
       id: '1',
       type: 'bot',
-      message: "Hi! I'm your Earth Data AI assistant powered by Gemini 2.5 Pro. Ask me about air quality, climate predictions, or satellites. Try 'What are those red lines on satellites?' or 'Tell me about air pollution in this city'",
+      message: "Hi! I'm Enviro, your environmental AI assistant. Ask me about air quality, climate predictions, natural disasters, or satellites. Try 'What are those red lines on satellites?' or 'Tell me about air pollution in this city'",
       timestamp: new Date()
     }
   ]);
@@ -64,7 +64,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
     const welcomeMessage: ChatMessage = {
       id: Date.now().toString(),
       type: 'bot',
-      message: 'Great! I\'m now connected to Gemini AI. Ask me anything about air quality, satellites, climate predictions, or environmental data!',
+      message: 'Great! I\'m now connected. Ask me anything about air quality, satellites, climate predictions, natural disasters, or environmental data!',
       timestamp: new Date()
     };
     
@@ -137,7 +137,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
           <MessageCircle className="w-6 h-6" />
         </Button>
         <Badge className="absolute -top-2 -right-2 bg-accent text-accent-foreground">
-          AI
+          Enviro
         </Badge>
       </div>
     );
@@ -150,9 +150,8 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
         <div className="flex items-center justify-between p-4 border-b border-primary/20">
           <div className="flex items-center gap-2">
             <Bot className="w-5 h-5 text-primary" />
-            <span className="font-medium">Earth Data AI</span>
-            <Badge variant="outline" className="text-xs">Gemini 2.5 Pro</Badge>
-            <Badge variant="outline" className="text-xs">Live</Badge>
+            <span className="font-medium">Enviro</span>
+            <Badge variant="outline" className="text-xs">AI Assistant</Badge>
           </div>
           <Button
             size="sm"
