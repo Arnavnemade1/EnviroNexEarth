@@ -81,13 +81,26 @@ export const NaturalDisasters = ({ onDisasterClick }: NaturalDisastersProps) => 
         body: { disasters: disasterSummary }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('AI summary error:', error);
+        throw error;
+      }
+      
       if (data?.summary) {
         setAiSummary(data.summary);
+      } else {
+        setAiSummary('AI analysis is currently unavailable.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('AI summary generation failed:', error);
-      setAiSummary('Unable to generate AI summary at this time.');
+      // More specific error messages
+      if (error?.message?.includes('rate limit')) {
+        setAiSummary('⚠️ AI service temporarily rate limited. Please try again in a moment.');
+      } else if (error?.message?.includes('credit')) {
+        setAiSummary('⚠️ AI credits exhausted. Please add credits to continue using AI features.');
+      } else {
+        setAiSummary('Unable to generate AI summary at this time. Data is still loading...');
+      }
     } finally {
       setLoadingSummary(false);
     }

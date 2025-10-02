@@ -143,8 +143,8 @@ const Auth = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/98 to-primary/5 flex items-center justify-center p-6 overflow-y-auto">
-      <div className="w-full max-w-lg space-y-8 my-8">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/98 to-primary/5 flex items-center justify-center p-6 overflow-y-auto overflow-x-hidden">
+      <div className="w-full max-w-lg space-y-8 my-8 max-h-full overflow-y-auto scrollbar-hide">
         {/* Header with Back */}
         <div className="text-center space-y-6">
           <Button

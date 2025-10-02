@@ -330,9 +330,15 @@ const Index = () => {
 
       {/* Bottom Credits - Only show when not on home screen */}
       {!showHomeScreen && (
-        <div className="absolute bottom-6 left-6 z-40">
-          <Badge variant="outline" className="glass text-xs px-3 py-1.5 bg-transparent border-white/10">
-            Powered by <span className="text-primary font-medium">NASA EarthData</span> + IBM Quantum
+        <div className="absolute bottom-6 left-6 z-40 group">
+          <Badge 
+            variant="outline" 
+            className="glass text-xs px-2 py-1 bg-transparent border-white/10 transition-all duration-300 group-hover:px-4 group-hover:py-2 cursor-default"
+          >
+            <span className="inline group-hover:hidden">🌍 🚀</span>
+            <span className="hidden group-hover:inline">
+              Powered by <span className="text-primary font-medium">NASA EarthData</span> + IBM Quantum
+            </span>
           </Badge>
         </div>
       )}

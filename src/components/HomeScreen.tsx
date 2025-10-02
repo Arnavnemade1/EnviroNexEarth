@@ -112,12 +112,12 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
                 <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${option.gradient} flex items-center justify-center shadow-xl ${option.shadowColor} backdrop-blur-sm border border-white/30 group-hover:scale-110 transition-transform duration-300`}>
                   <option.icon className="w-8 h-8 text-white drop-shadow-lg" />
                 </div>
-                <div>
+                <div className="relative z-10">
                   <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">{option.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{option.description}</p>
                 </div>
-                <div className="flex items-center text-primary text-sm font-semibold group-hover:text-primary-foreground transition-colors">
-                  Get started <ChevronRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
+                <div className="flex items-center text-primary text-sm font-semibold transition-colors relative z-20">
+                  <span className="drop-shadow-lg">Get started</span> <ChevronRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
                 </div>
               </div>
             </Card>
@@ -135,13 +135,13 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
           <div className="grid md:grid-cols-3 gap-6">
             {features.map((feature, index) => (
               <div key={index} className="group flex items-start gap-4 glass p-6 rounded-xl hover:scale-105 transition-all duration-300 border border-white/10 hover:border-white/20">
-                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <feature.icon className="w-6 h-6 text-primary flex-shrink-0" />
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                  <feature.icon className="w-6 h-6 text-primary" />
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="flex-1 relative z-10">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h4 className="font-semibold text-foreground">{feature.title}</h4>
-                    <Badge variant="outline" className="text-xs px-2 py-0 border-primary/30 text-primary">
+                    <Badge variant="outline" className="text-xs px-2 py-0 border-primary/30 text-primary shrink-0">
                       {feature.highlight}
                     </Badge>
                   </div>
