@@ -121,6 +121,52 @@ class NASAEONETService {
       return [];
     }
   }
+
+  /**
+   * Fetch past natural disasters from NASA EONET
+   */
+  async getPastDisasters(limit: number = 10): Promise<DisasterEvent[]> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/events?status=closed&limit=${limit}&days=60`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`EONET API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const events: EONETEvent[] = data.events || [];
+
+      const disasters: DisasterEvent[] = await Promise.all(
+        events.map(async (event) => {
+          const latestGeometry = event.geometries[event.geometries.length - 1];
+          const [lng, lat] = latestGeometry.coordinates;
+          
+          const location = await this.getLocationName(lat, lng);
+          const category = event.categories[0];
+          
+          return {
+            id: event.id,
+            title: event.title,
+            type: this.mapCategory(category.id),
+            location,
+            lat,
+            lng,
+            severity: this.estimateSeverity(),
+            date: latestGeometry.date,
+            description: event.description || category.title,
+            source: event.sources[0]?.url || 'NASA EONET',
+          };
+        })
+      );
+
+      return disasters;
+    } catch (error) {
+      console.error('Failed to fetch past disasters from NASA EONET:', error);
+      return [];
+    }
+  }
 }
 
 export const nasaEONET = new NASAEONETService();

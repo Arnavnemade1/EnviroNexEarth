@@ -48,16 +48,27 @@ export const NaturalDisasters = ({ onDisasterClick }: NaturalDisastersProps) => 
   const [loading, setLoading] = useState(true);
   const [aiSummary, setAiSummary] = useState<string>('');
   const [loadingSummary, setLoadingSummary] = useState(false);
+  const [showPast, setShowPast] = useState(false);
 
   useEffect(() => {
-    const fetchLiveDisasters = async () => {
+    const fetchDisasters = async () => {
       try {
         setLoading(true);
-        const liveDisasters = await nasaEONET.getActiveDisasters(15);
-        setDisasters(liveDisasters);
+        const [activeDisasters, pastDisasters] = await Promise.all([
+          nasaEONET.getActiveDisasters(15),
+          nasaEONET.getPastDisasters(10)
+        ]);
+        
+        const allDisasters = showPast 
+          ? [...activeDisasters, ...pastDisasters]
+          : activeDisasters;
+        
+        setDisasters(allDisasters);
         
         // Generate AI summary of environmental impact
-        generateAISummary(liveDisasters);
+        if (allDisasters.length > 0) {
+          generateAISummary(allDisasters);
+        }
       } catch (error) {
         console.error('Failed to load disasters:', error);
       } finally {
@@ -65,8 +76,8 @@ export const NaturalDisasters = ({ onDisasterClick }: NaturalDisastersProps) => 
       }
     };
 
-    fetchLiveDisasters();
-  }, []);
+    fetchDisasters();
+  }, [showPast]);
 
   const generateAISummary = async (disasters: DisasterEvent[]) => {
     if (disasters.length === 0) return;
@@ -125,14 +136,33 @@ export const NaturalDisasters = ({ onDisasterClick }: NaturalDisastersProps) => 
   }
 
   return (
-    <div className="glass bg-transparent border-white/10 p-4 rounded-xl w-80 max-h-[calc(100vh-3rem)]">
-      <h3 className="font-bold text-lg mb-3 text-primary flex items-center gap-2">
-        <AlertTriangle className="w-5 h-5" />
-        Live Natural Disasters
-        <Badge variant="outline" className="text-xs border-primary/30">
-          NASA EONET
+    <div className="glass bg-transparent border-white/10 p-4 rounded-xl w-80 max-h-[calc(100vh-3rem)] flex flex-col">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-bold text-lg text-primary flex items-center gap-2">
+          <AlertTriangle className="w-5 h-5" />
+          Natural Disasters
+          <Badge variant="outline" className="text-xs border-primary/30">
+            NASA EONET
+          </Badge>
+        </h3>
+      </div>
+      
+      <div className="flex gap-2 mb-3">
+        <Badge 
+          variant={!showPast ? "default" : "outline"}
+          className="cursor-pointer text-xs"
+          onClick={() => setShowPast(false)}
+        >
+          Active ({disasters.filter((_, i) => i < 15).length})
         </Badge>
-      </h3>
+        <Badge 
+          variant={showPast ? "default" : "outline"}
+          className="cursor-pointer text-xs"
+          onClick={() => setShowPast(true)}
+        >
+          Include Past
+        </Badge>
+      </div>
       
       {/* AI Environmental Impact Summary */}
       {aiSummary && (
@@ -154,8 +184,13 @@ export const NaturalDisasters = ({ onDisasterClick }: NaturalDisastersProps) => 
         </Card>
       )}
       
-      <ScrollArea className="h-[60vh]">
-        <div className="space-y-3">
+      <ScrollArea className="flex-1 overflow-y-auto">
+        <div className="space-y-3 pr-2">
+          {disasters.length === 0 && !loading && (
+            <Card className="p-4 text-center border-border/50">
+              <p className="text-sm text-muted-foreground">No disasters found</p>
+            </Card>
+          )}
           {disasters.map((disaster) => (
             <Card 
               key={disaster.id}
