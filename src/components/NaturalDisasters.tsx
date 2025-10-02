@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { AlertTriangle, Flame, CloudRain, Wind, Zap, Mountain, Sparkles, RefreshCw, MapPin, Calendar, ExternalLink } from 'lucide-react';
+import { TriangleAlert as AlertTriangle, Flame, CloudRain, Wind, Zap, Mountain, Sparkles, RefreshCw, MapPin, Calendar, ExternalLink } from 'lucide-react';
 import { nasaEONET, type DisasterEvent } from '@/services/nasaEONET';
 import { supabase } from '@/integrations/supabase/client';
 

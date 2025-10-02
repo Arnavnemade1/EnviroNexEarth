@@ -8,16 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  Globe, 
-  Mail, 
-  Lock, 
-  User, 
-  Loader2,
-  Eye,
-  EyeOff,
-  ArrowLeft
-} from 'lucide-react';
+import { Globe, Mail, Lock, User, Loader as Loader2, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
