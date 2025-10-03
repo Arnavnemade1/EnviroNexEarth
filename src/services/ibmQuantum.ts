@@ -1,6 +1,6 @@
 /**
- * IBM Quantum - Real Qiskit Aer Simulator Integration
- * Uses actual IBM Qiskit Aer for quantum circuit simulation
+ * IBM Quantum - Real IBM Quantum Runtime Integration
+ * Uses actual IBM Quantum devices with Aer fallback
  */
 
 import { supabase } from "@/integrations/supabase/client";
@@ -12,12 +12,15 @@ export interface QuantumCircuitResult {
   quantumEntropy?: number;
   circuitDepth?: number;
   backend: string;
+  jobId?: string;
+  status: "completed" | "timeout" | "fallback";
 }
 
 export interface AerSimulationConfig {
   shots: number;
   qubits: number;
   circuitDepth?: number;
+  timeout?: number;
 }
 
 export interface QuantumFeatures {
@@ -31,16 +34,17 @@ export interface QuantumFeatures {
 }
 
 /**
- * Real IBM Qiskit Aer integration for quantum circuit simulation
- * Executes genuine quantum circuits via edge function with Python/Qiskit
+ * IBM Quantum Runtime integration with Aer fallback
+ * Tries real IBM Quantum hardware first, falls back to Aer if timeout
  */
 export class IBMQuantumAer {
   private static readonly DEFAULT_SHOTS = 1024;
   private static readonly DEFAULT_QUBITS = 5;
+  private static readonly IBM_TIMEOUT_MS = 8000;
 
   /**
-   * Run real quantum circuit simulation for air quality prediction
-   * Executes actual Qiskit circuits on IBM Aer simulator
+   * Run quantum circuit on IBM Quantum hardware with Aer fallback
+   * If IBM Quantum takes too long, automatically falls back to Aer simulator
    */
   static async simulateAQIPrediction(
     currentAQI: number,
@@ -49,6 +53,7 @@ export class IBMQuantumAer {
   ): Promise<QuantumCircuitResult> {
     const shots = config?.shots || this.DEFAULT_SHOTS;
     const qubits = config?.qubits || this.DEFAULT_QUBITS;
+    const timeout = config?.timeout || this.IBM_TIMEOUT_MS;
 
     const startTime = performance.now();
 
@@ -69,27 +74,30 @@ export class IBMQuantumAer {
       cosPhase: Math.cos(phase)
     };
 
+    const featureArray = [
+      features.pm25,
+      features.o3,
+      features.no2,
+      features.so2,
+      features.co,
+      features.sinPhase,
+      features.cosPhase
+    ];
+
     try {
-      const { data, error } = await supabase.functions.invoke("quantum-aer-simulation", {
+      const { data, error } = await supabase.functions.invoke("ibm-quantum-runtime", {
         body: {
-          features: [
-            features.pm25,
-            features.o3,
-            features.no2,
-            features.so2,
-            features.co,
-            features.sinPhase,
-            features.cosPhase
-          ],
+          features: featureArray,
           qubits,
           shots,
-          base_aqi: currentAQI
+          base_aqi: currentAQI,
+          timeout_ms: timeout
         }
       });
 
-      if (error) {
-        console.warn("Quantum Aer simulation failed, using fallback:", error);
-        return this.fallbackSimulation(currentAQI, historicalData, shots, qubits);
+      if (error || data?.status === "timeout" || data?.status === "failed") {
+        console.warn("IBM Quantum Runtime unavailable, falling back to Aer:", error || data?.error);
+        return this.runAerFallback(currentAQI, featureArray, shots, qubits, startTime);
       }
 
       const executionTime = performance.now() - startTime;
@@ -100,32 +108,73 @@ export class IBMQuantumAer {
         confidence: data.confidence || 75,
         quantumEntropy: data.quantum_entropy,
         circuitDepth: data.circuit_depth,
-        backend: data.backend || "qiskit-aer-simulator"
+        backend: data.backend || "ibm-quantum-runtime",
+        jobId: data.job_id,
+        status: "completed"
       };
 
     } catch (err) {
-      console.warn("Quantum circuit execution error:", err);
-      return this.fallbackSimulation(currentAQI, historicalData, shots, qubits);
+      console.warn("IBM Quantum error, using Aer fallback:", err);
+      return this.runAerFallback(currentAQI, featureArray, shots, qubits, startTime);
     }
   }
 
   /**
-   * Fallback simulation when Qiskit is unavailable
+   * Run Aer simulation as fallback
    */
-  private static async fallbackSimulation(
+  private static async runAerFallback(
     currentAQI: number,
-    historicalData: number[],
+    features: number[],
     shots: number,
-    qubits: number
+    qubits: number,
+    startTime: number
   ): Promise<QuantumCircuitResult> {
-    const startTime = performance.now();
+    try {
+      const { data, error } = await supabase.functions.invoke("quantum-aer-simulation", {
+        body: {
+          features,
+          qubits,
+          shots,
+          base_aqi: currentAQI
+        }
+      });
 
+      if (error) {
+        console.warn("Aer simulation also failed, using classical fallback:", error);
+        return this.classicalFallback(currentAQI, shots, qubits, startTime);
+      }
+
+      const executionTime = performance.now() - startTime;
+
+      return {
+        counts: data.measurement_counts || {},
+        executionTime,
+        confidence: data.confidence || 75,
+        quantumEntropy: data.quantum_entropy,
+        circuitDepth: data.circuit_depth,
+        backend: "qiskit-aer-fallback",
+        status: "fallback"
+      };
+    } catch (err) {
+      console.warn("Aer fallback error, using classical:", err);
+      return this.classicalFallback(currentAQI, shots, qubits, startTime);
+    }
+  }
+
+  /**
+   * Classical fallback when all quantum methods fail
+   */
+  private static classicalFallback(
+    currentAQI: number,
+    shots: number,
+    qubits: number,
+    startTime: number
+  ): QuantumCircuitResult {
     const stateCount = Math.pow(2, qubits);
     const measurements: Record<string, number> = {};
 
     for (let i = 0; i < shots; i++) {
       const state = Math.floor(Math.random() * stateCount);
-      const aqi = Math.round(currentAQI * (0.8 + 0.4 * (state / (stateCount - 1))));
       const key = state.toString(2).padStart(qubits, '0');
       measurements[key] = (measurements[key] || 0) + 1;
     }
@@ -137,7 +186,8 @@ export class IBMQuantumAer {
       counts: measurements,
       executionTime: performance.now() - startTime,
       confidence: Math.min(95, confidence),
-      backend: "fallback-classical-simulator"
+      backend: "classical-fallback",
+      status: "fallback"
     };
   }
 
