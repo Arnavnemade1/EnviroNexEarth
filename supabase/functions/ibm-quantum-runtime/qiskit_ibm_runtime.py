@@ -107,29 +107,50 @@ def main():
         if not api_token:
             raise ValueError("IBM Quantum API token required")
 
+        # Initialize IBM Quantum Runtime service with provided API token
         service = QiskitRuntimeService(channel="ibm_quantum", token=api_token)
 
+        # Create quantum circuit for AQI prediction
         circuit = create_quantum_aqi_circuit(features, qubits)
 
+        # Get least busy REAL quantum hardware (not simulator)
+        # This selects actual quantum processors like ibm_kyoto, ibm_osaka, etc.
         backend = service.least_busy(simulator=False, operational=True)
+        
+        print(f"Selected backend: {backend.name} (Real Quantum Hardware)", file=sys.stderr)
+        print(f"Backend configuration: {backend.configuration().to_dict()}", file=sys.stderr)
 
+        # Open a session with the real quantum hardware
         with Session(service=service, backend=backend) as session:
+            # Use Sampler primitive for quantum measurement
             sampler = Sampler(session=session)
 
+            print(f"Submitting job to {backend.name} with {shots} shots...", file=sys.stderr)
+            
+            # Submit circuit to REAL quantum hardware
             job = sampler.run(circuits=circuit, shots=shots)
+            
+            print(f"Job ID: {job.job_id()} - Status: {job.status()}", file=sys.stderr)
 
+            # Wait for real quantum hardware to complete execution
             result = job.result()
 
+            # Extract measurement counts from quantum execution
             counts_raw = result.quasi_dists[0]
 
+            # Convert to binary string format
             counts = {format(int(k), f'0{qubits}b'): int(v * shots) for k, v in counts_raw.items()}
 
+            # Analyze quantum measurement results
             analysis = compute_aqi_from_measurements(counts, base_aqi)
 
+            # Add metadata about the real quantum execution
             analysis["backend"] = backend.name
             analysis["job_id"] = job.job_id()
             analysis["circuit_depth"] = circuit.depth()
             analysis["circuit_qubits"] = qubits
+            analysis["is_real_quantum_hardware"] = True
+            analysis["backend_type"] = "IBM Quantum Processor"
 
             print(json.dumps(analysis))
 

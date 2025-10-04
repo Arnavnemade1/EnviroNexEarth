@@ -22,6 +22,8 @@ interface QuantumJobResponse {
   measurement_counts?: Record<string, number>;
   quantum_entropy?: number;
   backend: string;
+  backend_type?: string;
+  is_real_quantum_hardware?: boolean;
   circuit_depth?: number;
   execution_time_ms?: number;
   error?: string;
@@ -107,7 +109,8 @@ Deno.serve(async (req: Request) => {
 
   try {
     const body: QuantumJobRequest = await req.json();
-    const { features, qubits, shots, base_aqi, timeout_ms = 8000 } = body;
+    // Increased timeout for real quantum hardware (can take 15-30s for real QPU execution)
+    const { features, qubits, shots, base_aqi, timeout_ms = 30000 } = body;
 
     const startTime = Date.now();
 
@@ -140,11 +143,14 @@ Deno.serve(async (req: Request) => {
 
     const timeoutPromise = new Promise<QuantumJobResponse>((resolve) => {
       setTimeout(() => {
+        console.log("IBM Quantum hardware timeout - falling back to Aer simulation");
         resolve({
           status: "timeout",
-          backend: "ibm-quantum-timeout-fallback",
+          backend: "timeout-fallback-to-aer",
+          backend_type: "Timeout Fallback",
+          is_real_quantum_hardware: false,
           execution_time_ms: Date.now() - startTime,
-          error: "IBM Quantum job exceeded timeout, using Aer fallback",
+          error: "Real quantum hardware exceeded 30s timeout, will use Aer simulation fallback",
         });
       }, timeout_ms);
     });
@@ -176,6 +182,8 @@ Deno.serve(async (req: Request) => {
       measurement_counts: result.measurement_counts,
       quantum_entropy: result.quantum_entropy,
       backend: result.backend || "ibm-quantum-runtime",
+      backend_type: result.backend_type || "IBM Quantum Processor",
+      is_real_quantum_hardware: result.is_real_quantum_hardware || true,
       circuit_depth: result.circuit_depth,
       execution_time_ms: Date.now() - startTime,
     };
