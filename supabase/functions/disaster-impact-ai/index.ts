@@ -27,7 +27,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'x-ai/grok-beta',
+        model: 'x-ai/grok-2-1212',
         messages: [
           {
             role: 'system',

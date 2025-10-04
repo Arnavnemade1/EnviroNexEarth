@@ -4,9 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Send, X, Bot, User, Key } from 'lucide-react';
-import { geminiService } from '@/services/geminiApi';
-import { API_KEYS } from '@/types';
+import { MessageCircle, Send, X, Bot, User } from 'lucide-react';
+import { grokService } from '@/services/grokApi';
 
 interface ChatMessage {
   id: string;
@@ -27,14 +26,12 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
     {
       id: '1',
       type: 'bot',
-      message: "Hi! I'm Enviro, your environmental AI assistant. Ask me about air quality, climate predictions, natural disasters, or satellites. Try 'What are those red lines on satellites?' or 'Tell me about air pollution in this city'",
+      message: "Hi! I'm Enviro, your environmental AI assistant powered by Grok-2. Ask me about air quality, climate predictions, natural disasters, or satellites. Try 'What are those red lines on satellites?' or 'Tell me about air pollution in this city'",
       timestamp: new Date()
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [showKeyInput, setShowKeyInput] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -45,40 +42,8 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
     scrollToBottom();
   }, [messages]);
 
-  // Auto-load API key from localStorage or fallback to API_KEYS
-  useEffect(() => {
-    const stored = localStorage.getItem('GEMINI_API_KEY');
-    const key = stored || API_KEYS.GEMINI || '';
-    if (key) {
-      setApiKey(key);
-      geminiService.setApiKey(key);
-    }
-  }, []);
-
-  const setGeminiApiKey = (key: string) => {
-    setApiKey(key);
-    geminiService.setApiKey(key);
-    localStorage.setItem('GEMINI_API_KEY', key);
-    setShowKeyInput(false);
-    
-    const welcomeMessage: ChatMessage = {
-      id: Date.now().toString(),
-      type: 'bot',
-      message: 'Great! I\'m now connected. Ask me anything about air quality, satellites, climate predictions, natural disasters, or environmental data!',
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, welcomeMessage]);
-  };
-
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
-
-    // Check if API key is set
-    if (!apiKey) {
-      setShowKeyInput(true);
-      return;
-    }
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -92,7 +57,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
     setIsTyping(true);
 
     try {
-      const response = await geminiService.generateResponse(
+      const response = await grokService.generateResponse(
         userMessage.message,
         { selectedCity, currentScenario, currentYear }
       );
@@ -109,7 +74,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
       const errorResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        message: 'Sorry, I encountered an error. Please check your API key or try again later.',
+        message: 'Sorry, I encountered an error. Please try again later.',
         timestamp: new Date()
       };
       
@@ -151,7 +116,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
           <div className="flex items-center gap-2">
             <Bot className="w-5 h-5 text-primary" />
             <span className="font-medium">Enviro</span>
-            <Badge variant="outline" className="text-xs">AI Assistant</Badge>
+            <Badge variant="outline" className="text-xs">Powered by Grok-2</Badge>
           </div>
           <Button
             size="sm"
@@ -213,57 +178,24 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
 
         {/* Input */}
         <div className="p-4 border-t border-primary/20">
-          {showKeyInput ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Key className="w-4 h-4" />
-                <span>Enter your Gemini API key to continue</span>
-              </div>
-              <div className="flex gap-2">
-                <Input
-                  type="password"
-                  placeholder="Gemini API Key"
-                  className="glass flex-1"
-                  onChange={(e) => setApiKey(e.target.value)}
-                />
-                <Button
-                  onClick={() => setGeminiApiKey(apiKey)}
-                  size="sm"
-                  disabled={!apiKey.trim()}
-                  className="glass"
-                >
-                  Set
-                </Button>
-              </div>
-              <Button
-                onClick={() => setShowKeyInput(false)}
-                size="sm"
-                variant="outline"
-                className="w-full glass"
-              >
-                Cancel
-              </Button>
-            </div>
-          ) : (
-            <div className="flex gap-2">
-              <Input
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder={apiKey ? "Ask about air quality, climate predictions..." : "Click send to add API key"}
-                className="glass flex-1"
-                disabled={isTyping}
-              />
-              <Button
-                onClick={handleSendMessage}
-                size="sm"
-                disabled={isTyping}
-                className="glass"
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
+          <div className="flex gap-2">
+            <Input
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask about air quality, climate predictions..."
+              className="glass flex-1"
+              disabled={isTyping}
+            />
+            <Button
+              onClick={handleSendMessage}
+              size="sm"
+              disabled={isTyping}
+              className="glass"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </Card>
     </div>
