@@ -26,7 +26,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
     {
       id: '1',
       type: 'bot',
-      message: "Hi! I'm Enviro, your environmental AI assistant powered by Grok-2. Ask me about air quality, climate predictions, natural disasters, or satellites. Try 'What are those red lines on satellites?' or 'Tell me about air pollution in this city'",
+      message: "Hi! I'm Grok-4 Fast, your quantum-enhanced environmental AI assistant. Ask me about air quality, IBM Quantum predictions, climate forecasts, natural disasters, or satellite data. Try 'How does quantum computing improve predictions?' or 'Analyze air quality in this city'",
       timestamp: new Date()
     }
   ]);
@@ -102,7 +102,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
           <MessageCircle className="w-6 h-6" />
         </Button>
         <Badge className="absolute -top-2 -right-2 bg-accent text-accent-foreground">
-          Enviro
+          Grok-4
         </Badge>
       </div>
     );
@@ -115,8 +115,8 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
         <div className="flex items-center justify-between p-4 border-b border-primary/20">
           <div className="flex items-center gap-2">
             <Bot className="w-5 h-5 text-primary" />
-            <span className="font-medium">Enviro</span>
-            <Badge variant="outline" className="text-xs">Powered by Grok-2</Badge>
+            <span className="font-medium">Grok-4 Fast</span>
+            <Badge variant="outline" className="text-xs">Quantum-Enhanced AI</Badge>
           </div>
           <Button
             size="sm"
@@ -183,7 +183,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask about air quality, climate predictions..."
+              placeholder="Ask about quantum predictions, air quality..."
               className="glass flex-1"
               disabled={isTyping}
             />

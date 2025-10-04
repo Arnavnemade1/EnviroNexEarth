@@ -64,9 +64,9 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
     },
     {
       icon: MessageCircle,
-      title: 'AI Assistant',
+      title: 'Grok-4 Fast',
       description: 'Ask questions about air quality and climate data',
-      highlight: 'Powered by Gemini'
+      highlight: 'X.AI Quantum AI'
     }
   ];
 

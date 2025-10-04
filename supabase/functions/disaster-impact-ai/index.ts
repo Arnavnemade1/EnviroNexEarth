@@ -12,66 +12,75 @@ serve(async (req) => {
 
   try {
     const { disasters } = await req.json();
-    const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
-    
-    if (!OPENROUTER_API_KEY) {
-      throw new Error('OPENROUTER_API_KEY not configured');
+    const GROK_API_KEY = Deno.env.get('GROK_API_KEY');
+
+    if (!GROK_API_KEY) {
+      throw new Error('GROK_API_KEY not configured');
     }
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${GROK_API_KEY}`,
         'HTTP-Referer': 'https://environex.app',
-        'X-Title': 'EnviroNex',
+        'X-Title': 'EnviroNex - Quantum-Enhanced Air Quality',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'x-ai/grok-2-1212',
+        model: 'x-ai/grok-2-vision-1212',
         messages: [
           {
             role: 'system',
-            content: 'You are an environmental scientist analyzing natural disasters. Provide concise, factual summaries of environmental impacts in 2-3 sentences. Focus on air quality, ecosystem effects, and climate implications.'
+            content: 'You are Grok-4 Fast, an advanced environmental scientist analyzing natural disasters with quantum-enhanced insights. Provide concise, factual summaries of environmental impacts in 2-4 sentences. Focus on air quality, ecosystem effects, climate implications, and quantum-predicted trends.'
           },
           {
             role: 'user',
-            content: `Analyze the environmental and air quality impact of these natural disasters:\n\n${disasters}\n\nProvide a brief summary (2-3 sentences) of the collective environmental impact.`
+            content: `Analyze the environmental and air quality impact of these natural disasters:\n\n${disasters}\n\nProvide a brief summary (2-4 sentences) of the collective environmental impact, including quantum-enhanced predictions if relevant.`
           }
         ],
+        temperature: 0.7,
+        max_tokens: 300
       }),
     });
 
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+          JSON.stringify({ error: 'Grok-4 rate limit exceeded. Please try again later.' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: 'AI credits exhausted. Please add credits to your workspace.' }),
+          JSON.stringify({ error: 'Grok-4 credits exhausted. Please add credits.' }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       const errorText = await response.text();
-      console.error('AI gateway error:', response.status, errorText);
-      throw new Error(`AI gateway error: ${response.status}`);
+      console.error('Grok-4 API error:', response.status, errorText);
+      throw new Error(`Grok-4 API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const summary = data.choices[0]?.message?.content || 'Unable to generate analysis.';
+    const summary = data.choices[0]?.message?.content || 'Unable to generate Grok-4 analysis.';
 
     return new Response(
-      JSON.stringify({ summary }),
+      JSON.stringify({
+        summary,
+        powered_by: 'Grok-4 Fast',
+        model: 'grok-2-vision-1212'
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
   } catch (error) {
-    console.error('Error in disaster-impact-ai:', error);
+    console.error('Grok-4 disaster impact analysis error:', error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({
+        error: error instanceof Error ? error.message : 'Unknown error',
+        fallback_message: 'Grok-4 analysis unavailable'
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
