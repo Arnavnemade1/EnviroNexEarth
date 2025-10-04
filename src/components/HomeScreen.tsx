@@ -2,17 +2,7 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Globe, 
-  Search, 
-  TrendingUp, 
-  Satellite, 
-  AlertTriangle,
-  MessageCircle,
-  Play,
-  ChevronRight,
-  User
-} from 'lucide-react';
+import { Globe, Search, TrendingUp, Satellite, TriangleAlert as AlertTriangle, MessageCircle, Play, ChevronRight, User } from 'lucide-react';
 
 interface HomeScreenProps {
   onStartExploring: () => void;
