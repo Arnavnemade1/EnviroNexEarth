@@ -5,6 +5,10 @@ import { interpolateRdYlBu } from 'd3-scale-chromatic';
 import { SatelliteData } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { MapPin, Layers, Navigation, Ruler, Clock, Cloud, Zap } from 'lucide-react';
 
 
 interface GlobeComponentProps {
@@ -26,6 +30,43 @@ export const GlobeComponent = ({
   const [selectedSatellite, setSelectedSatellite] = useState<SatelliteData | null>(null);
   const [dayNightCycle, setDayNightCycle] = useState(0);
   const [shootingStars, setShootingStars] = useState<Array<{id: number, x: number, y: number}>>([]);
+  const [showControls, setShowControls] = useState(true);
+  const [layers, setLayers] = useState({
+    cityLights: true,
+    clouds: true,
+    satellites: true,
+    atmosphere: true,
+    orbitalPaths: true
+  });
+  const [timeOfDay, setTimeOfDay] = useState(12); // 0-24 hours
+  const [measuringDistance, setMeasuringDistance] = useState(false);
+  const [measurePoints, setMeasurePoints] = useState<Array<{lat: number, lng: number}>>([]);
+
+  // Famous locations for quick travel
+  const famousLocations = [
+    { name: 'New York', lat: 40.7128, lng: -74.0060 },
+    { name: 'Paris', lat: 48.8566, lng: 2.3522 },
+    { name: 'Tokyo', lat: 35.6762, lng: 139.6503 },
+    { name: 'Sydney', lat: -33.8688, lng: 151.2093 },
+    { name: 'Dubai', lat: 25.2048, lng: 55.2708 },
+    { name: 'Amazon', lat: -3.4653, lng: -62.2159 },
+  ];
+
+  // Major cities for city lights
+  const cityLights = [
+    { lat: 40.7128, lng: -74.0060, size: 0.8 }, // New York
+    { lat: 34.0522, lng: -118.2437, size: 0.7 }, // LA
+    { lat: 51.5074, lng: -0.1278, size: 0.6 }, // London
+    { lat: 48.8566, lng: 2.3522, size: 0.6 }, // Paris
+    { lat: 35.6762, lng: 139.6503, size: 0.9 }, // Tokyo
+    { lat: 31.2304, lng: 121.4737, size: 0.8 }, // Shanghai
+    { lat: 28.6139, lng: 77.2090, size: 0.7 }, // Delhi
+    { lat: 19.4326, lng: -99.1332, size: 0.6 }, // Mexico City
+    { lat: -23.5505, lng: -46.6333, size: 0.7 }, // São Paulo
+    { lat: 30.0444, lng: 31.2357, size: 0.6 }, // Cairo
+    { lat: 25.2048, lng: 55.2708, size: 0.7 }, // Dubai
+    { lat: -33.8688, lng: 151.2093, size: 0.5 }, // Sydney
+  ];
 
   // Generate satellite data
   useEffect(() => {
@@ -78,7 +119,7 @@ export const GlobeComponent = ({
   useEffect(() => {
     if (!globeRef.current || globeInstanceRef.current) return; // Prevent re-initialization
 
-    // Initialize Globe with enhanced visuals
+    // Initialize Globe with ultra-enhanced visuals
     const globe = new Globe(globeRef.current)
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-day.jpg')
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
@@ -99,9 +140,31 @@ export const GlobeComponent = ({
     globe.controls().enableDamping = true;
     globe.controls().dampingFactor = 0.1;
 
-    // Click handler for cities
+    // Click handler for cities and distance measurement
     globe.onGlobeClick((coords: { lat: number; lng: number }) => {
-      if (onCityClick) {
+      if (measuringDistance) {
+        setMeasurePoints(prev => {
+          const newPoints = [...prev, coords];
+          if (newPoints.length === 2) {
+            // Calculate distance
+            const R = 6371; // Earth's radius in km
+            const lat1 = newPoints[0].lat * Math.PI / 180;
+            const lat2 = newPoints[1].lat * Math.PI / 180;
+            const deltaLat = (newPoints[1].lat - newPoints[0].lat) * Math.PI / 180;
+            const deltaLng = (newPoints[1].lng - newPoints[0].lng) * Math.PI / 180;
+            
+            const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
+                     Math.cos(lat1) * Math.cos(lat2) *
+                     Math.sin(deltaLng/2) * Math.sin(deltaLng/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const distance = R * c;
+            
+            alert(`Distance: ${distance.toFixed(2)} km`);
+            return [];
+          }
+          return newPoints;
+        });
+      } else if (onCityClick) {
         onCityClick(coords.lat, coords.lng);
       }
     });
@@ -148,9 +211,47 @@ export const GlobeComponent = ({
       .htmlLng((d: any) => d.lng);
   }, [selectedCity]);
 
+  // City Lights Layer
+  useEffect(() => {
+    if (!globeInstanceRef.current || !layers.cityLights) return;
+
+    globeInstanceRef.current
+      .pointsData(cityLights)
+      .pointColor(() => '#ffeb3b')
+      .pointAltitude((d: any) => 0.01)
+      .pointRadius((d: any) => d.size)
+      .pointsMerge(false);
+  }, [layers.cityLights]);
+
+  // Clouds Layer
+  useEffect(() => {
+    if (!globeInstanceRef.current || !layers.clouds) return;
+
+    const CLOUDS_IMG_URL = '//unpkg.com/three-globe/example/clouds/clouds.png';
+    const CLOUDS_ALT = 0.004;
+    const CLOUDS_ROTATION_SPEED = -0.006;
+
+    new THREE.TextureLoader().load(CLOUDS_IMG_URL, (cloudsTexture) => {
+      const clouds = new THREE.Mesh(
+        new THREE.SphereGeometry(
+          globeInstanceRef.current.getGlobeRadius() * (1 + CLOUDS_ALT),
+          75,
+          75
+        ),
+        new THREE.MeshPhongMaterial({ map: cloudsTexture, transparent: true, opacity: 0.8 })
+      );
+      globeInstanceRef.current.scene().add(clouds);
+
+      (function rotateClouds() {
+        clouds.rotation.y += CLOUDS_ROTATION_SPEED * Math.PI / 180;
+        requestAnimationFrame(rotateClouds);
+      })();
+    });
+  }, [layers.clouds]);
+
   // Animate satellites
   useEffect(() => {
-    if (!globeInstanceRef.current || !showSatellites || !satellites.length) return;
+    if (!globeInstanceRef.current || !layers.satellites || !satellites.length) return;
 
     const animateSatellites = () => {
       const updatedSatellites = satellites.map(sat => ({
@@ -213,7 +314,30 @@ export const GlobeComponent = ({
       });
 
     return () => clearInterval(interval);
-  }, [satellites, showSatellites]);
+  }, [satellites, layers.satellites]);
+
+  // Orbital Path Trails
+  useEffect(() => {
+    if (!globeInstanceRef.current || !layers.orbitalPaths || !satellites.length) return;
+
+    const pathsData = satellites.map(sat => {
+      const points = [];
+      for (let i = 0; i < 50; i++) {
+        const lng = (sat.lng + (i * sat.velocity * 0.5)) % 360;
+        points.push({ lat: sat.lat, lng, alt: sat.altitude / 1000 });
+      }
+      return points;
+    });
+
+    globeInstanceRef.current
+      .pathsData(pathsData)
+      .pathColor(() => ['#60a5fa', '#8b5cf6'])
+      .pathDashLength(0.01)
+      .pathDashGap(0.004)
+      .pathDashAnimateTime(50000)
+      .pathStroke(1.5)
+      .pathTransitionDuration(0);
+  }, [satellites, layers.orbitalPaths]);
 
   // Day/Night Cycle Animation
   useEffect(() => {
@@ -243,7 +367,7 @@ export const GlobeComponent = ({
 
   // Aurora Borealis Effect
   useEffect(() => {
-    if (!globeInstanceRef.current) return;
+    if (!globeInstanceRef.current || !layers.atmosphere) return;
 
     const auroraData = [
       { lat: 70, lng: -100, alt: 0.1 },
@@ -260,7 +384,13 @@ export const GlobeComponent = ({
       .ringMaxRadius(8)
       .ringPropagationSpeed(3)
       .ringRepeatPeriod(2000);
-  }, []);
+  }, [layers.atmosphere]);
+
+  // Quick Travel Function
+  const travelTo = (location: { lat: number; lng: number; name: string }) => {
+    if (!globeInstanceRef.current) return;
+    globeInstanceRef.current.pointOfView({ lat: location.lat, lng: location.lng, altitude: 1.5 }, 2000);
+  };
 
   // Handle window resize
   useEffect(() => {
@@ -280,6 +410,112 @@ export const GlobeComponent = ({
   return (
     <div className="relative w-full h-full overflow-hidden">
       <div ref={globeRef} className="w-full h-full" />
+
+      {/* Control Panel Toggle */}
+      <Button
+        onClick={() => setShowControls(!showControls)}
+        className="absolute top-4 left-4 z-50 glass"
+        size="icon"
+      >
+        <Layers className="w-5 h-5" />
+      </Button>
+
+      {/* Advanced Control Panel */}
+      {showControls && (
+        <Card className="absolute top-16 left-4 z-50 glass p-4 w-64 space-y-4">
+          <div>
+            <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
+              <Layers className="w-4 h-4" />
+              Visual Layers
+            </h3>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="cityLights" className="text-xs">City Lights</Label>
+                <Switch
+                  id="cityLights"
+                  checked={layers.cityLights}
+                  onCheckedChange={(checked) => setLayers(prev => ({ ...prev, cityLights: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="clouds" className="text-xs">Clouds</Label>
+                <Switch
+                  id="clouds"
+                  checked={layers.clouds}
+                  onCheckedChange={(checked) => setLayers(prev => ({ ...prev, clouds: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="satellites" className="text-xs">Satellites</Label>
+                <Switch
+                  id="satellites"
+                  checked={layers.satellites}
+                  onCheckedChange={(checked) => setLayers(prev => ({ ...prev, satellites: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="orbitalPaths" className="text-xs">Orbital Paths</Label>
+                <Switch
+                  id="orbitalPaths"
+                  checked={layers.orbitalPaths}
+                  onCheckedChange={(checked) => setLayers(prev => ({ ...prev, orbitalPaths: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="atmosphere" className="text-xs">Aurora</Label>
+                <Switch
+                  id="atmosphere"
+                  checked={layers.atmosphere}
+                  onCheckedChange={(checked) => setLayers(prev => ({ ...prev, atmosphere: checked }))}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
+              <Ruler className="w-4 h-4" />
+              Measurement Tool
+            </h3>
+            <Button
+              onClick={() => {
+                setMeasuringDistance(!measuringDistance);
+                setMeasurePoints([]);
+              }}
+              className={`w-full ${measuringDistance ? 'bg-accent' : ''}`}
+              size="sm"
+              variant={measuringDistance ? 'default' : 'outline'}
+            >
+              {measuringDistance ? 'Cancel Measuring' : 'Measure Distance'}
+            </Button>
+            {measuringDistance && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Click 2 points on globe
+              </p>
+            )}
+          </div>
+
+          <div>
+            <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
+              <Navigation className="w-4 h-4" />
+              Quick Travel
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              {famousLocations.map((loc) => (
+                <Button
+                  key={loc.name}
+                  onClick={() => travelTo(loc)}
+                  size="sm"
+                  variant="outline"
+                  className="text-xs"
+                >
+                  {loc.name}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Shooting Stars */}
       {shootingStars.map(star => (
