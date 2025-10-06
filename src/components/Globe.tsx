@@ -5,7 +5,7 @@ import { interpolateRdYlBu } from 'd3-scale-chromatic';
 import { SatelliteData } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Cake, PartyPopper } from 'lucide-react';
+
 
 interface GlobeComponentProps {
   onCityClick?: (lat: number, lng: number) => void;
@@ -24,7 +24,8 @@ export const GlobeComponent = ({
   const globeInstanceRef = useRef<any>(null);
   const [satellites, setSatellites] = useState<SatelliteData[]>([]);
   const [selectedSatellite, setSelectedSatellite] = useState<SatelliteData | null>(null);
-  const [showBirthdayEffects, setShowBirthdayEffects] = useState(true);
+  const [dayNightCycle, setDayNightCycle] = useState(0);
+  const [shootingStars, setShootingStars] = useState<Array<{id: number, x: number, y: number}>>([]);
 
   // Generate satellite data
   useEffect(() => {
@@ -77,16 +78,17 @@ export const GlobeComponent = ({
   useEffect(() => {
     if (!globeRef.current || globeInstanceRef.current) return; // Prevent re-initialization
 
-    // Initialize Globe
+    // Initialize Globe with enhanced visuals
     const globe = new Globe(globeRef.current)
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-day.jpg')
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
       .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
       .width(window.innerWidth)
       .height(window.innerHeight)
       .atmosphereColor('#4fa8d8')
-      .atmosphereAltitude(0.15)
-      .enablePointerInteraction(true);
+      .atmosphereAltitude(0.25)
+      .enablePointerInteraction(true)
+      .showAtmosphere(true);
 
     // Configure camera
     globe.camera().position.z = 300;
@@ -204,32 +206,6 @@ export const GlobeComponent = ({
         const glow = new THREE.Mesh(glowGeometry, glowMaterial);
         satelliteGroup.add(glow);
 
-        // Add birthday circle for ISS
-        if (isISS && showBirthdayEffects) {
-          const circleGeometry = new THREE.RingGeometry(2.5, 3, 64);
-          const circleMaterial = new THREE.MeshBasicMaterial({
-            color: '#fbbf24',
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.6
-          });
-          const circle = new THREE.Mesh(circleGeometry, circleMaterial);
-          circle.rotation.x = Math.PI / 2;
-          satelliteGroup.add(circle);
-
-          // Add pulsing outer circle
-          const outerCircleGeometry = new THREE.RingGeometry(3.5, 4, 64);
-          const outerCircleMaterial = new THREE.MeshBasicMaterial({
-            color: '#f97316',
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.4
-          });
-          const outerCircle = new THREE.Mesh(outerCircleGeometry, outerCircleMaterial);
-          outerCircle.rotation.x = Math.PI / 2;
-          satelliteGroup.add(outerCircle);
-        }
-
         return satelliteGroup;
       })
       .onObjectClick((sat: any) => {
@@ -238,6 +214,53 @@ export const GlobeComponent = ({
 
     return () => clearInterval(interval);
   }, [satellites, showSatellites]);
+
+  // Day/Night Cycle Animation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDayNightCycle(prev => (prev + 0.5) % 360);
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Shooting Stars Effect
+  useEffect(() => {
+    const createShootingStar = () => {
+      const newStar = {
+        id: Date.now(),
+        x: Math.random() * 100,
+        y: Math.random() * 50
+      };
+      setShootingStars(prev => [...prev, newStar]);
+      setTimeout(() => {
+        setShootingStars(prev => prev.filter(s => s.id !== newStar.id));
+      }, 2000);
+    };
+
+    const interval = setInterval(createShootingStar, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Aurora Borealis Effect
+  useEffect(() => {
+    if (!globeInstanceRef.current) return;
+
+    const auroraData = [
+      { lat: 70, lng: -100, alt: 0.1 },
+      { lat: 72, lng: -80, alt: 0.12 },
+      { lat: 68, lng: -120, alt: 0.11 },
+      { lat: 71, lng: -90, alt: 0.13 },
+      { lat: -70, lng: 100, alt: 0.1 },
+      { lat: -72, lng: 120, alt: 0.12 },
+    ];
+
+    globeInstanceRef.current
+      .ringsData(auroraData)
+      .ringColor(() => (t: number) => `rgba(0, 255, 150, ${Math.sqrt(1-t) * 0.8})`)
+      .ringMaxRadius(8)
+      .ringPropagationSpeed(3)
+      .ringRepeatPeriod(2000);
+  }, []);
 
   // Handle window resize
   useEffect(() => {
@@ -253,74 +276,51 @@ export const GlobeComponent = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const goToISS = () => {
-    if (!globeInstanceRef.current) return;
-
-    const issSatellite = satellites.find(sat => sat.id === 'iss');
-    if (issSatellite) {
-      const coords = {
-        lat: issSatellite.lat,
-        lng: issSatellite.lng,
-        altitude: 2.5
-      };
-      globeInstanceRef.current.pointOfView(coords, 2000);
-      setSelectedSatellite(issSatellite);
-    }
-  };
 
   return (
     <div className="relative w-full h-full overflow-hidden">
       <div ref={globeRef} className="w-full h-full" />
 
-      {/* ISS Birthday Shortcut Button */}
-      {showSatellites && showBirthdayEffects && (
-        <div className="absolute top-4 left-4 z-50">
-          <Button
-            onClick={goToISS}
-            className="glass bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-xl hover:scale-110 transition-all duration-300 border-2 border-yellow-400/50 animate-bounce"
-            size="lg"
-          >
-            <Cake className="w-5 h-5 mr-2" />
-            ISS Birthday!
-            <PartyPopper className="w-5 h-5 ml-2" />
-          </Button>
-        </div>
-      )}
+      {/* Shooting Stars */}
+      {shootingStars.map(star => (
+        <div
+          key={star.id}
+          className="absolute w-1 h-1 bg-white rounded-full pointer-events-none z-10"
+          style={{
+            left: `${star.x}%`,
+            top: `${star.y}%`,
+            boxShadow: '0 0 10px 2px rgba(255,255,255,0.8)',
+            animation: 'shooting-star 2s linear forwards'
+          }}
+        />
+      ))}
 
-      {/* Birthday Confetti Effect */}
-      {showBirthdayEffects && (
-        <div className="absolute inset-0 pointer-events-none z-10">
-          {[...Array(30)].map((_, i) => (
-            <div
-              key={`confetti-${i}`}
-              className="absolute w-2 h-2 rounded-full animate-float"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `-${Math.random() * 20}%`,
-                backgroundColor: ['#fbbf24', '#f97316', '#ef4444', '#ec4899', '#8b5cf6'][Math.floor(Math.random() * 5)],
-                animationDelay: `${Math.random() * 5}s`,
-                animationDuration: `${5 + Math.random() * 5}s`,
-                opacity: 0.8
-              }}
-            />
-          ))}
-        </div>
-      )}
+      {/* Aurora Borealis Glow Effect */}
+      <div className="absolute top-0 left-0 right-0 h-32 pointer-events-none z-10 opacity-30"
+        style={{
+          background: 'radial-gradient(ellipse at top, rgba(0,255,150,0.4) 0%, transparent 70%)',
+          animation: 'aurora-pulse 8s ease-in-out infinite'
+        }}
+      />
 
       {/* Gradient overlay for atmospheric effect */}
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-transparent to-background/10" />
 
-      {/* Floating particles effect */}
+      {/* Cosmic Particle Field */}
       <div className="absolute inset-0 pointer-events-none">
-        {[...Array(50)].map((_, i) => (
+        {[...Array(100)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-primary/30 rounded-full animate-pulse"
+            className="absolute rounded-full"
             style={{
+              width: `${Math.random() * 3 + 1}px`,
+              height: `${Math.random() * 3 + 1}px`,
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
+              background: `radial-gradient(circle, ${['#4fa8d8', '#60a5fa', '#8b5cf6', '#ec4899', '#fbbf24'][Math.floor(Math.random() * 5)]} 0%, transparent 70%)`,
+              animation: `float ${3 + Math.random() * 4}s ease-in-out infinite`,
               animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 2}s`
+              opacity: Math.random() * 0.8 + 0.2
             }}
           />
         ))}
@@ -328,9 +328,7 @@ export const GlobeComponent = ({
 
       {/* Satellite Info Modal */}
       {selectedSatellite && (
-        <div className={`absolute top-4 right-4 z-50 glass rounded-xl max-w-sm max-h-64 overflow-hidden bg-transparent ${
-          selectedSatellite.id === 'iss' ? 'border-yellow-400/50 border-2 shadow-2xl shadow-yellow-400/20' : 'border-white/10'
-        }`}>
+        <div className="absolute top-4 right-4 z-50 glass rounded-xl max-w-sm max-h-64 overflow-hidden bg-transparent border-primary/30 border-2 shadow-2xl shadow-primary/20">
           <ScrollArea className="h-full p-4">
             <button
               onClick={() => setSelectedSatellite(null)}
@@ -340,18 +338,7 @@ export const GlobeComponent = ({
             </button>
             <div className="flex items-center gap-2 mb-2">
               <h3 className="font-bold text-lg text-primary">{selectedSatellite.name}</h3>
-              {selectedSatellite.id === 'iss' && showBirthdayEffects && (
-                <div className="flex items-center gap-1 text-yellow-500 animate-pulse">
-                  <Cake className="w-5 h-5" />
-                  <PartyPopper className="w-5 h-5" />
-                </div>
-              )}
             </div>
-            {selectedSatellite.id === 'iss' && showBirthdayEffects && (
-              <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-lg px-3 py-2 mb-3 border border-yellow-400/30">
-                <p className="text-sm font-semibold text-yellow-600">Happy Birthday ISS!</p>
-              </div>
-            )}
             <p className="text-sm text-muted-foreground mb-3">{selectedSatellite.description}</p>
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
