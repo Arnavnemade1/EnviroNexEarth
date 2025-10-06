@@ -3,7 +3,11 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Wind, 
   Thermometer, 
@@ -17,7 +21,9 @@ import {
   RotateCcw,
   Home,
   BarChart3,
-  Atom
+  Atom,
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import { AirQualityData, PredictionData } from '@/types';
  
@@ -58,7 +64,11 @@ export const DataPanel = ({
 }: DataPanelProps) => {
   const [selectedScenario, setSelectedScenario] = useState<'current' | 'clean_energy' | 'no_action'>('current');
   const [animationSpeed, setAnimationSpeed] = useState(1);
+  const [showImpactDialog, setShowImpactDialog] = useState(false);
+  const [impactAnalysis, setImpactAnalysis] = useState<string>('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const getAQIColor = (aqi: number) => {
     if (aqi <= 50) return 'text-clean-green';
@@ -152,9 +162,76 @@ export const DataPanel = ({
     }
   };
 
+  const handleGenerateImpactSummary = async () => {
+    if (!airQuality || !cityName) return;
+
+    setIsAnalyzing(true);
+    setShowImpactDialog(true);
+    setImpactAnalysis('');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-impact', {
+        body: {
+          cityName,
+          airQuality,
+          quantumForecast,
+          scenario: selectedScenario
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.analysis) {
+        setImpactAnalysis(data.analysis);
+      } else {
+        throw new Error('No analysis received');
+      }
+    } catch (error) {
+      console.error('Error generating impact summary:', error);
+      toast({
+        title: "Analysis Failed",
+        description: "Unable to generate impact summary. Please try again.",
+        variant: "destructive"
+      });
+      setShowImpactDialog(false);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   return (
-    <div className="fixed top-6 left-6 w-80 space-y-4 z-40 max-h-[calc(100vh-3rem)] overflow-y-auto scrollbar-thin">
-      {/* Back to Home Button */}
+    <>
+      {/* AI Impact Summary Dialog */}
+      <Dialog open={showImpactDialog} onOpenChange={setShowImpactDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] glass">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              <Sparkles className="w-6 h-6 text-primary" />
+              AI Impact Summary
+            </DialogTitle>
+            <DialogDescription>
+              Comprehensive analysis for {cityName}
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[60vh] pr-4">
+            {isAnalyzing ? (
+              <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                <Loader2 className="w-12 h-12 animate-spin text-primary" />
+                <p className="text-muted-foreground">Analyzing air quality data with AI...</p>
+              </div>
+            ) : (
+              <div className="prose prose-invert max-w-none">
+                <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                  {impactAnalysis}
+                </div>
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      <div className="fixed top-6 left-6 w-80 space-y-4 z-40 max-h-[calc(100vh-3rem)] overflow-y-auto scrollbar-thin">
+        {/* Back to Home Button */}
       {onBackToHome && (
         <Button
           size="sm"
@@ -214,6 +291,16 @@ export const DataPanel = ({
                 <span>SO₂: {airQuality.so2}μg/m³</span>
               </div>
             </div>
+
+            {/* AI Impact Summary Button */}
+            <Button 
+              onClick={handleGenerateImpactSummary}
+              className="w-full mt-4 bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 transition-opacity"
+              size="lg"
+            >
+              <Sparkles className="w-5 h-5 mr-2" />
+              Generate AI Impact Summary
+            </Button>
           </div>
         </Card>
       )}
@@ -437,7 +524,8 @@ export const DataPanel = ({
           </div>
         </Card>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

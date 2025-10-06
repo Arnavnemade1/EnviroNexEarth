@@ -1,5 +1,8 @@
 project_id = "naaohlrbreowzrjdwxje"
 
+[functions.analyze-impact]
+verify_jwt = false
+
 [functions.quantum-predictor]
 verify_jwt = false
 

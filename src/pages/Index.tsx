@@ -108,12 +108,21 @@ const Index = () => {
       setPredictions(forecasts);
       setQuantumForecast(qForecast);
 
-      // Generate pollution visualization data
+      // Generate pollution visualization data based on actual AQI
       const pollutionPoints = [];
-      for (let i = 0; i < 100; i++) {
-        const lat = city.lat + (Math.random() - 0.5) * 10;
-        const lng = city.lng + (Math.random() - 0.5) * 10;
-        const value = Math.random() * 150;
+      const baseValue = aqData.aqi;
+      const radius = 5; // degrees
+      const points = 80;
+      
+      for (let i = 0; i < points; i++) {
+        const angle = (i / points) * 2 * Math.PI;
+        const distance = (i % 4) * (radius / 4);
+        const lat = city.lat + Math.cos(angle) * distance;
+        const lng = city.lng + Math.sin(angle) * distance;
+        
+        // Value varies based on distance from city center and actual AQI
+        const distanceFactor = 1 - (distance / radius) * 0.3;
+        const value = baseValue * distanceFactor;
         const color = value > 100 ? '#ef4444' : value > 50 ? '#f59e0b' : '#10b981';
         
         pollutionPoints.push({ lat, lng, value, color });

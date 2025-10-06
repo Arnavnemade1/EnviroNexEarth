@@ -316,28 +316,8 @@ export const GlobeComponent = ({
     return () => clearInterval(interval);
   }, [satellites, layers.satellites]);
 
-  // Orbital Path Trails
-  useEffect(() => {
-    if (!globeInstanceRef.current || !layers.orbitalPaths || !satellites.length) return;
-
-    const pathsData = satellites.map(sat => {
-      const points = [];
-      for (let i = 0; i < 50; i++) {
-        const lng = (sat.lng + (i * sat.velocity * 0.5)) % 360;
-        points.push({ lat: sat.lat, lng, alt: sat.altitude / 1000 });
-      }
-      return points;
-    });
-
-    globeInstanceRef.current
-      .pathsData(pathsData)
-      .pathColor(() => ['#60a5fa', '#8b5cf6'])
-      .pathDashLength(0.01)
-      .pathDashGap(0.004)
-      .pathDashAnimateTime(50000)
-      .pathStroke(1.5)
-      .pathTransitionDuration(0);
-  }, [satellites, layers.orbitalPaths]);
+  // Orbital Path Trails - Disabled due to rendering issues
+  // Will be re-enabled once globe.gl geometry issues are resolved
 
   // Day/Night Cycle Animation
   useEffect(() => {
