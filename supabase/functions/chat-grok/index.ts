@@ -46,7 +46,7 @@ Current forecast year: ${new Date().getFullYear() + (context.currentYear || 0)}
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'x-ai/grok-2-vision-1212',
+        model: 'x-ai/grok-beta',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: contextInfo + '\n\nUser question: ' + message }

@@ -75,7 +75,7 @@ Format your response in clear sections with headers.`;
         'X-Title': 'EnviroNex - Quantum-Enhanced Air Quality'
       },
       body: JSON.stringify({
-        model: 'x-ai/grok-2-vision-1212',
+        model: 'x-ai/grok-beta',
         messages: [
           { role: 'system', content: systemPrompt },
           {
