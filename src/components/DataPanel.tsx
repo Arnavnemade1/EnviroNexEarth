@@ -203,27 +203,80 @@ export const DataPanel = ({
     <>
       {/* AI Impact Summary Dialog */}
       <Dialog open={showImpactDialog} onOpenChange={setShowImpactDialog}>
-        <DialogContent className="max-w-2xl max-h-[80vh] glass">
+        <DialogContent className="max-w-3xl max-h-[85vh] glass bg-gradient-to-br from-background/95 to-background/80 backdrop-blur-xl border-primary/20">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-2xl">
-              <Sparkles className="w-6 h-6 text-primary" />
+            <DialogTitle className="flex items-center gap-3 text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+              <Sparkles className="w-8 h-8 text-primary animate-pulse" />
               AI Impact Summary
             </DialogTitle>
-            <DialogDescription>
-              Comprehensive analysis for {cityName}
+            <DialogDescription className="text-base text-muted-foreground mt-2">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="border-primary/30 text-primary">
+                  Powered by Llama 4 Maverick
+                </Badge>
+                <span>•</span>
+                <span>{cityName}</span>
+              </div>
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="h-[60vh] pr-4">
+          <ScrollArea className="h-[65vh] pr-4">
             {isAnalyzing ? (
-              <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                <Loader2 className="w-12 h-12 animate-spin text-primary" />
-                <p className="text-muted-foreground">Analyzing air quality data with AI...</p>
+              <div className="flex flex-col items-center justify-center py-16 space-y-6">
+                <div className="relative">
+                  <Loader2 className="w-16 h-16 animate-spin text-primary" />
+                  <div className="absolute inset-0 w-16 h-16 animate-ping opacity-20">
+                    <Sparkles className="w-16 h-16 text-primary" />
+                  </div>
+                </div>
+                <div className="text-center space-y-2">
+                  <p className="text-lg font-semibold text-foreground">Analyzing air quality data...</p>
+                  <p className="text-sm text-muted-foreground">Llama 4 Maverick is processing OpenMeteo measurements</p>
+                </div>
               </div>
             ) : (
-              <div className="prose prose-invert max-w-none">
-                <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {impactAnalysis}
-                </div>
+              <div className="space-y-6">
+                {impactAnalysis.split('\n').map((paragraph, idx) => {
+                  const line = paragraph.trim();
+                  if (!line) return null;
+
+                  if (line.startsWith('## ')) {
+                    return (
+                      <h2 key={idx} className="text-2xl font-bold text-primary mt-6 mb-3 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-primary rounded-full" />
+                        {line.replace('## ', '')}
+                      </h2>
+                    );
+                  }
+
+                  if (line.startsWith('### ')) {
+                    return (
+                      <h3 key={idx} className="text-xl font-semibold text-secondary mt-4 mb-2">
+                        {line.replace('### ', '')}
+                      </h3>
+                    );
+                  }
+
+                  if (line.startsWith('- ')) {
+                    return (
+                      <li key={idx} className="ml-6 text-sm text-foreground/90 leading-relaxed list-disc">
+                        {line.replace('- ', '').replace(/\*\*(.*?)\*\*/g, '<strong class="text-primary font-semibold">$1</strong>')}
+                      </li>
+                    );
+                  }
+
+                  if (line.startsWith('**') || line.includes('**')) {
+                    const formatted = line.replace(/\*\*(.*?)\*\*/g, '<span class="font-bold text-accent">$1</span>');
+                    return (
+                      <p key={idx} className="text-base text-foreground leading-relaxed" dangerouslySetInnerHTML={{ __html: formatted }} />
+                    );
+                  }
+
+                  return (
+                    <p key={idx} className="text-base text-foreground/90 leading-relaxed">
+                      {line}
+                    </p>
+                  );
+                })}
               </div>
             )}
           </ScrollArea>
@@ -293,13 +346,13 @@ export const DataPanel = ({
             </div>
 
             {/* AI Impact Summary Button */}
-            <Button 
+            <Button
               onClick={handleGenerateImpactSummary}
-              className="w-full mt-4 bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 transition-opacity"
+              className="w-full mt-4 bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 transition-all duration-300 hover:scale-105 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40"
               size="lg"
             >
-              <Sparkles className="w-5 h-5 mr-2" />
-              Generate AI Impact Summary
+              <Sparkles className="w-5 h-5 mr-2 animate-pulse" />
+              <span className="font-semibold">Generate AI Impact Summary</span>
             </Button>
           </div>
         </Card>
