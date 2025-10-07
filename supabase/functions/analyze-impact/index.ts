@@ -15,9 +15,9 @@ serve(async (req) => {
 
     console.log('Analyzing impact for:', { cityName, scenario });
 
-    const GROK_API_KEY = Deno.env.get('GROK_API_KEY');
-    if (!GROK_API_KEY) {
-      throw new Error('GROK_API_KEY not configured');
+    const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
+    if (!OPENROUTER_API_KEY) {
+      throw new Error('OPENROUTER_API_KEY not configured');
     }
 
     // Build a comprehensive data summary for the AI
@@ -43,7 +43,7 @@ ${quantumForecast ? `Quantum Forecast (Next 24 Hours):
 Selected Scenario: ${scenario}
 `;
 
-    const systemPrompt = `You are Grok-4 Fast, an advanced environmental data analyst providing clear, data-driven air quality impact summaries enhanced with quantum computing insights.
+    const systemPrompt = `You are Llama 4 Maverick, an advanced environmental data analyst providing clear, data-driven air quality impact summaries enhanced with quantum computing insights.
 
 CRITICAL RULES:
 1. Base ALL analysis ONLY on the provided measurements and data from OpenMeteo
@@ -53,6 +53,7 @@ CRITICAL RULES:
 5. Focus on factual analysis of the current situation and realistic trends
 6. Be informative but not alarmist
 7. Mention IBM Quantum-enhanced predictions when quantum forecast data is available
+8. Keep the analysis comprehensive but concise (aim for 500-800 words)
 
 AQI Reference Scale (US EPA):
 - 0-50: Good (Green) - Air quality is satisfactory
@@ -64,42 +65,44 @@ AQI Reference Scale (US EPA):
 
 Data Source: OpenMeteo Air Quality API provides real-time measurements of PM2.5, PM10, O3, NO2, SO2, and CO.
 
-Format your response in clear sections with headers.`;
+Format your response with clear markdown headers (##) and bullet points for readability.`;
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GROK_API_KEY}`,
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://environex.app',
         'X-Title': 'EnviroNex - Quantum-Enhanced Air Quality'
       },
       body: JSON.stringify({
-        model: 'x-ai/grok-beta',
+        model: 'meta-llama/llama-3.3-70b-instruct',
         messages: [
           { role: 'system', content: systemPrompt },
           {
             role: 'user',
             content: `Analyze the air quality impact for this location using OpenMeteo data and provide a comprehensive but balanced summary. Include:
-1. Current Air Quality Assessment (based on OpenMeteo measurements)
-2. Health Impact Analysis (factual, based on US EPA AQI levels)
-3. Pollutant Breakdown (explain the measured values from OpenMeteo)
-4. Quantum-Enhanced Trend Analysis (if IBM Quantum forecast available, highlight quantum advantage)
-5. Practical Recommendations (measured, not extreme)
+
+## Required Sections:
+1. **Current Air Quality Assessment** - Based on OpenMeteo measurements
+2. **Health Impact Analysis** - Factual assessment using US EPA AQI levels
+3. **Pollutant Breakdown** - Explain what each measured value means
+4. **Quantum-Enhanced Trend Analysis** - If IBM Quantum forecast is available, highlight the quantum advantage
+5. **Practical Recommendations** - Measured advice, not extreme
 
 Data Source: OpenMeteo Air Quality API
 ${dataContext}`
           }
         ],
         temperature: 0.7,
-        max_tokens: 2000
+        max_tokens: 1500
       })
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Grok-4 API error:', response.status, errorText);
-      throw new Error(`Grok-4 API error: ${response.status}`);
+      console.error('Llama 4 Maverick API error:', response.status, errorText);
+      throw new Error(`Llama 4 Maverick API error: ${response.status}`);
     }
 
     const data = await response.json();
