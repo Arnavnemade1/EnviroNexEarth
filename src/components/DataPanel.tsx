@@ -8,23 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Wind, 
-  Thermometer, 
-  Eye, 
-  Heart, 
-  Activity,
-  TrendingUp,
-  TrendingDown,
-  Play,
-  Pause,
-  RotateCcw,
-  Home,
-  BarChart3,
-  Atom,
-  Sparkles,
-  Loader2
-} from 'lucide-react';
+import { Wind, Thermometer, Eye, Heart, Activity, TrendingUp, TrendingDown, Play, Pause, RotateCcw, Chrome as Home, ChartBar as BarChart3, Atom, Sparkles, Loader as Loader2 } from 'lucide-react';
 import { AirQualityData, PredictionData } from '@/types';
  
  type QuantumForecast = {
