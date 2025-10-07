@@ -121,24 +121,27 @@ export const GlobeComponent = ({
 
     // Initialize Globe with ultra-enhanced visuals
     const globe = new Globe(globeRef.current)
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-day.jpg')
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
       .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
       .width(window.innerWidth)
       .height(window.innerHeight)
-      .atmosphereColor('#4fa8d8')
-      .atmosphereAltitude(0.25)
+      .atmosphereColor('#60a5fa')
+      .atmosphereAltitude(0.3)
       .enablePointerInteraction(true)
-      .showAtmosphere(true);
+      .showAtmosphere(true)
+      .pointOfView({ altitude: 2.5 });
 
-    // Configure camera
+    // Configure camera with enhanced settings
     globe.camera().position.z = 300;
     
-    // Auto-rotate
+    // Auto-rotate with smooth motion
     globe.controls().autoRotate = true;
-    globe.controls().autoRotateSpeed = 0.5;
+    globe.controls().autoRotateSpeed = 0.3;
     globe.controls().enableDamping = true;
-    globe.controls().dampingFactor = 0.1;
+    globe.controls().dampingFactor = 0.05;
+    globe.controls().minDistance = 200;
+    globe.controls().maxDistance = 600;
 
     // Click handler for cities and distance measurement
     globe.onGlobeClick((coords: { lat: number; lng: number }) => {
@@ -213,45 +216,68 @@ export const GlobeComponent = ({
 
   // City Lights Layer
   useEffect(() => {
-    if (!globeInstanceRef.current || !layers.cityLights) return;
+    if (!globeInstanceRef.current) return;
 
-    globeInstanceRef.current
-      .pointsData(cityLights)
-      .pointColor(() => '#ffeb3b')
-      .pointAltitude((d: any) => 0.01)
-      .pointRadius((d: any) => d.size)
-      .pointsMerge(false);
+    if (layers.cityLights) {
+      globeInstanceRef.current
+        .pointsData(cityLights)
+        .pointColor(() => '#ffeb3b')
+        .pointAltitude((d: any) => 0.01)
+        .pointRadius((d: any) => d.size)
+        .pointsMerge(false);
+    } else {
+      globeInstanceRef.current.pointsData([]);
+    }
   }, [layers.cityLights]);
 
   // Clouds Layer
   useEffect(() => {
-    if (!globeInstanceRef.current || !layers.clouds) return;
+    if (!globeInstanceRef.current) return;
 
     const CLOUDS_IMG_URL = '//unpkg.com/three-globe/example/clouds/clouds.png';
     const CLOUDS_ALT = 0.004;
     const CLOUDS_ROTATION_SPEED = -0.006;
 
-    new THREE.TextureLoader().load(CLOUDS_IMG_URL, (cloudsTexture) => {
-      const clouds = new THREE.Mesh(
-        new THREE.SphereGeometry(
-          globeInstanceRef.current.getGlobeRadius() * (1 + CLOUDS_ALT),
-          75,
-          75
-        ),
-        new THREE.MeshPhongMaterial({ map: cloudsTexture, transparent: true, opacity: 0.8 })
-      );
-      globeInstanceRef.current.scene().add(clouds);
+    let cloudsLayer: THREE.Mesh | null = null;
 
-      (function rotateClouds() {
-        clouds.rotation.y += CLOUDS_ROTATION_SPEED * Math.PI / 180;
-        requestAnimationFrame(rotateClouds);
-      })();
-    });
+    if (layers.clouds) {
+      new THREE.TextureLoader().load(CLOUDS_IMG_URL, (cloudsTexture) => {
+        cloudsLayer = new THREE.Mesh(
+          new THREE.SphereGeometry(
+            globeInstanceRef.current.getGlobeRadius() * (1 + CLOUDS_ALT),
+            75,
+            75
+          ),
+          new THREE.MeshPhongMaterial({ map: cloudsTexture, transparent: true, opacity: 0.8 })
+        );
+        cloudsLayer.name = 'clouds-layer';
+        globeInstanceRef.current.scene().add(cloudsLayer);
+
+        (function rotateClouds() {
+          if (cloudsLayer && cloudsLayer.parent) {
+            cloudsLayer.rotation.y += CLOUDS_ROTATION_SPEED * Math.PI / 180;
+            requestAnimationFrame(rotateClouds);
+          }
+        })();
+      });
+    } else {
+      // Remove clouds layer if it exists
+      const existingClouds = globeInstanceRef.current.scene().getObjectByName('clouds-layer');
+      if (existingClouds) {
+        globeInstanceRef.current.scene().remove(existingClouds);
+      }
+    }
+
+    return () => {
+      if (cloudsLayer) {
+        globeInstanceRef.current.scene().remove(cloudsLayer);
+      }
+    };
   }, [layers.clouds]);
 
   // Animate satellites
   useEffect(() => {
-    if (!globeInstanceRef.current || !layers.satellites || !satellites.length) return;
+    if (!globeInstanceRef.current || !satellites.length) return;
 
     const animateSatellites = () => {
       const updatedSatellites = satellites.map(sat => ({
@@ -263,55 +289,59 @@ export const GlobeComponent = ({
 
     const interval = setInterval(animateSatellites, 100);
     
-    globeInstanceRef.current
-      .objectsData(satellites)
-      .objectLat((d: any) => d.lat)
-      .objectLng((d: any) => d.lng)
-      .objectAltitude((d: any) => d.altitude / 1000)
-      .objectThreeObject((d: any) => {
-        const isISS = d.id === 'iss';
+    if (layers.satellites) {
+      globeInstanceRef.current
+        .objectsData(satellites)
+        .objectLat((d: any) => d.lat)
+        .objectLng((d: any) => d.lng)
+        .objectAltitude((d: any) => d.altitude / 1000)
+        .objectThreeObject((d: any) => {
+          const isISS = d.id === 'iss';
 
-        // Create satellite mesh
-        const geometry = new THREE.BoxGeometry(0.8, 0.8, 2.5);
-        const material = new THREE.MeshLambertMaterial({
-          color: isISS ? '#fbbf24' : '#60a5fa'
+          // Create satellite mesh
+          const geometry = new THREE.BoxGeometry(0.8, 0.8, 2.5);
+          const material = new THREE.MeshLambertMaterial({
+            color: isISS ? '#fbbf24' : '#60a5fa'
+          });
+          const satellite = new THREE.Mesh(geometry, material);
+
+          // Add solar panels
+          const panelGeometry = new THREE.PlaneGeometry(4, 1.5);
+          const panelMaterial = new THREE.MeshLambertMaterial({
+            color: '#1e293b',
+            transparent: true,
+            opacity: 0.9
+          });
+
+          const panel1 = new THREE.Mesh(panelGeometry, panelMaterial);
+          const panel2 = new THREE.Mesh(panelGeometry, panelMaterial);
+
+          panel1.position.set(-2.5, 0, 0);
+          panel2.position.set(2.5, 0, 0);
+
+          const satelliteGroup = new THREE.Group();
+          satelliteGroup.add(satellite);
+          satelliteGroup.add(panel1);
+          satelliteGroup.add(panel2);
+
+          // Add glow effect
+          const glowGeometry = new THREE.SphereGeometry(1.5);
+          const glowMaterial = new THREE.MeshLambertMaterial({
+            color: isISS ? '#fbbf24' : '#60a5fa',
+            transparent: true,
+            opacity: 0.3
+          });
+          const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+          satelliteGroup.add(glow);
+
+          return satelliteGroup;
+        })
+        .onObjectClick((sat: any) => {
+          setSelectedSatellite(sat);
         });
-        const satellite = new THREE.Mesh(geometry, material);
-
-        // Add solar panels
-        const panelGeometry = new THREE.PlaneGeometry(4, 1.5);
-        const panelMaterial = new THREE.MeshLambertMaterial({
-          color: '#1e293b',
-          transparent: true,
-          opacity: 0.9
-        });
-
-        const panel1 = new THREE.Mesh(panelGeometry, panelMaterial);
-        const panel2 = new THREE.Mesh(panelGeometry, panelMaterial);
-
-        panel1.position.set(-2.5, 0, 0);
-        panel2.position.set(2.5, 0, 0);
-
-        const satelliteGroup = new THREE.Group();
-        satelliteGroup.add(satellite);
-        satelliteGroup.add(panel1);
-        satelliteGroup.add(panel2);
-
-        // Add glow effect
-        const glowGeometry = new THREE.SphereGeometry(1.5);
-        const glowMaterial = new THREE.MeshLambertMaterial({
-          color: isISS ? '#fbbf24' : '#60a5fa',
-          transparent: true,
-          opacity: 0.3
-        });
-        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-        satelliteGroup.add(glow);
-
-        return satelliteGroup;
-      })
-      .onObjectClick((sat: any) => {
-        setSelectedSatellite(sat);
-      });
+    } else {
+      globeInstanceRef.current.objectsData([]);
+    }
 
     return () => clearInterval(interval);
   }, [satellites, layers.satellites]);
@@ -347,23 +377,27 @@ export const GlobeComponent = ({
 
   // Aurora Borealis Effect
   useEffect(() => {
-    if (!globeInstanceRef.current || !layers.atmosphere) return;
+    if (!globeInstanceRef.current) return;
 
-    const auroraData = [
-      { lat: 70, lng: -100, alt: 0.1 },
-      { lat: 72, lng: -80, alt: 0.12 },
-      { lat: 68, lng: -120, alt: 0.11 },
-      { lat: 71, lng: -90, alt: 0.13 },
-      { lat: -70, lng: 100, alt: 0.1 },
-      { lat: -72, lng: 120, alt: 0.12 },
-    ];
+    if (layers.atmosphere) {
+      const auroraData = [
+        { lat: 70, lng: -100, alt: 0.1 },
+        { lat: 72, lng: -80, alt: 0.12 },
+        { lat: 68, lng: -120, alt: 0.11 },
+        { lat: 71, lng: -90, alt: 0.13 },
+        { lat: -70, lng: 100, alt: 0.1 },
+        { lat: -72, lng: 120, alt: 0.12 },
+      ];
 
-    globeInstanceRef.current
-      .ringsData(auroraData)
-      .ringColor(() => (t: number) => `rgba(0, 255, 150, ${Math.sqrt(1-t) * 0.8})`)
-      .ringMaxRadius(8)
-      .ringPropagationSpeed(3)
-      .ringRepeatPeriod(2000);
+      globeInstanceRef.current
+        .ringsData(auroraData)
+        .ringColor(() => (t: number) => `rgba(0, 255, 150, ${Math.sqrt(1-t) * 0.8})`)
+        .ringMaxRadius(8)
+        .ringPropagationSpeed(3)
+        .ringRepeatPeriod(2000);
+    } else {
+      globeInstanceRef.current.ringsData([]);
+    }
   }, [layers.atmosphere]);
 
   // Quick Travel Function
