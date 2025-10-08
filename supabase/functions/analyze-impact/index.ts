@@ -81,7 +81,7 @@ Format your response with clear markdown headers (##) and bullet points for read
         'X-Title': 'EnviroNex Air Quality'
       },
       body: JSON.stringify({
-         model="meta-llama/llama-4-maverick:free",
+         model:"meta-llama/llama-4-maverick:free",
         messages: [
           {
             role: 'system',
