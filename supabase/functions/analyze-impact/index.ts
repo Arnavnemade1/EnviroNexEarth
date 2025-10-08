@@ -24,7 +24,6 @@ Deno.serve(async (req) => {
       throw new Error('OPENROUTER_API_KEY not configured');
     }
 
-    // Build a comprehensive data summary for the AI
     const dataContext = `
 City: ${cityName}
 
@@ -47,7 +46,7 @@ ${quantumForecast ? `Quantum Forecast (Next 24 Hours):
 Selected Scenario: ${scenario}
 `;
 
-    const systemPrompt = `You are an advanced environmental AI analyst powered by Llama 4 Maverick, providing clear, data-driven air quality impact summaries enhanced with quantum computing insights.
+    const systemPrompt = `You are an advanced environmental data analyst providing clear, data-driven air quality impact summaries.
 
 CRITICAL RULES:
 1. Base ALL analysis ONLY on the provided measurements and data from OpenMeteo
@@ -71,30 +70,33 @@ Data Source: OpenMeteo Air Quality API provides real-time measurements of PM2.5,
 
 Format your response with clear markdown headers (##) and bullet points for readability.`;
 
+    console.log('Calling OpenRouter API with Llama 3.3 70B...');
+
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://environex.app',
-        'X-Title': 'EnviroNex - Quantum-Enhanced Air Quality'
+        'X-Title': 'EnviroNex Air Quality'
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-4.1-maverick:free',
+        model: 'meta-llama/llama-3.3-70b-instruct',
         messages: [
-          { role: 'system', content: systemPrompt },
+          {
+            role: 'system',
+            content: systemPrompt
+          },
           {
             role: 'user',
-            content: `Analyze the air quality impact for this location using OpenMeteo data and provide a comprehensive but balanced summary. Include:
+            content: `Analyze the air quality impact for ${cityName} and provide a comprehensive summary with these sections:
 
-## Required Sections:
-1. **Current Air Quality Assessment** - Based on OpenMeteo measurements
-2. **Health Impact Analysis** - Factual assessment using US EPA AQI levels
-3. **Pollutant Breakdown** - Explain what each measured value means
-4. **Quantum-Enhanced Trend Analysis** - If IBM Quantum forecast is available, highlight the quantum advantage
-5. **Practical Recommendations** - Measured advice, not extreme
+1. Current Air Quality Assessment
+2. Health Impact Analysis
+3. Pollutant Breakdown
+4. Trend Analysis${quantumForecast ? ' (with Quantum Predictions)' : ''}
+5. Practical Recommendations
 
-Data Source: OpenMeteo Air Quality API
 ${dataContext}`
           }
         ],
@@ -103,20 +105,26 @@ ${dataContext}`
       })
     });
 
+    console.log('OpenRouter response status:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Llama 4 Maverick API error:', response.status, errorText);
-      throw new Error(`Llama 4 Maverick API error: ${response.status}`);
+      console.error('OpenRouter API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    const analysis = data.choices[0]?.message?.content;
+    const analysis = data.choices?.[0]?.message?.content;
 
     if (!analysis) {
-      throw new Error('No analysis generated');
+      throw new Error('No analysis generated from API response');
     }
 
-    console.log('Analysis generated successfully');
+    console.log('Analysis generated successfully, length:', analysis.length);
 
     return new Response(
       JSON.stringify({ analysis }),
@@ -126,8 +134,11 @@ ${dataContext}`
   } catch (error) {
     console.error('Error in analyze-impact:', error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
-      { 
+      JSON.stringify({
+        error: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.stack : undefined
+      }),
+      {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
