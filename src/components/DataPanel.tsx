@@ -191,15 +191,18 @@ export const DataPanel = ({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
               <Sparkles className="w-8 h-8 text-primary animate-pulse" />
-              AI Impact Summary
+              AI Impact Analysis
             </DialogTitle>
             <DialogDescription className="text-base text-muted-foreground mt-2">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="border-primary/30 text-primary">
-                  Powered by Llama 4 Maverick
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5">
+                  🤖 Llama 4 Maverick
                 </Badge>
-                <span>•</span>
-                <span>{cityName}</span>
+                <Badge variant="outline" className="border-secondary/30 text-secondary bg-secondary/5">
+                  📊 OpenMeteo Data
+                </Badge>
+                <span className="text-sm">•</span>
+                <span className="font-medium">{cityName}</span>
               </div>
             </DialogDescription>
           </DialogHeader>
@@ -212,9 +215,16 @@ export const DataPanel = ({
                     <Sparkles className="w-16 h-16 text-primary" />
                   </div>
                 </div>
-                <div className="text-center space-y-2">
-                  <p className="text-lg font-semibold text-foreground">Analyzing air quality data...</p>
-                  <p className="text-sm text-muted-foreground">Llama 4 Maverick is processing OpenMeteo measurements</p>
+                <div className="text-center space-y-3">
+                  <p className="text-lg font-semibold text-foreground">🤖 AI Analysis In Progress</p>
+                  <p className="text-sm text-muted-foreground">Llama 4 Maverick is processing environmental data</p>
+                  <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/70">
+                    <span className="animate-pulse">Quantum forecasts</span>
+                    <span>•</span>
+                    <span className="animate-pulse delay-75">Pollutant analysis</span>
+                    <span>•</span>
+                    <span className="animate-pulse delay-150">Health impacts</span>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -332,11 +342,11 @@ export const DataPanel = ({
             {/* AI Impact Summary Button */}
             <Button
               onClick={handleGenerateImpactSummary}
-              className="w-full mt-4 bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 transition-all duration-300 hover:scale-105 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40"
+              className="w-full mt-4 bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-secondary/40 group"
               size="lg"
             >
-              <Sparkles className="w-5 h-5 mr-2 animate-pulse" />
-              <span className="font-semibold">Generate AI Impact Summary</span>
+              <Sparkles className="w-5 h-5 mr-2 group-hover:animate-spin" />
+              <span className="font-semibold">🤖 AI Impact Analysis</span>
             </Button>
           </div>
         </Card>

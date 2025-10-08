@@ -47,7 +47,7 @@ ${quantumForecast ? `Quantum Forecast (Next 24 Hours):
 Selected Scenario: ${scenario}
 `;
 
-    const systemPrompt = `You are Llama 4 Maverick, an advanced environmental data analyst providing clear, data-driven air quality impact summaries enhanced with quantum computing insights.
+    const systemPrompt = `You are an advanced environmental AI analyst powered by Llama 4 Maverick, providing clear, data-driven air quality impact summaries enhanced with quantum computing insights.
 
 CRITICAL RULES:
 1. Base ALL analysis ONLY on the provided measurements and data from OpenMeteo
@@ -80,7 +80,7 @@ Format your response with clear markdown headers (##) and bullet points for read
         'X-Title': 'EnviroNex - Quantum-Enhanced Air Quality'
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-3.3-70b-instruct',
+        model: 'meta-llama/llama-4.1-maverick:free',
         messages: [
           { role: 'system', content: systemPrompt },
           {
