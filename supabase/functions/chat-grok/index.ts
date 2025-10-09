@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
       throw new Error('GROK_API_KEY not configured');
     }
 
-    const systemPrompt = `You are Grok-4 Fast, an advanced AI assistant specialized in air quality, climate change, quantum computing applications, and environmental science.
+    const systemPrompt = `You are Enviro AI, an advanced environmental assistant specialized in air quality, climate change, quantum computing applications, and environmental science.
 Provide accurate, insightful responses about air quality, pollution, climate predictions, IBM Quantum computing applications, and Earth observation data.
 Be conversational but precise. Keep responses informative and engaging (2-4 sentences).`;
 
@@ -69,7 +69,7 @@ Current forecast year: ${new Date().getFullYear() + (context.currentYear || 0)}
         JSON.stringify({
           response: data.choices[0].message.content,
           model: 'grok-2-vision-1212',
-          powered_by: 'Grok-4 Fast'
+          powered_by: 'Enviro AI'
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -83,7 +83,7 @@ Current forecast year: ${new Date().getFullYear() + (context.currentYear || 0)}
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : String(error),
-        fallback_message: 'Grok-4 is currently unavailable. Please try again.'
+        fallback_message: 'Enviro AI is currently unavailable. Please try again.'
       }),
       {
         status: 500,

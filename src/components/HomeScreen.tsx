@@ -49,14 +49,14 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
     {
       icon: TrendingUp,
       title: '2030 Predictions',
-      description: 'Quantum-enhanced AI forecasting',
+      description: 'Enviro AI forecasting',
       highlight: 'IBM Quantum'
     },
     {
       icon: MessageCircle,
-      title: 'Grok-4 Fast',
+      title: 'Enviro AI',
       description: 'Ask questions about air quality and climate data',
-      highlight: 'X.AI Quantum AI'
+      highlight: 'Enviro AI'
     }
   ];
 
@@ -80,7 +80,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
             </Badge>
           </div>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Explore real-time air quality from NASA satellites and see quantum-enhanced AI predictions for Earth’s atmosphere.
+            Explore real-time air quality from NASA satellites and see Enviro AI predictions for Earth’s atmosphere.
           </p>
         </div>
 
@@ -120,7 +120,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
             <h2 className="text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
               Powered by NASA EarthData
             </h2>
-            <p className="text-muted-foreground">Advanced satellite technology meets AI innovation</p>
+            <p className="text-muted-foreground">Advanced satellite technology meets Enviro AI</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {features.map((feature, index) => (
@@ -179,7 +179,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
         {/* Info Badge */}
         <div className="flex justify-center">
           <Badge variant="outline" className="glass text-sm px-6 py-2 border-primary/30 bg-transparent border-white/10">
-            🌍 Real-time data • 🚀 Quantum-enhanced AI • 🛰️ Interactive globe
+            Real-time data • Enviro AI forecasting • Interactive globe
           </Badge>
         </div>
         </div>

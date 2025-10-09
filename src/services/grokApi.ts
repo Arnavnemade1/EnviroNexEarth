@@ -45,18 +45,18 @@ class Grok4ApiService {
     }
 
     if (msg.includes('air quality') || msg.includes('pollution')) {
-      return "Air pollution comes from vehicles, industry, and power generation. Our quantum-enhanced AI powered by Grok-4 Fast analyzes NASA satellite data to track pollution trends with unprecedented accuracy.";
+      return "Air pollution comes from vehicles, industry, and power generation. Enviro AI analyzes NASA satellite data to track pollution trends with high accuracy.";
     }
 
     if (msg.includes('grok') || msg.includes('ai')) {
-      return "I'm powered by Grok-4 Fast, X.AI's advanced AI model specialized in environmental science and quantum computing applications. Ask me anything about air quality, climate predictions, or quantum analytics!";
+      return "I'm Enviro AI, specialized in environmental science and quantum analytics. Ask me anything about air quality, climate predictions, or satellite data!";
     }
 
     if (context?.selectedCity && (msg.includes('this city') || msg.includes('here'))) {
       return `For ${context.selectedCity}, the ${context.currentScenario} scenario shows ${context.currentScenario === 'clean_energy' ? 'significant improvements with quantum-predicted 40% AQI reduction' : context.currentScenario === 'no_action' ? 'concerning deterioration with 60% worsening' : 'gradual changes'} in air quality by ${new Date().getFullYear() + (context.currentYear || 0)}.`;
     }
 
-    return "I'm Grok-4 Fast, your quantum-enhanced environmental AI assistant! Ask me about air quality, IBM Quantum predictions, climate data, satellite observations, or anything related to environmental science.";
+    return "I'm Enviro AI, your environmental assistant. Ask me about air quality, climate predictions, satellite observations, or anything related to environmental science.";
   }
 }
 

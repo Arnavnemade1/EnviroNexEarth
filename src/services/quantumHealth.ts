@@ -101,73 +101,73 @@ export function calculateQuantumHealthRisk(
   
   // High risk recommendations
   if (adjustedRisk > 60) {
-    recommendations.push("🏠 Stay indoors during peak pollution hours (7-9 AM, 5-7 PM)");
-    recommendations.push("💨 Use air purifiers and keep windows closed");
-    recommendations.push("😷 Wear N95 masks when going outside");
+    recommendations.push("Stay indoors during peak pollution hours (7-9 AM, 5-7 PM)");
+    recommendations.push("Use air purifiers and keep windows closed");
+    recommendations.push("Wear N95 masks when going outside");
   }
   
   // Medium risk recommendations
   if (adjustedRisk > 35 && adjustedRisk <= 60) {
-    recommendations.push("⏰ Limit outdoor time to essential activities");
-    recommendations.push("🌬️ Check hourly air quality before going outside");
-    recommendations.push("🏃‍♂️ Move exercise indoors or to early morning hours");
+    recommendations.push("Limit outdoor time to essential activities");
+    recommendations.push("Check hourly air quality before going outside");
+    recommendations.push("Move exercise indoors or to early morning hours");
   }
   
   // Condition-specific recommendations
   if (profile?.hasAsthma) {
     if (adjustedRisk > 40) {
-      recommendations.push("💊 Keep rescue inhaler readily available");
-      recommendations.push("🔔 Consider pre-medication before outdoor activities");
+      recommendations.push("Keep rescue inhaler readily available");
+      recommendations.push("Consider pre-medication before outdoor activities");
     }
     if (pm25 > 25) {
-      recommendations.push("⚠️ PM2.5 levels may trigger asthma symptoms - be extra cautious");
+      recommendations.push("PM2.5 levels may trigger asthma symptoms - be extra cautious");
     }
   }
   
   if (profile?.hasHeartCondition) {
     if (adjustedRisk > 35) {
-      recommendations.push("❤️ Monitor heart rate during any physical activity");
-      recommendations.push("👨‍⚕️ Consult cardiologist about air quality precautions");
+      recommendations.push("Monitor heart rate during any physical activity");
+      recommendations.push("Consult a cardiologist about air quality precautions");
     }
     if (adjustedRisk > 50) {
-      recommendations.push("🚫 Avoid strenuous outdoor activities completely");
+      recommendations.push("Avoid strenuous outdoor activities completely");
     }
   }
 
   if (profile?.hasLungCondition && adjustedRisk > 30) {
-    recommendations.push("🫁 Monitor breathing closely and avoid outdoor exertion");
-    recommendations.push("💨 Use bronchodilators as prescribed before exposure");
+    recommendations.push("Monitor breathing closely and avoid outdoor exertion");
+    recommendations.push("Use bronchodilators as prescribed before exposure");
   }
 
   // Age-specific recommendations
   if (profile && profile.age > 65 && adjustedRisk > 40) {
-    recommendations.push("👴 Seniors: Consider avoiding all outdoor activities");
-    recommendations.push("🏥 Stay close to medical facilities if symptoms develop");
+    recommendations.push("Seniors: Consider avoiding all outdoor activities");
+    recommendations.push("Stay close to medical facilities if symptoms develop");
   }
 
   if (profile && profile.age < 18 && adjustedRisk > 45) {
-    recommendations.push("🧒 Keep children indoors during high pollution periods");
-    recommendations.push("🎮 Plan indoor activities and games");
+    recommendations.push("Keep children indoors during high pollution periods");
+    recommendations.push("Plan indoor activities and games");
   }
 
   // Smoking-related recommendations
   if (profile?.smokingStatus === 'current' && adjustedRisk > 30) {
-    recommendations.push("🚭 Avoid smoking - it amplifies pollution effects significantly");
-    recommendations.push("💔 Your smoking status increases health risks by 60%");
+    recommendations.push("Avoid smoking - it amplifies pollution effects significantly");
+    recommendations.push("Your smoking status increases health risks by 60%");
   }
 
   // Low risk recommendations
   if (adjustedRisk < 25) {
-    recommendations.push("✅ Air quality is good for all outdoor activities");
-    recommendations.push("🏃‍♂️ Great time for exercise and recreational activities");
-    recommendations.push("🌳 Perfect for walks in parks and outdoor sports");
+    recommendations.push("Air quality is good for all outdoor activities");
+    recommendations.push("Great time for exercise and recreational activities");
+    recommendations.push("Perfect for walks in parks and outdoor sports");
   }
 
   // Always provide at least some recommendations
   if (recommendations.length === 0) {
-    recommendations.push("📊 Monitoring air quality - check back for updates");
-    recommendations.push("💧 Stay hydrated and maintain healthy indoor air");
-    recommendations.push("🌿 Consider indoor plants to improve air quality");
+    recommendations.push("Monitoring air quality - check back for updates");
+    recommendations.push("Stay hydrated and maintain healthy indoor air");
+    recommendations.push("Consider indoor plants to improve air quality");
   }
 
   // Activity safety assessment
@@ -185,15 +185,15 @@ export function calculateQuantumHealthRisk(
   const personalizedAlerts: string[] = [];
   
   if (riskLevel === 'very-high') {
-    personalizedAlerts.push("🚨 Health Alert: Very high pollution risk detected");
+    personalizedAlerts.push("Health Alert: Very high pollution risk detected");
   }
   
   if (profile?.hasAsthma && pm25 > 25) {
-    personalizedAlerts.push("⚠️ Asthma Alert: PM2.5 levels may trigger symptoms");
+    personalizedAlerts.push("Asthma Alert: PM2.5 levels may trigger symptoms");
   }
   
   if (profile && profile.age > 65 && adjustedRisk > 40) {
-    personalizedAlerts.push("👴 Senior Alert: Consider limiting outdoor exposure");
+    personalizedAlerts.push("Senior Alert: Consider limiting outdoor exposure");
   }
 
   return {

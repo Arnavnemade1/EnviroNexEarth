@@ -210,7 +210,7 @@ export const UserProfile = ({ onClose }: UserProfileProps) => {
                 Sign Out
               </Button>
               <Button variant="outline" onClick={onClose} className="glass">
-                ✕
+                Close
               </Button>
             </div>
           </div>

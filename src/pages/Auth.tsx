@@ -163,7 +163,7 @@ const Auth = () => {
           
           <div className="space-y-2">
             <Badge variant="outline" className="border-primary/30 text-primary px-4 py-2 glass bg-transparent">
-              🚀 IBM Quantum Computing Powered
+              IBM Quantum Computing Powered
             </Badge>
             <p className="text-muted-foreground text-sm max-w-md mx-auto">
               Join thousands exploring real-time air quality data with quantum-enhanced predictions

@@ -31,7 +31,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are Grok-4 Fast, an advanced environmental scientist analyzing natural disasters with quantum-enhanced insights. Provide concise, factual summaries of environmental impacts in 2-4 sentences. Focus on air quality, ecosystem effects, climate implications, and quantum-predicted trends.'
+            content: 'You are Enviro AI, an advanced environmental assistant analyzing natural disasters with quantum-enhanced insights. Provide concise, factual summaries of environmental impacts in 2-4 sentences. Focus on air quality, ecosystem effects, climate implications, and quantum-predicted trends.'
           },
           {
             role: 'user',
@@ -46,28 +46,28 @@ serve(async (req) => {
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(
-          JSON.stringify({ error: 'Grok-4 rate limit exceeded. Please try again later.' }),
+          JSON.stringify({ error: 'Enviro AI rate limit exceeded. Please try again later.' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: 'Grok-4 credits exhausted. Please add credits.' }),
+          JSON.stringify({ error: 'Enviro AI credits exhausted. Please add credits.' }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       const errorText = await response.text();
-      console.error('Grok-4 API error:', response.status, errorText);
+      console.error('Enviro AI API error:', response.status, errorText);
       throw new Error(`Grok-4 API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const summary = data.choices[0]?.message?.content || 'Unable to generate Grok-4 analysis.';
+    const summary = data.choices[0]?.message?.content || 'Unable to generate Enviro AI analysis.';
 
     return new Response(
       JSON.stringify({
         summary,
-        powered_by: 'Grok-4 Fast',
+        powered_by: 'Enviro AI',
         model: 'grok-2-vision-1212'
       }),
       {
@@ -75,11 +75,11 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Grok-4 disaster impact analysis error:', error);
+    console.error('Enviro AI disaster impact analysis error:', error);
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : 'Unknown error',
-        fallback_message: 'Grok-4 analysis unavailable'
+        fallback_message: 'Enviro AI analysis unavailable'
       }),
       {
         status: 500,

@@ -26,7 +26,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
     {
       id: '1',
       type: 'bot',
-      message: "Hi! I'm Grok-4 Fast, your quantum-enhanced environmental AI assistant. Ask me about air quality, IBM Quantum predictions, climate forecasts, natural disasters, or satellite data. Try 'How does quantum computing improve predictions?' or 'Analyze air quality in this city'",
+      message: "Hi! I'm Enviro AI, your environmental assistant. Ask me about air quality, climate forecasts, natural disasters, or satellite data. Try 'How does quantum computing improve predictions?' or 'Analyze air quality in this city'",
       timestamp: new Date()
     }
   ]);
@@ -102,7 +102,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
           <MessageCircle className="w-6 h-6" />
         </Button>
         <Badge className="absolute -top-2 -right-2 bg-accent text-accent-foreground">
-          Grok-4
+          Enviro AI
         </Badge>
       </div>
     );
@@ -115,8 +115,8 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
         <div className="flex items-center justify-between p-4 border-b border-primary/20">
           <div className="flex items-center gap-2">
             <Bot className="w-5 h-5 text-primary" />
-            <span className="font-medium">Grok-4 Fast</span>
-            <Badge variant="outline" className="text-xs">Quantum-Enhanced AI</Badge>
+            <span className="font-medium">Enviro AI</span>
+            <Badge variant="outline" className="text-xs">Enviro AI</Badge>
           </div>
           <Button
             size="sm"
