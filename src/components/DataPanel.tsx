@@ -290,6 +290,17 @@ export const DataPanel = ({
           Back to Home
         </Button>
       )}
+      {cityName && airQuality && (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleHealthNavigation}
+          className="glass bg-transparent border-white/10"
+        >
+          <Heart className="w-4 h-4 mr-2" />
+          Health Dashboard
+        </Button>
+      )}
       {/* City Info Card */}
       {cityName && airQuality && (
         <Card className="glass bg-transparent border-white/10 animate-fade-in-up">
