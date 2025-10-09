@@ -29,13 +29,29 @@ const Health = () => {
   const state = location.state as LocationState;
   
   useEffect(() => {
-    // Check if we have the required data
-    if (!state?.cityName || !state?.airQuality) {
+    // Prefer navigation state; fall back to session storage if missing
+    let cityName = state?.cityName;
+    let airQuality = state?.airQuality;
+    let forecast = state?.forecast;
+
+    if (!cityName || !airQuality) {
+      try {
+        const stored = sessionStorage.getItem('healthContext');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          cityName = parsed.cityName || cityName;
+          airQuality = parsed.airQuality || airQuality;
+          forecast = parsed.forecast || forecast;
+        }
+      } catch {}
+    }
+
+    if (!cityName || !airQuality) {
       toast.error("Health analysis requires air quality data. Redirecting to home...");
       setTimeout(() => navigate('/'), 2000);
       return;
     }
-    
+
     setIsLoading(false);
   }, [state, navigate]);
 

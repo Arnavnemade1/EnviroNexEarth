@@ -136,6 +136,16 @@ export const DataPanel = ({
 
   const handleHealthNavigation = () => {
     if (cityName && airQuality) {
+      try {
+        const payload = {
+          cityName,
+          airQuality,
+          forecast: quantumForecast?.hourly,
+        };
+        sessionStorage.setItem('healthContext', JSON.stringify(payload));
+      } catch (e) {
+        // no-op: sessionStorage may be unavailable
+      }
       navigate('/health', {
         state: {
           cityName,
