@@ -185,21 +185,21 @@ export const DataPanel = ({
 
   return (
     <>
-      {/* AI Impact Summary Dialog */}
+      {/* Enviro AI Impact Summary Dialog */}
       <Dialog open={showImpactDialog} onOpenChange={setShowImpactDialog}>
         <DialogContent className="max-w-3xl max-h-[85vh] glass bg-gradient-to-br from-background/95 to-background/80 backdrop-blur-xl border-primary/20">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-              <Sparkles className="w-8 h-8 text-primary animate-pulse" />
-              AI Impact Analysis
+              <Sparkles className="w-8 h-8 text-primary" />
+              Enviro AI Impact Analysis
             </DialogTitle>
             <DialogDescription className="text-base text-muted-foreground mt-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5">
-                  🤖 Llama 4 Maverick
+                  Enviro AI
                 </Badge>
                 <Badge variant="outline" className="border-secondary/30 text-secondary bg-secondary/5">
-                  📊 OpenMeteo Data
+                  OpenMeteo Data
                 </Badge>
                 <span className="text-sm">•</span>
                 <span className="font-medium">{cityName}</span>
@@ -216,8 +216,8 @@ export const DataPanel = ({
                   </div>
                 </div>
                 <div className="text-center space-y-3">
-                  <p className="text-lg font-semibold text-foreground">🤖 AI Analysis In Progress</p>
-                  <p className="text-sm text-muted-foreground">Llama 4 Maverick is processing environmental data</p>
+                  <p className="text-lg font-semibold text-foreground">Enviro AI analysis in progress</p>
+                  <p className="text-sm text-muted-foreground">Processing environmental data</p>
                   <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/70">
                     <span className="animate-pulse">Quantum forecasts</span>
                     <span>•</span>
@@ -339,14 +339,14 @@ export const DataPanel = ({
               </div>
             </div>
 
-            {/* AI Impact Summary Button */}
+            {/* Enviro AI Impact Summary Button */}
             <Button
               onClick={handleGenerateImpactSummary}
               className="w-full mt-4 bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-secondary/40 group"
               size="lg"
             >
               <Sparkles className="w-5 h-5 mr-2 group-hover:animate-spin" />
-              <span className="font-semibold">🤖 AI Impact Analysis</span>
+              <span className="font-semibold">Enviro AI Impact Analysis</span>
             </Button>
           </div>
         </Card>
@@ -368,7 +368,7 @@ export const DataPanel = ({
               </Badge>
             </div>
             <div className="text-xs text-muted-foreground bg-primary/5 p-2 rounded">
-              🚀 Powered by IBM Quantum Computing - leveraging quantum superposition for exponentially enhanced predictions.
+              Powered by IBM Quantum Computing - leveraging quantum superposition for enhanced predictions.
             </div>
             <div className="text-sm text-muted-foreground">
               Next hour AQI: <span className={getAQIColor(quantumForecast.hourly[0]?.aqi || 0)}>

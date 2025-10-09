@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { MapPin, Layers, Navigation, Ruler, Clock, Cloud, Zap } from 'lucide-react';
+import { MapPin, Layers, Navigation, Ruler, Clock, Cloud, Zap, X } from 'lucide-react';
 
 
 interface GlobeComponentProps {
@@ -583,8 +583,9 @@ export const GlobeComponent = ({
             <button
               onClick={() => setSelectedSatellite(null)}
               className="absolute top-2 right-2 text-muted-foreground hover:text-foreground z-10"
+              aria-label="Close"
             >
-              ✕
+              <X className="w-4 h-4" />
             </button>
             <div className="flex items-center gap-2 mb-2">
               <h3 className="font-bold text-lg text-primary">{selectedSatellite.name}</h3>

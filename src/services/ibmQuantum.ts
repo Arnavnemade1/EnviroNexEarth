@@ -114,13 +114,13 @@ export class IBMQuantumAer {
       });
 
       if (error || data?.status === "timeout" || data?.status === "failed") {
-        console.warn("🔄 IBM Quantum Hardware unavailable, falling back to Aer simulation:", error || data?.error);
+        console.warn("IBM Quantum Hardware unavailable, falling back to Aer simulation:", error || data?.error);
         return this.runAerFallback(currentAQI, featureArray, shots, qubits, startTime);
       }
 
       const executionTime = performance.now() - startTime;
 
-      console.log(`✅ Real Quantum Hardware Execution Complete:
+      console.log(`Real Quantum Hardware Execution Complete:
         - Backend: ${data.backend}
         - Job ID: ${data.job_id}
         - Execution Time: ${executionTime.toFixed(0)}ms
@@ -141,7 +141,7 @@ export class IBMQuantumAer {
       };
 
     } catch (err) {
-      console.warn("❌ IBM Quantum Hardware error, using Aer simulation fallback:", err);
+      console.warn("IBM Quantum Hardware error, using Aer simulation fallback:", err);
       return this.runAerFallback(currentAQI, featureArray, shots, qubits, startTime);
     }
   }
@@ -168,13 +168,13 @@ export class IBMQuantumAer {
       });
 
       if (error) {
-        console.warn("⚠️ Aer simulation failed, using classical Monte Carlo fallback:", error);
+        console.warn("Aer simulation failed, using classical Monte Carlo fallback:", error);
         return this.classicalFallback(currentAQI, shots, qubits, startTime);
       }
 
       const executionTime = performance.now() - startTime;
 
-      console.log(`🔄 Aer Simulation Complete (Fallback):
+      console.log(`Aer Simulation Complete (Fallback):
         - Execution Time: ${executionTime.toFixed(0)}ms
         - Circuit Depth: ${data.circuit_depth}
         - Quantum Entropy: ${data.quantum_entropy}`);
@@ -191,7 +191,7 @@ export class IBMQuantumAer {
         status: "fallback"
       };
     } catch (err) {
-      console.warn("⚠️ Aer simulation error, using classical Monte Carlo fallback:", err);
+      console.warn("Aer simulation error, using classical Monte Carlo fallback:", err);
       return this.classicalFallback(currentAQI, shots, qubits, startTime);
     }
   }
@@ -218,7 +218,7 @@ export class IBMQuantumAer {
     const maxCount = Math.max(...Object.values(measurements));
     const confidence = (maxCount / shots) * 100 + 15;
 
-    console.log(`⚠️ Classical Monte Carlo Fallback (No Quantum):
+    console.log(`Classical Monte Carlo Fallback (No Quantum):
       - Execution Time: ${(performance.now() - startTime).toFixed(0)}ms
       - Pure classical random sampling`);
 

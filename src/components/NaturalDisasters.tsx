@@ -92,7 +92,7 @@ export const NaturalDisasters = ({ onDisasterClick }: NaturalDisastersProps) => 
         
         setDisasters(sortedDisasters);
         
-        // Generate AI summary of environmental impact
+        // Generate Enviro AI summary of environmental impact
         if (sortedDisasters.length > 0 && !loadingSummary) {
           generateAISummary(sortedDisasters);
         }
@@ -178,32 +178,32 @@ export const NaturalDisasters = ({ onDisasterClick }: NaturalDisastersProps) => 
         `${d.title} (${d.type.toUpperCase()}) at ${d.location} - Severity: ${d.severity.toUpperCase()} - Date: ${new Date(d.date).toLocaleDateString()}`
       ).join('\n');
 
-      console.log('Generating AI summary for disasters:', disasterSummary);
+      console.log('Generating Enviro AI summary for disasters:', disasterSummary);
 
       const { data, error } = await supabase.functions.invoke('disaster-impact-ai', {
         body: { disasters: disasterSummary }
       });
 
       if (error) {
-        console.error('AI summary error:', error);
-        setAiSummary('🌍 Current natural disasters are impacting global air quality patterns. Wildfires contribute particulate matter, while storms can both disperse and concentrate pollutants across regions.');
+        console.error('Enviro AI summary error:', error);
+        setAiSummary('Current natural disasters are impacting global air quality patterns. Wildfires contribute particulate matter, while storms can both disperse and concentrate pollutants across regions.');
         return;
       }
       
       if (data?.summary) {
         setAiSummary(data.summary);
       } else {
-        setAiSummary('🌍 Environmental impact analysis: Multiple active natural disasters are currently affecting global atmospheric conditions and air quality patterns.');
+        setAiSummary('Environmental impact analysis: Multiple active natural disasters are currently affecting global atmospheric conditions and air quality patterns.');
       }
     } catch (error: any) {
       console.error('AI summary generation failed:', error);
       // More specific error messages
       if (error?.message?.includes('rate limit')) {
-        setAiSummary('⚠️ AI analysis temporarily rate limited. Current disasters show significant environmental impacts across multiple regions.');
+        setAiSummary('Enviro AI analysis temporarily rate limited. Current disasters show significant environmental impacts across multiple regions.');
       } else if (error?.message?.includes('credit')) {
-        setAiSummary('⚠️ AI analysis unavailable. Natural disasters continue to affect global air quality and atmospheric conditions.');
+        setAiSummary('Enviro AI analysis unavailable. Natural disasters continue to affect global air quality and atmospheric conditions.');
       } else {
-        setAiSummary('🌍 Natural disasters are actively impacting global air quality. Wildfires, storms, and volcanic activity contribute to atmospheric pollution patterns.');
+        setAiSummary('Natural disasters are actively impacting global air quality. Wildfires, storms, and volcanic activity contribute to atmospheric pollution patterns.');
       }
     } finally {
       setLoadingSummary(false);
@@ -339,12 +339,12 @@ export const NaturalDisasters = ({ onDisasterClick }: NaturalDisastersProps) => 
         </Badge>
       </div>
       
-      {/* AI Environmental Impact Summary */}
+      {/* Enviro AI Environmental Impact Summary */}
       {aiSummary && (
         <Card className="mb-4 p-3 bg-primary/5 border-primary/20 max-h-24 overflow-y-auto scrollbar-thin">
           <div className="flex items-start gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-            <span className="text-xs font-semibold text-primary">AI Environmental Impact Analysis</span>
+            <span className="text-xs font-semibold text-primary">Enviro AI Environmental Impact Analysis</span>
           </div>
           <p className="text-xs text-foreground/90 leading-relaxed">{aiSummary}</p>
         </Card>
@@ -354,7 +354,7 @@ export const NaturalDisasters = ({ onDisasterClick }: NaturalDisastersProps) => 
         <Card className="mb-4 p-3 bg-primary/5 border-primary/20">
           <div className="flex items-center gap-2">
             <Loader2 className="w-4 h-4 text-primary animate-spin" />
-            <span className="text-xs text-muted-foreground">Generating AI analysis...</span>
+            <span className="text-xs text-muted-foreground">Generating Enviro AI analysis...</span>
           </div>
         </Card>
       )}

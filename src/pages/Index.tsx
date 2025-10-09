@@ -281,7 +281,7 @@ const Index = () => {
               Earth's Skies in 2030
             </h1>
             <p className="text-xl md:text-2xl text-foreground/80 mb-8">
-              See tomorrow's air quality, today. Live NASA data meets AI predictions.
+              See tomorrow's air quality, today. Live NASA data meets Enviro AI predictions.
             </p>
             <div className="animate-bounce">
               <div className="w-8 h-8 bg-primary rounded-full mx-auto glow"></div>
@@ -344,7 +344,7 @@ const Index = () => {
             variant="outline" 
             className="glass text-xs px-2 py-1 bg-transparent border-white/10 transition-all duration-300 group-hover:px-4 group-hover:py-2 cursor-default"
           >
-            <span className="inline group-hover:hidden">🌍 🚀</span>
+            <span className="inline group-hover:hidden"></span>
             <span className="hidden group-hover:inline">
               Powered by <span className="text-primary font-medium">NASA EarthData</span> + IBM Quantum
             </span>
