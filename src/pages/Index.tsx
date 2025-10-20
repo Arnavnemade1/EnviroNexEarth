@@ -56,6 +56,18 @@ const Index = () => {
 
   const handleCitySelect = async (city: { name: string; country: string; lat: number; lng: number }) => {
     try {
+      // Persist last selected city for restoration when returning from Health page
+      try {
+        sessionStorage.setItem('lastCitySelection', JSON.stringify({
+          name: city.name,
+          country: city.country,
+          lat: city.lat,
+          lng: city.lng
+        }));
+      } catch (_) {
+        // ignore storage errors
+      }
+
       setShowHomeScreen(false);
       setShowIntro(false);
       setShowDisasters(false);
@@ -141,6 +153,26 @@ const Index = () => {
       });
     }
   };
+
+  // Restore last selected city if present (e.g., when returning from Health page)
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('lastCitySelection');
+      if (stored && !selectedCity) {
+        const last = JSON.parse(stored) as { name: string; country: string; lat: number; lng: number };
+        setShowHomeScreen(false);
+        setShowIntro(false);
+        // Re-fetch data for the last city to restore the stats panel
+        handleCitySelect(last);
+        // Consume the stored value to avoid unintended restorations
+        sessionStorage.removeItem('lastCitySelection');
+      }
+    } catch (_) {
+      // ignore
+    }
+    // We intentionally omit handleCitySelect from deps to avoid re-triggering
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleGlobeClick = async (lat: number, lng: number) => {
     try {
@@ -316,6 +348,7 @@ const Index = () => {
           onYearChange={handleYearChange}
           onShowQuantumAnalytics={quantumForecast ? () => setShowQuantumAnalytics(true) : undefined}
           onBackToHome={() => {
+            try { sessionStorage.removeItem('lastCitySelection'); } catch (_) {}
             setShowHomeScreen(true);
             setSelectedCity(null);
             setAirQuality(null);
