@@ -31,8 +31,15 @@ const Health = () => {
   useEffect(() => {
     // Check if we have the required data
     if (!state?.cityName || !state?.airQuality) {
-      toast.error("Health analysis requires air quality data. Redirecting to home...");
-      setTimeout(() => navigate('/'), 2000);
+      toast.error("Health analysis requires air quality data. Returning to previous page...");
+      setTimeout(() => {
+        // Prefer returning to previous page (which preserves city stats)
+        if (typeof window !== 'undefined' && window.history.length > 1) {
+          navigate(-1);
+        } else {
+          navigate('/');
+        }
+      }, 2000);
       return;
     }
     
@@ -40,7 +47,12 @@ const Health = () => {
   }, [state, navigate]);
 
   const handleBackToHome = () => {
-    navigate('/');
+    // Go back to the previous page to restore city stats; fall back to home
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/')
+    }
   };
 
   if (isLoading) {
