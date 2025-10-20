@@ -122,12 +122,16 @@ export const EnhancedGlobe = ({
       particles.add(particle);
     });
 
-    globeInstanceRef.current.scene().add(particles);
+    const scene = globeInstanceRef.current?.scene?.();
+    if (scene) {
+      scene.add(particles);
+    }
     setParticleSystem(particles);
 
     return () => {
-      if (particles && globeInstanceRef.current) {
-        globeInstanceRef.current.scene().remove(particles);
+      const cleanupScene = globeInstanceRef.current?.scene?.();
+      if (particles && cleanupScene) {
+        cleanupScene.remove(particles);
       }
     };
   }, [globeInstanceRef.current, pollutionData, showPollutionParticles]);
