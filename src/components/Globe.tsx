@@ -242,16 +242,26 @@ export const GlobeComponent = ({
 
     if (layers.clouds) {
       new THREE.TextureLoader().load(CLOUDS_IMG_URL, (cloudsTexture) => {
+        const instance = globeInstanceRef.current;
+        if (!instance) return; // Globe may have been unmounted
+
+        const radius = instance.getGlobeRadius?.() ?? 0;
+        if (!radius) return;
+
         cloudsLayer = new THREE.Mesh(
           new THREE.SphereGeometry(
-            globeInstanceRef.current.getGlobeRadius() * (1 + CLOUDS_ALT),
+            radius * (1 + CLOUDS_ALT),
             75,
             75
           ),
           new THREE.MeshPhongMaterial({ map: cloudsTexture, transparent: true, opacity: 0.8 })
         );
         cloudsLayer.name = 'clouds-layer';
-        globeInstanceRef.current.scene().add(cloudsLayer);
+
+        const scene = instance.scene?.();
+        if (scene) {
+          scene.add(cloudsLayer);
+        }
 
         (function rotateClouds() {
           if (cloudsLayer && cloudsLayer.parent) {
@@ -262,15 +272,19 @@ export const GlobeComponent = ({
       });
     } else {
       // Remove clouds layer if it exists
-      const existingClouds = globeInstanceRef.current.scene().getObjectByName('clouds-layer');
-      if (existingClouds) {
-        globeInstanceRef.current.scene().remove(existingClouds);
+      const scene = globeInstanceRef.current?.scene?.();
+      if (scene) {
+        const existingClouds = scene.getObjectByName('clouds-layer');
+        if (existingClouds) {
+          scene.remove(existingClouds);
+        }
       }
     }
 
     return () => {
-      if (cloudsLayer) {
-        globeInstanceRef.current.scene().remove(cloudsLayer);
+      const scene = globeInstanceRef.current?.scene?.();
+      if (cloudsLayer && scene) {
+        scene.remove(cloudsLayer);
       }
     };
   }, [layers.clouds]);
