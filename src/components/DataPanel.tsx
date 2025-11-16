@@ -196,7 +196,7 @@ export const DataPanel = ({
             <DialogDescription className="text-base text-muted-foreground mt-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5">
-                  Enviro AI
+                  🤖 Llama 3.3 70B
                 </Badge>
                 <Badge variant="outline" className="border-secondary/30 text-secondary bg-secondary/5">
                   OpenMeteo Data
