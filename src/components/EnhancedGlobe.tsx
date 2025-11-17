@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Play, 
   Pause, 
@@ -15,6 +16,15 @@ import {
   Thermometer,
   Settings
 } from 'lucide-react';
+
+interface CloudData {
+  lat: number;
+  lng: number;
+  clouds: number;
+  weather: string;
+  temp: number;
+  humidity: number;
+}
 
 interface EnhancedGlobeProps {
   onCityClick: (lat: number, lng: number) => void;
@@ -41,7 +51,9 @@ export const EnhancedGlobe = ({
   const [animationSpeed, setAnimationSpeed] = useState([1]);
   const [showPollutionParticles, setShowPollutionParticles] = useState(true);
   const [show3DTerrain, setShow3DTerrain] = useState(false);
+  const [showClouds, setShowClouds] = useState(true);
   const [particleSystem, setParticleSystem] = useState<THREE.Group | null>(null);
+  const [cloudData, setCloudData] = useState<CloudData[]>([]);
 
   // Use callback ref to ensure DOM is ready before initializing Globe
   const globeElRef = useCallback((node: HTMLDivElement | null) => {
@@ -75,6 +87,27 @@ export const EnhancedGlobe = ({
     }
   }, [onCityClick]);
 
+  // Fetch cloud data
+  useEffect(() => {
+    const fetchClouds = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('weather-proxy', {
+          body: { action: 'global-clouds' }
+        });
+        
+        if (!error && data?.clouds) {
+          setCloudData(data.clouds);
+        }
+      } catch (err) {
+        console.error('Failed to fetch cloud data:', err);
+      }
+    };
+
+    fetchClouds();
+    const interval = setInterval(fetchClouds, 60000); // Update every minute
+    return () => clearInterval(interval);
+  }, []);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -88,6 +121,63 @@ export const EnhancedGlobe = ({
       }
     };
   }, [])
+
+  // Add cloud visualization
+  useEffect(() => {
+    if (!globeInstanceRef.current || !showClouds || cloudData.length === 0) return;
+
+    const scene = globeInstanceRef.current.scene();
+    if (!scene) return;
+
+    // Remove existing clouds
+    const existingClouds = scene.children.find((child: any) => child.userData?.type === 'clouds');
+    if (existingClouds) {
+      scene.remove(existingClouds);
+    }
+
+    const cloudGroup = new THREE.Group();
+    cloudGroup.userData = { type: 'clouds' };
+
+    cloudData.forEach((cloud) => {
+      if (cloud.clouds < 30) return; // Only show significant cloud coverage
+
+      const opacity = (cloud.clouds / 100) * 0.6;
+      const size = 2 + (cloud.clouds / 100) * 3;
+      
+      const geometry = new THREE.SphereGeometry(size, 16, 16);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: opacity,
+        depthWrite: false
+      });
+
+      const cloudMesh = new THREE.Mesh(geometry, material);
+
+      // Position on globe surface
+      const phi = (90 - cloud.lat) * (Math.PI / 180);
+      const theta = (cloud.lng + 180) * (Math.PI / 180);
+      const radius = 103; // Above earth surface
+
+      cloudMesh.position.x = -(radius * Math.sin(phi) * Math.cos(theta));
+      cloudMesh.position.y = radius * Math.cos(phi);
+      cloudMesh.position.z = radius * Math.sin(phi) * Math.sin(theta);
+
+      cloudGroup.add(cloudMesh);
+    });
+
+    scene.add(cloudGroup);
+
+    return () => {
+      scene.remove(cloudGroup);
+      cloudGroup.children.forEach(mesh => {
+        if (mesh instanceof THREE.Mesh) {
+          mesh.geometry.dispose();
+          (mesh.material as THREE.Material).dispose();
+        }
+      });
+    };
+  }, [cloudData, showClouds]);
 
   // Add pollution particles
   useEffect(() => {
@@ -320,6 +410,17 @@ export const EnhancedGlobe = ({
                 <Thermometer className="w-3 h-3" />
                 3D Terrain
               </label>
+              
+              <label className="flex items-center gap-2 text-xs">
+                <input
+                  type="checkbox"
+                  checked={showClouds}
+                  onChange={(e) => setShowClouds(e.target.checked)}
+                  className="rounded"
+                />
+                <Wind className="w-3 h-3" />
+                Real-time Clouds
+              </label>
             </div>
           </div>
 
@@ -365,6 +466,13 @@ export const EnhancedGlobe = ({
             <Badge variant="outline" className="glass bg-transparent border-white/10">
               <Wind className="w-3 h-3 mr-1" />
               {pollutionData.length} Particles
+            </Badge>
+          )}
+          
+          {showClouds && cloudData.length > 0 && (
+            <Badge variant="outline" className="glass bg-transparent border-white/10">
+              <Wind className="w-3 h-3 mr-1" />
+              {cloudData.filter(c => c.clouds >= 30).length} Clouds
             </Badge>
           )}
         </div>
