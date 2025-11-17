@@ -8,9 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { MapPin, Layers, Navigation, Ruler, Clock, Cloud, Zap, X, CloudRain } from 'lucide-react';
-import { weatherService, WeatherGridData } from '@/services/weatherApi';
-import { toast } from 'sonner';
+import { MapPin, Layers, Navigation, Ruler, Clock, Cloud, Zap, X } from 'lucide-react';
 
 
 interface GlobeComponentProps {
@@ -43,8 +41,6 @@ export const GlobeComponent = ({
   const [timeOfDay, setTimeOfDay] = useState(12); // 0-24 hours
   const [measuringDistance, setMeasuringDistance] = useState(false);
   const [measurePoints, setMeasurePoints] = useState<Array<{lat: number, lng: number}>>([]);
-  const [cloudData, setCloudData] = useState<WeatherGridData | null>(null);
-  const [loadingWeather, setLoadingWeather] = useState(false);
 
   // Famous locations for quick travel
   const famousLocations = [
@@ -123,44 +119,18 @@ export const GlobeComponent = ({
   useEffect(() => {
     if (!globeRef.current || globeInstanceRef.current) return; // Prevent re-initialization
 
-    // Initialize Globe with HDR ultra-enhanced visuals
+    // Initialize Globe with ultra-enhanced visuals
     const globe = new Globe(globeRef.current)
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
       .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
       .width(window.innerWidth)
       .height(window.innerHeight)
-      .atmosphereColor('#3b82f6')
-      .atmosphereAltitude(0.35)
+      .atmosphereColor('#60a5fa')
+      .atmosphereAltitude(0.3)
       .enablePointerInteraction(true)
       .showAtmosphere(true)
       .pointOfView({ altitude: 2.5 });
-
-    // HDR-like rendering setup
-    const scene = globe.scene();
-    const renderer = globe.renderer();
-    
-    // Enable HDR tone mapping
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    
-    // Enhanced lighting for HDR effect
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-    scene.add(ambientLight);
-    
-    const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
-    sunLight.position.set(5, 3, 5);
-    sunLight.castShadow = true;
-    scene.add(sunLight);
-    
-    const backLight = new THREE.DirectionalLight(0x4488ff, 0.6);
-    backLight.position.set(-5, 2, -5);
-    scene.add(backLight);
-    
-    const fillLight = new THREE.PointLight(0xffffff, 0.5);
-    fillLight.position.set(0, 5, 0);
-    scene.add(fillLight);
 
     // Configure camera with enhanced settings
     globe.camera().position.z = 300;
@@ -244,29 +214,6 @@ export const GlobeComponent = ({
       .htmlLng((d: any) => d.lng);
   }, [selectedCity]);
 
-  // Real-time cloud data fetching
-  useEffect(() => {
-    const fetchCloudData = async () => {
-      setLoadingWeather(true);
-      try {
-        const data = await weatherService.getGlobalCloudData();
-        setCloudData(data);
-        toast.success('Real-time weather data loaded');
-      } catch (error) {
-        console.error('Failed to fetch cloud data:', error);
-        toast.error('Using simulated weather data');
-      } finally {
-        setLoadingWeather(false);
-      }
-    };
-
-    fetchCloudData();
-    
-    // Refresh every 10 minutes
-    const interval = setInterval(fetchCloudData, 10 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
-
   // City Lights Layer
   useEffect(() => {
     if (!globeInstanceRef.current) return;
@@ -283,151 +230,50 @@ export const GlobeComponent = ({
     }
   }, [layers.cityLights]);
 
-  // Real-time High-Quality Clouds Layer with actual weather data
+  // Clouds Layer
   useEffect(() => {
-    if (!globeInstanceRef.current || !cloudData) return;
+    if (!globeInstanceRef.current) return;
 
-    const CLOUDS_ALT = 0.006;
+    const CLOUDS_IMG_URL = '//unpkg.com/three-globe/example/clouds/clouds.png';
+    const CLOUDS_ALT = 0.004;
+    const CLOUDS_ROTATION_SPEED = -0.006;
+
     let cloudsLayer: THREE.Mesh | null = null;
-    let cloudParticles: THREE.Points | null = null;
 
     if (layers.clouds) {
-      // Create high-quality volumetric cloud layer
-      const cloudGeometry = new THREE.SphereGeometry(
-        globeInstanceRef.current.getGlobeRadius() * (1 + CLOUDS_ALT),
-        128, // Higher resolution
-        128
-      );
+      new THREE.TextureLoader().load(CLOUDS_IMG_URL, (cloudsTexture) => {
+        cloudsLayer = new THREE.Mesh(
+          new THREE.SphereGeometry(
+            globeInstanceRef.current.getGlobeRadius() * (1 + CLOUDS_ALT),
+            75,
+            75
+          ),
+          new THREE.MeshPhongMaterial({ map: cloudsTexture, transparent: true, opacity: 0.8 })
+        );
+        cloudsLayer.name = 'clouds-layer';
+        globeInstanceRef.current.scene().add(cloudsLayer);
 
-      // Create canvas for dynamic cloud texture based on real-time data
-      const canvas = document.createElement('canvas');
-      canvas.width = 2048; // 4K-like quality
-      canvas.height = 1024;
-      const ctx = canvas.getContext('2d')!;
-      
-      // Fill with base transparent color
-      ctx.fillStyle = 'rgba(0, 0, 0, 0)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // Draw clouds based on real-time weather data
-      cloudData.clouds.forEach(cloud => {
-        // Convert lat/lng to canvas coordinates
-        const x = ((cloud.lng + 180) / 360) * canvas.width;
-        const y = ((90 - cloud.lat) / 180) * canvas.height;
-        
-        // Cloud opacity based on coverage percentage
-        const opacity = cloud.clouds / 100;
-        const radius = 40 + (cloud.clouds / 100) * 20;
-        
-        // Create gradient for each cloud cluster
-        const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
-        gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity * 0.9})`);
-        gradient.addColorStop(0.5, `rgba(240, 240, 255, ${opacity * 0.6})`);
-        gradient.addColorStop(1, `rgba(220, 220, 240, 0)`);
-        
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      
-      // Apply blur for soft, realistic clouds
-      ctx.filter = 'blur(8px)';
-      ctx.drawImage(canvas, 0, 0);
-      
-      const cloudTexture = new THREE.CanvasTexture(canvas);
-      cloudTexture.needsUpdate = true;
-      
-      // HDR-quality cloud material with enhanced properties
-      const cloudMaterial = new THREE.MeshPhongMaterial({
-        map: cloudTexture,
-        transparent: true,
-        opacity: 0.85,
-        side: THREE.DoubleSide,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-        shininess: 15,
-        emissive: new THREE.Color(0x446688),
-        emissiveIntensity: 0.15
-      });
-
-      cloudsLayer = new THREE.Mesh(cloudGeometry, cloudMaterial);
-      cloudsLayer.name = 'clouds-layer-realtime';
-      globeInstanceRef.current.scene().add(cloudsLayer);
-
-      // Add particle clouds for extra depth (HDR effect)
-      const particleGeometry = new THREE.BufferGeometry();
-      const particleCount = 2000;
-      const positions = new Float32Array(particleCount * 3);
-      const opacities = new Float32Array(particleCount);
-      
-      cloudData.clouds.forEach((cloud, i) => {
-        if (i >= particleCount / 2) return;
-        
-        // Convert to 3D sphere coordinates
-        const phi = (90 - cloud.lat) * (Math.PI / 180);
-        const theta = (cloud.lng + 180) * (Math.PI / 180);
-        const radius = globeInstanceRef.current.getGlobeRadius() * (1 + CLOUDS_ALT + 0.002);
-        
-        const idx = i * 3;
-        positions[idx] = radius * Math.sin(phi) * Math.cos(theta);
-        positions[idx + 1] = radius * Math.cos(phi);
-        positions[idx + 2] = radius * Math.sin(phi) * Math.sin(theta);
-        
-        opacities[i] = cloud.clouds / 150;
-      });
-      
-      particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      particleGeometry.setAttribute('opacity', new THREE.BufferAttribute(opacities, 1));
-      
-      const particleMaterial = new THREE.PointsMaterial({
-        color: 0xffffff,
-        size: 2,
-        transparent: true,
-        opacity: 0.6,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false
-      });
-      
-      cloudParticles = new THREE.Points(particleGeometry, particleMaterial);
-      cloudParticles.name = 'cloud-particles';
-      globeInstanceRef.current.scene().add(cloudParticles);
-
-      // Smooth rotation animation
-      let rotation = 0;
-      (function rotateClouds() {
-        if (cloudsLayer && cloudsLayer.parent) {
-          rotation += 0.0001;
-          cloudsLayer.rotation.y = rotation;
-          if (cloudParticles) {
-            cloudParticles.rotation.y = rotation * 0.8;
+        (function rotateClouds() {
+          if (cloudsLayer && cloudsLayer.parent) {
+            cloudsLayer.rotation.y += CLOUDS_ROTATION_SPEED * Math.PI / 180;
+            requestAnimationFrame(rotateClouds);
           }
-          requestAnimationFrame(rotateClouds);
-        }
-      })();
+        })();
+      });
     } else {
       // Remove clouds layer if it exists
-      if (globeInstanceRef.current) {
-        const existingClouds = globeInstanceRef.current.scene().getObjectByName('clouds-layer-realtime');
-        if (existingClouds) {
-          globeInstanceRef.current.scene().remove(existingClouds);
-        }
-        const existingParticles = globeInstanceRef.current.scene().getObjectByName('cloud-particles');
-        if (existingParticles) {
-          globeInstanceRef.current.scene().remove(existingParticles);
-        }
+      const existingClouds = globeInstanceRef.current.scene().getObjectByName('clouds-layer');
+      if (existingClouds) {
+        globeInstanceRef.current.scene().remove(existingClouds);
       }
     }
 
     return () => {
-      if (cloudsLayer && globeInstanceRef.current) {
+      if (cloudsLayer) {
         globeInstanceRef.current.scene().remove(cloudsLayer);
       }
-      if (cloudParticles && globeInstanceRef.current) {
-        globeInstanceRef.current.scene().remove(cloudParticles);
-      }
     };
-  }, [layers.clouds, cloudData]);
+  }, [layers.clouds]);
 
   // Animate satellites
   useEffect(() => {
@@ -606,46 +452,13 @@ export const GlobeComponent = ({
                 />
               </div>
               <div className="flex items-center justify-between">
-                <Label htmlFor="clouds" className="text-xs flex items-center gap-1">
-                  <Cloud className="w-3 h-3" />
-                  Real-time Clouds
-                </Label>
+                <Label htmlFor="clouds" className="text-xs">Clouds</Label>
                 <Switch
                   id="clouds"
                   checked={layers.clouds}
                   onCheckedChange={(checked) => setLayers(prev => ({ ...prev, clouds: checked }))}
                 />
               </div>
-              {layers.clouds && (
-                <div className="pl-6 space-y-1">
-                  <Button
-                    onClick={async () => {
-                      setLoadingWeather(true);
-                      try {
-                        const data = await weatherService.getGlobalCloudData();
-                        setCloudData(data);
-                        toast.success('Weather data refreshed');
-                      } catch (error) {
-                        toast.error('Failed to refresh weather');
-                      } finally {
-                        setLoadingWeather(false);
-                      }
-                    }}
-                    size="sm"
-                    variant="ghost"
-                    className="w-full text-xs"
-                    disabled={loadingWeather}
-                  >
-                    <CloudRain className="w-3 h-3 mr-1" />
-                    {loadingWeather ? 'Updating...' : 'Refresh Weather'}
-                  </Button>
-                  {cloudData && (
-                    <p className="text-[10px] text-muted-foreground">
-                      Last updated: {new Date(cloudData.timestamp).toLocaleTimeString()}
-                    </p>
-                  )}
-                </div>
-              )}
               <div className="flex items-center justify-between">
                 <Label htmlFor="satellites" className="text-xs">Satellites</Label>
                 <Switch
