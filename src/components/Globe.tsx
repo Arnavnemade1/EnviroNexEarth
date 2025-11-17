@@ -407,21 +407,23 @@ export const GlobeComponent = ({
       })();
     } else {
       // Remove clouds layer if it exists
-      const existingClouds = globeInstanceRef.current.scene().getObjectByName('clouds-layer-realtime');
-      if (existingClouds) {
-        globeInstanceRef.current.scene().remove(existingClouds);
-      }
-      const existingParticles = globeInstanceRef.current.scene().getObjectByName('cloud-particles');
-      if (existingParticles) {
-        globeInstanceRef.current.scene().remove(existingParticles);
+      if (globeInstanceRef.current) {
+        const existingClouds = globeInstanceRef.current.scene().getObjectByName('clouds-layer-realtime');
+        if (existingClouds) {
+          globeInstanceRef.current.scene().remove(existingClouds);
+        }
+        const existingParticles = globeInstanceRef.current.scene().getObjectByName('cloud-particles');
+        if (existingParticles) {
+          globeInstanceRef.current.scene().remove(existingParticles);
+        }
       }
     }
 
     return () => {
-      if (cloudsLayer) {
+      if (cloudsLayer && globeInstanceRef.current) {
         globeInstanceRef.current.scene().remove(cloudsLayer);
       }
-      if (cloudParticles) {
+      if (cloudParticles && globeInstanceRef.current) {
         globeInstanceRef.current.scene().remove(cloudParticles);
       }
     };
