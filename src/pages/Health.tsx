@@ -23,7 +23,6 @@ interface LocationState {
 const Health = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
   
   // Get data from navigation state
   const state = location.state as LocationState;
@@ -33,40 +32,24 @@ const Health = () => {
     if (!state?.cityName || !state?.airQuality) {
       toast.error("Health analysis requires air quality data. Redirecting to home...");
       setTimeout(() => navigate('/'), 2000);
-      return;
     }
-    
-    setIsLoading(false);
   }, [state, navigate]);
 
-  const handleBackToHome = () => {
-    navigate('/');
+  const handleBackToCity = () => {
+    // Navigate back to home with the city still selected
+    navigate('/', { state: { returnToCity: state?.cityName } });
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <Heart className="w-8 h-8 text-primary-foreground animate-pulse" />
-          </div>
-          <h2 className="text-xl font-semibold mb-2">Loading Health Analysis...</h2>
-          <p className="text-muted-foreground">Preparing quantum health assessment</p>
-        </div>
-      </div>
-    );
-  }
 
   if (!state?.cityName || !state?.airQuality) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
-        <Card className="glass p-8 text-center max-w-md">
+        <Card className="glass p-8 text-center max-w-md animate-scale-in">
           <Shield className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
           <h2 className="text-xl font-semibold mb-2">No Health Data Available</h2>
           <p className="text-muted-foreground mb-4">
             Please select a city first to view health analysis.
           </p>
-          <Button onClick={handleBackToHome} className="w-full">
+          <Button onClick={() => navigate('/')} className="w-full">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Home
           </Button>
@@ -76,13 +59,13 @@ const Health = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 animate-fade-in">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="outline" onClick={handleBackToHome} className="glass">
+        <div className="flex items-center gap-4 mb-8 animate-slide-in-right">
+          <Button variant="outline" onClick={handleBackToCity} className="glass hover-scale">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Globe
+            Back to {state.cityName}
           </Button>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
@@ -97,7 +80,7 @@ const Health = () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="glass p-4">
+          <Card className="glass p-4 animate-fade-in hover-scale transition-all duration-300">
             <div className="flex items-center gap-3">
               <Activity className="w-8 h-8 text-primary" />
               <div>
@@ -106,7 +89,7 @@ const Health = () => {
               </div>
             </div>
           </Card>
-          <Card className="glass p-4">
+          <Card className="glass p-4 animate-fade-in hover-scale transition-all duration-300" style={{ animationDelay: '0.1s' }}>
             <div className="flex items-center gap-3">
               <Heart className="w-8 h-8 text-red-500" />
               <div>
@@ -115,7 +98,7 @@ const Health = () => {
               </div>
             </div>
           </Card>
-          <Card className="glass p-4">
+          <Card className="glass p-4 animate-fade-in hover-scale transition-all duration-300" style={{ animationDelay: '0.2s' }}>
             <div className="flex items-center gap-3">
               <Shield className="w-8 h-8 text-green-500" />
               <div>
