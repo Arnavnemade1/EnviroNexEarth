@@ -187,86 +187,125 @@ export const DataPanel = ({
     <>
       {/* Enviro AI Impact Summary Dialog */}
       <Dialog open={showImpactDialog} onOpenChange={setShowImpactDialog}>
-        <DialogContent className="max-w-3xl max-h-[85vh] glass bg-gradient-to-br from-background/95 to-background/80 backdrop-blur-xl border-primary/20">
-          <DialogHeader>
+        <DialogContent className="max-w-4xl max-h-[90vh] glass bg-gradient-to-br from-background/95 via-primary/5 to-background/90 backdrop-blur-xl border-primary/20 animate-scale-in">
+          <DialogHeader className="animate-fade-in">
             <DialogTitle className="flex items-center gap-3 text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-              <Sparkles className="w-8 h-8 text-primary" />
+              <div className="relative">
+                <Sparkles className="w-8 h-8 text-primary animate-pulse" />
+                <div className="absolute inset-0 w-8 h-8 animate-ping opacity-30">
+                  <Sparkles className="w-8 h-8 text-primary" />
+                </div>
+              </div>
               Enviro AI Impact Analysis
             </DialogTitle>
             <DialogDescription className="text-base text-muted-foreground mt-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5">
+              <div className="flex items-center gap-2 flex-wrap animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                <Badge variant="outline" className="border-primary/30 text-primary bg-primary/10 animate-fade-in hover-scale">
                   🤖 Llama 3.3 70B
                 </Badge>
-                <Badge variant="outline" className="border-secondary/30 text-secondary bg-secondary/5">
-                  OpenMeteo Data
+                <Badge variant="outline" className="border-secondary/30 text-secondary bg-secondary/10 animate-fade-in hover-scale" style={{ animationDelay: '0.05s' }}>
+                  📊 OpenMeteo Data
+                </Badge>
+                <Badge variant="outline" className="border-accent/30 text-accent bg-accent/10 animate-fade-in hover-scale" style={{ animationDelay: '0.1s' }}>
+                  ⚛️ Quantum Enhanced
                 </Badge>
                 <span className="text-sm">•</span>
-                <span className="font-medium">{cityName}</span>
+                <span className="font-medium text-foreground">{cityName}</span>
               </div>
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="h-[65vh] pr-4">
+          <ScrollArea className="h-[70vh] pr-4">
             {isAnalyzing ? (
-              <div className="flex flex-col items-center justify-center py-16 space-y-6">
+              <div className="flex flex-col items-center justify-center py-20 space-y-8">
                 <div className="relative">
-                  <Loader2 className="w-16 h-16 animate-spin text-primary" />
-                  <div className="absolute inset-0 w-16 h-16 animate-ping opacity-20">
-                    <Sparkles className="w-16 h-16 text-primary" />
+                  <Loader2 className="w-20 h-20 animate-spin text-primary" />
+                  <div className="absolute inset-0 w-20 h-20 animate-ping opacity-20">
+                    <Sparkles className="w-20 h-20 text-primary" />
+                  </div>
+                  <div className="absolute inset-0 w-20 h-20 animate-pulse opacity-30">
+                    <Atom className="w-20 h-20 text-secondary" />
                   </div>
                 </div>
-                <div className="text-center space-y-3">
-                  <p className="text-lg font-semibold text-foreground">Enviro AI analysis in progress</p>
-                  <p className="text-sm text-muted-foreground">Processing environmental data</p>
-                  <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/70">
-                    <span className="animate-pulse">Quantum forecasts</span>
-                    <span>•</span>
-                    <span className="animate-pulse delay-75">Pollutant analysis</span>
-                    <span>•</span>
-                    <span className="animate-pulse delay-150">Health impacts</span>
+                <div className="text-center space-y-4">
+                  <p className="text-2xl font-bold text-foreground animate-pulse">Enviro AI Processing...</p>
+                  <p className="text-sm text-muted-foreground">Analyzing environmental data with advanced AI</p>
+                  <div className="grid grid-cols-3 gap-4 mt-8 max-w-2xl">
+                    <Card className="glass p-4 animate-fade-in" style={{ animationDelay: '0s' }}>
+                      <Atom className="w-8 h-8 text-primary mx-auto mb-2 animate-spin" />
+                      <p className="text-xs text-center text-muted-foreground">Quantum Forecasts</p>
+                    </Card>
+                    <Card className="glass p-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                      <Wind className="w-8 h-8 text-secondary mx-auto mb-2 animate-pulse" />
+                      <p className="text-xs text-center text-muted-foreground">Pollutant Analysis</p>
+                    </Card>
+                    <Card className="glass p-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                      <Heart className="w-8 h-8 text-accent mx-auto mb-2 animate-pulse" />
+                      <p className="text-xs text-center text-muted-foreground">Health Impacts</p>
+                    </Card>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {impactAnalysis.split('\n').map((paragraph, idx) => {
                   const line = paragraph.trim();
                   if (!line) return null;
 
                   if (line.startsWith('## ')) {
                     return (
-                      <h2 key={idx} className="text-2xl font-bold text-primary mt-6 mb-3 flex items-center gap-2">
-                        <div className="w-1 h-6 bg-primary rounded-full" />
-                        {line.replace('## ', '')}
-                      </h2>
+                      <Card key={idx} className="glass p-4 border-l-4 border-primary animate-fade-in hover-scale" style={{ animationDelay: `${idx * 0.05}s` }}>
+                        <h2 className="text-2xl font-bold text-primary flex items-center gap-3">
+                          <Sparkles className="w-6 h-6" />
+                          {line.replace('## ', '')}
+                        </h2>
+                      </Card>
                     );
                   }
 
                   if (line.startsWith('### ')) {
                     return (
-                      <h3 key={idx} className="text-xl font-semibold text-secondary mt-4 mb-2">
-                        {line.replace('### ', '')}
-                      </h3>
+                      <div key={idx} className="animate-fade-in" style={{ animationDelay: `${idx * 0.05}s` }}>
+                        <h3 className="text-xl font-semibold text-secondary mt-4 mb-2 flex items-center gap-2">
+                          <div className="w-2 h-2 bg-secondary rounded-full animate-pulse" />
+                          {line.replace('### ', '')}
+                        </h3>
+                      </div>
                     );
                   }
 
                   if (line.startsWith('- ')) {
+                    const content = line.replace('- ', '');
+                    const icon = content.includes('AQI') ? <Activity className="w-4 h-4 text-primary" /> :
+                                 content.includes('PM') ? <Wind className="w-4 h-4 text-secondary" /> :
+                                 content.includes('health') || content.includes('Health') ? <Heart className="w-4 h-4 text-accent" /> :
+                                 <div className="w-2 h-2 bg-foreground/50 rounded-full" />;
+                    
                     return (
-                      <li key={idx} className="ml-6 text-sm text-foreground/90 leading-relaxed list-disc">
-                        {line.replace('- ', '').replace(/\*\*(.*?)\*\*/g, '<strong class="text-primary font-semibold">$1</strong>')}
-                      </li>
+                      <Card key={idx} className="glass p-3 animate-fade-in hover-scale transition-all duration-300" style={{ animationDelay: `${idx * 0.05}s` }}>
+                        <div className="flex items-start gap-3">
+                          {icon}
+                          <span 
+                            className="text-sm text-foreground/90 leading-relaxed flex-1" 
+                            dangerouslySetInnerHTML={{ 
+                              __html: content.replace(/\*\*(.*?)\*\*/g, '<strong class="text-primary font-semibold">$1</strong>')
+                            }}
+                          />
+                        </div>
+                      </Card>
                     );
                   }
 
                   if (line.startsWith('**') || line.includes('**')) {
                     const formatted = line.replace(/\*\*(.*?)\*\*/g, '<span class="font-bold text-accent">$1</span>');
                     return (
-                      <p key={idx} className="text-base text-foreground leading-relaxed" dangerouslySetInnerHTML={{ __html: formatted }} />
+                      <Card key={idx} className="glass p-4 animate-fade-in" style={{ animationDelay: `${idx * 0.05}s` }}>
+                        <p className="text-base text-foreground leading-relaxed" dangerouslySetInnerHTML={{ __html: formatted }} />
+                      </Card>
                     );
                   }
 
                   return (
-                    <p key={idx} className="text-base text-foreground/90 leading-relaxed">
+                    <p key={idx} className="text-base text-foreground/90 leading-relaxed animate-fade-in px-2" style={{ animationDelay: `${idx * 0.05}s` }}>
                       {line}
                     </p>
                   );

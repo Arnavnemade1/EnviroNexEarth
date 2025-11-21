@@ -498,6 +498,81 @@ export type Database = {
         }
         Relationships: []
       }
+      habit_patterns: {
+        Row: {
+          activity_type: string | null
+          created_at: string
+          day_of_week: number
+          duration_minutes: number | null
+          environmental_aqi: number | null
+          environmental_temp: number | null
+          id: string
+          location_lat: number
+          location_lng: number
+          time_of_day: string
+          user_id: string
+        }
+        Insert: {
+          activity_type?: string | null
+          created_at?: string
+          day_of_week: number
+          duration_minutes?: number | null
+          environmental_aqi?: number | null
+          environmental_temp?: number | null
+          id?: string
+          location_lat: number
+          location_lng: number
+          time_of_day: string
+          user_id: string
+        }
+        Update: {
+          activity_type?: string | null
+          created_at?: string
+          day_of_week?: number
+          duration_minutes?: number | null
+          environmental_aqi?: number | null
+          environmental_temp?: number | null
+          id?: string
+          location_lat?: number
+          location_lng?: number
+          time_of_day?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      learned_habits: {
+        Row: {
+          accepted: boolean | null
+          confidence_score: number
+          created_at: string
+          habit_name: string
+          id: string
+          pattern_data: Json
+          suggested_at: string
+          user_id: string
+        }
+        Insert: {
+          accepted?: boolean | null
+          confidence_score: number
+          created_at?: string
+          habit_name: string
+          id?: string
+          pattern_data: Json
+          suggested_at?: string
+          user_id: string
+        }
+        Update: {
+          accepted?: boolean | null
+          confidence_score?: number
+          created_at?: string
+          habit_name?: string
+          id?: string
+          pattern_data?: Json
+          suggested_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       likes: {
         Row: {
           created_at: string | null
