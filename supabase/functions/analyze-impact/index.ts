@@ -70,7 +70,7 @@ Data Source: OpenMeteo Air Quality API provides real-time measurements of PM2.5,
 
 Format your response with clear markdown headers (##) and bullet points for readability.`;
 
-    console.log('Calling OpenRouter API with Llama 3.3 70B (streaming)...');
+    console.log('Calling OpenRouter API with Llama 3.3 70B...');
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -101,12 +101,11 @@ ${dataContext}`
           }
         ],
         temperature: 0.7,
-        max_tokens: 1500,
-        stream: true
+        max_tokens: 1500
       })
     });
 
-    console.log('OpenRouter streaming response status:', response.status);
+    console.log('OpenRouter response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -118,15 +117,19 @@ ${dataContext}`
       throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
     }
 
-    // Return the stream directly to the client
-    return new Response(response.body, {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
-      }
-    });
+    const data = await response.json();
+    const analysis = data.choices?.[0]?.message?.content;
+
+    if (!analysis) {
+      throw new Error('No analysis generated from API response');
+    }
+
+    console.log('Analysis generated successfully, length:', analysis.length);
+
+    return new Response(
+      JSON.stringify({ analysis }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
 
   } catch (error) {
     console.error('Error in analyze-impact:', error);
