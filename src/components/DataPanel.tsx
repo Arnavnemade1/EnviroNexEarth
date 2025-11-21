@@ -154,21 +154,64 @@ export const DataPanel = ({
     setImpactAnalysis('');
 
     try {
-      const { data, error } = await supabase.functions.invoke('analyze-impact', {
-        body: {
-          cityName,
-          airQuality,
-          quantumForecast,
-          scenario: selectedScenario
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-impact`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+          },
+          body: JSON.stringify({
+            cityName,
+            airQuality,
+            quantumForecast,
+            scenario: selectedScenario
+          })
         }
-      });
+      );
 
-      if (error) throw error;
+      if (!response.ok || !response.body) {
+        throw new Error('Failed to start stream');
+      }
 
-      if (data?.analysis) {
-        setImpactAnalysis(data.analysis);
-      } else {
-        throw new Error('No analysis received');
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let fullAnalysis = "";
+
+      setIsAnalyzing(false); // Show content as it streams
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+          let line = buffer.slice(0, newlineIndex);
+          buffer = buffer.slice(newlineIndex + 1);
+
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
+
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") break;
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) {
+              fullAnalysis += content;
+              setImpactAnalysis(fullAnalysis);
+            }
+          } catch {
+            buffer = line + "\n" + buffer;
+            break;
+          }
+        }
       }
     } catch (error) {
       console.error('Error generating impact summary:', error);
@@ -178,7 +221,6 @@ export const DataPanel = ({
         variant: "destructive"
       });
       setShowImpactDialog(false);
-    } finally {
       setIsAnalyzing(false);
     }
   };
