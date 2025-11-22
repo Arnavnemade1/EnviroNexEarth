@@ -242,6 +242,8 @@ export const GlobeComponent = ({
 
     if (layers.clouds) {
       new THREE.TextureLoader().load(CLOUDS_IMG_URL, (cloudsTexture) => {
+        if (!globeInstanceRef.current) return;
+        
         cloudsLayer = new THREE.Mesh(
           new THREE.SphereGeometry(
             globeInstanceRef.current.getGlobeRadius() * (1 + CLOUDS_ALT),
@@ -251,7 +253,11 @@ export const GlobeComponent = ({
           new THREE.MeshPhongMaterial({ map: cloudsTexture, transparent: true, opacity: 0.8 })
         );
         cloudsLayer.name = 'clouds-layer';
-        globeInstanceRef.current.scene().add(cloudsLayer);
+        
+        const scene = globeInstanceRef.current.scene();
+        if (scene) {
+          scene.add(cloudsLayer);
+        }
 
         (function rotateClouds() {
           if (cloudsLayer && cloudsLayer.parent) {
@@ -262,15 +268,23 @@ export const GlobeComponent = ({
       });
     } else {
       // Remove clouds layer if it exists
-      const existingClouds = globeInstanceRef.current.scene().getObjectByName('clouds-layer');
-      if (existingClouds) {
-        globeInstanceRef.current.scene().remove(existingClouds);
+      if (globeInstanceRef.current) {
+        const scene = globeInstanceRef.current.scene();
+        if (scene) {
+          const existingClouds = scene.getObjectByName('clouds-layer');
+          if (existingClouds) {
+            scene.remove(existingClouds);
+          }
+        }
       }
     }
 
     return () => {
-      if (cloudsLayer) {
-        globeInstanceRef.current.scene().remove(cloudsLayer);
+      if (cloudsLayer && globeInstanceRef.current) {
+        const scene = globeInstanceRef.current.scene();
+        if (scene) {
+          scene.remove(cloudsLayer);
+        }
       }
     };
   }, [layers.clouds]);
