@@ -126,7 +126,14 @@ export const EnhancedGlobe = ({
   useEffect(() => {
     if (!globeInstanceRef.current || !showClouds || cloudData.length === 0) return;
 
-    const scene = globeInstanceRef.current.scene();
+    let scene: any = null;
+    try {
+      scene = globeInstanceRef.current.scene();
+    } catch (e) {
+      console.error('Failed to access globe scene:', e);
+      return;
+    }
+    
     if (!scene) return;
 
     // Remove existing clouds
@@ -169,7 +176,9 @@ export const EnhancedGlobe = ({
     scene.add(cloudGroup);
 
     return () => {
-      scene.remove(cloudGroup);
+      if (scene) {
+        scene.remove(cloudGroup);
+      }
       cloudGroup.children.forEach(mesh => {
         if (mesh instanceof THREE.Mesh) {
           mesh.geometry.dispose();
@@ -182,6 +191,16 @@ export const EnhancedGlobe = ({
   // Add pollution particles
   useEffect(() => {
     if (!globeInstanceRef.current || !showPollutionParticles) return;
+
+    let scene: any = null;
+    try {
+      scene = globeInstanceRef.current.scene();
+    } catch (e) {
+      console.error('Failed to access globe scene:', e);
+      return;
+    }
+    
+    if (!scene) return;
 
     const particles = new THREE.Group();
     
@@ -212,12 +231,16 @@ export const EnhancedGlobe = ({
       particles.add(particle);
     });
 
-    globeInstanceRef.current.scene().add(particles);
+    scene.add(particles);
     setParticleSystem(particles);
 
     return () => {
-      if (particles && globeInstanceRef.current) {
-        globeInstanceRef.current.scene().remove(particles);
+      if (particles && scene) {
+        try {
+          scene.remove(particles);
+        } catch (e) {
+          console.error('Failed to remove particles:', e);
+        }
       }
     };
   }, [globeInstanceRef.current, pollutionData, showPollutionParticles]);
