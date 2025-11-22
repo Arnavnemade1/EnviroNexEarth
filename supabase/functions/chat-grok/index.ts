@@ -21,10 +21,10 @@ Deno.serve(async (req) => {
 
   try {
     const { message, context }: ChatRequest = await req.json();
-    const GROK_API_KEY = Deno.env.get('GROK_API_KEY');
+    const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
 
-    if (!GROK_API_KEY) {
-      throw new Error('GROK_API_KEY not configured');
+    if (!OPENROUTER_API_KEY) {
+      throw new Error('OPENROUTER_API_KEY not configured');
     }
 
     const systemPrompt = `You are Enviro AI, an advanced environmental assistant specialized in air quality, climate change, quantum computing applications, and environmental science.
@@ -40,13 +40,13 @@ Current forecast year: ${new Date().getFullYear() + (context.currentYear || 0)}
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GROK_API_KEY}`,
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'HTTP-Referer': 'https://environex.app',
         'X-Title': 'EnviroNex - Quantum-Enhanced Air Quality',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'x-ai/grok-beta',
+        model: 'meta-llama/llama-3.3-70b-instruct:free',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: contextInfo + '\n\nUser question: ' + message }
@@ -68,7 +68,7 @@ Current forecast year: ${new Date().getFullYear() + (context.currentYear || 0)}
       return new Response(
         JSON.stringify({
           response: data.choices[0].message.content,
-          model: 'grok-2-vision-1212',
+          model: 'llama-3.3-70b-instruct',
           powered_by: 'Enviro AI'
         }),
         {
