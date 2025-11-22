@@ -18,15 +18,16 @@ interface ChatbotProps {
   selectedCity?: string;
   currentScenario?: 'current' | 'clean_energy' | 'no_action';
   currentYear?: number;
+  onToolCall?: (toolName: string, args: any) => void;
 }
 
-export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotProps) => {
+export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall }: ChatbotProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
       type: 'bot',
-      message: "Hi! I'm Enviro AI, your environmental assistant. Ask me about air quality, climate forecasts, natural disasters, or satellite data. Try 'How does quantum computing improve predictions?' or 'Analyze air quality in this city'",
+      message: "Hi! I'm Enviro AI Beta - I can answer questions AND control the app. Try: 'Show me Paris' or 'Switch to clean energy scenario'",
       timestamp: new Date()
     }
   ]);
@@ -62,14 +63,31 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
         { selectedCity, currentScenario, currentYear }
       );
       
-      const botResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        type: 'bot',
-        message: response,
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, botResponse]);
+      // Check if response contains tool calls
+      if (typeof response === 'object' && response.tool_calls && onToolCall) {
+        for (const toolCall of response.tool_calls) {
+          const args = JSON.parse(toolCall.function.arguments);
+          onToolCall(toolCall.function.name, args);
+        }
+        
+        const botResponse: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          type: 'bot',
+          message: response.text || '✓ Action executed',
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, botResponse]);
+      } else {
+        const botResponse: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          type: 'bot',
+          message: typeof response === 'string' ? response : response.text,
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, botResponse]);
+      }
     } catch (error) {
       const errorResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -116,7 +134,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear }: ChatbotP
           <div className="flex items-center gap-2">
             <Bot className="w-5 h-5 text-primary" />
             <span className="font-medium">Enviro AI</span>
-            <Badge variant="outline" className="text-xs">Enviro AI</Badge>
+            <Badge variant="default" className="text-xs bg-accent">Beta - Agentic</Badge>
           </div>
           <Button
             size="sm"

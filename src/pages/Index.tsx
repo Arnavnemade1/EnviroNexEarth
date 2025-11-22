@@ -334,6 +334,17 @@ const Index = () => {
           selectedCity={selectedCity ? `${selectedCity.name}, ${selectedCity.country}` : undefined}
           currentScenario={currentScenario}
           currentYear={currentYear}
+          onToolCall={(toolName, args) => {
+            if (toolName === 'change_city') {
+              geocodingService.searchCity(args.city_name).then(cities => {
+                if (cities.length > 0) handleCitySelect(cities[0]);
+              });
+            } else if (toolName === 'toggle_scenario') {
+              handleForecastToggle(args.scenario);
+            } else if (toolName === 'show_disasters') {
+              setShowDisasters(true);
+            }
+          }}
         />
       )}
 
