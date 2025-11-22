@@ -4,6 +4,12 @@ interface Grok4Response {
   response: string;
   model: string;
   powered_by?: string;
+  tool_calls?: Array<{
+    function: {
+      name: string;
+      arguments: string;
+    };
+  }>;
 }
 
 class Grok4ApiService {
@@ -11,7 +17,7 @@ class Grok4ApiService {
     selectedCity?: string;
     currentScenario?: string;
     currentYear?: number;
-  }): Promise<string> {
+  }): Promise<string | { text: string; tool_calls?: any[] }> {
     try {
       const { data, error } = await supabase.functions.invoke<Grok4Response>('chat-grok', {
         body: { message, context }
@@ -23,6 +29,9 @@ class Grok4ApiService {
       }
 
       if (data?.response) {
+        if (data.tool_calls && data.tool_calls.length > 0) {
+          return { text: data.response, tool_calls: data.tool_calls };
+        }
         return data.response;
       }
 
