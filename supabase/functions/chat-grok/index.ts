@@ -24,8 +24,11 @@ Deno.serve(async (req) => {
     const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
 
     if (!OPENROUTER_API_KEY) {
+      console.error('OPENROUTER_API_KEY not configured');
       throw new Error('OPENROUTER_API_KEY not configured');
     }
+
+    console.log('Using OpenRouter API with Llama 3.3 70B');
 
     const systemPrompt = `You are Enviro AI, an advanced environmental assistant specialized in air quality, climate change, quantum computing applications, and environmental science.
 Provide accurate, insightful responses about air quality, pollution, climate predictions, IBM Quantum computing applications, and Earth observation data.
@@ -58,8 +61,8 @@ Current forecast year: ${new Date().getFullYear() + (context.currentYear || 0)}
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Grok-4 API error:', response.status, errorText);
-      throw new Error(`Grok-4 API error: ${response.status}`);
+      console.error('OpenRouter API error:', response.status, errorText);
+      throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
@@ -77,9 +80,9 @@ Current forecast year: ${new Date().getFullYear() + (context.currentYear || 0)}
       );
     }
 
-    throw new Error('Invalid response format from Grok-4 API');
+    throw new Error('Invalid response format from OpenRouter API');
   } catch (error) {
-    console.error('Grok-4 chat error:', error);
+    console.error('OpenRouter chat error:', error);
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : String(error),
