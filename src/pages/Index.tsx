@@ -343,6 +343,16 @@ const Index = () => {
               handleForecastToggle(args.scenario);
             } else if (toolName === 'show_disasters') {
               setShowDisasters(true);
+            } else if (toolName === 'time_travel') {
+              setCurrentYear(args.years);
+            } else if (toolName === 'show_quantum_analytics') {
+              if (quantumForecast) setShowQuantumAnalytics(true);
+            } else if (toolName === 'compare_cities') {
+              // TODO: Implement city comparison
+              toast({
+                title: "City Comparison",
+                description: "Multi-city comparison coming soon!",
+              });
             }
           }}
         />
