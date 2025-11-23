@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Send, X, Bot, User } from 'lucide-react';
+import { MessageCircle, Send, X, Bot, User, Palette } from 'lucide-react';
 import { grokService } from '@/services/grokApi';
+import { AgenticOverlay } from '@/components/AgenticOverlay';
 
 interface ChatMessage {
   id: string;
@@ -27,12 +28,15 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
     {
       id: '1',
       type: 'bot',
-      message: "Hi! I'm Enviro AI Beta - I can answer questions AND control the app. Try: 'Show me Paris' or 'Switch to clean energy scenario'",
+      message: "Hi! I'm Enviro AI - your quantum-enhanced agentic assistant. I can control everything: switch cities, time travel through predictions, analyze quantum data, and more. Try: 'Show Mumbai' or 'Jump to 2029'",
       timestamp: new Date()
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [agenticAction, setAgenticAction] = useState<string | undefined>();
+  const [showSettings, setShowSettings] = useState(false);
+  const [theme, setTheme] = useState<'quantum' | 'earth' | 'space' | 'minimal'>('quantum');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -65,15 +69,23 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
       
       // Check if response contains tool calls
       if (typeof response === 'object' && response.tool_calls && onToolCall) {
+        // Show agentic overlay
+        setAgenticAction('Executing actions...');
+        
         for (const toolCall of response.tool_calls) {
           const args = JSON.parse(toolCall.function.arguments);
+          setAgenticAction(getActionDescription(toolCall.function.name, args));
+          await new Promise(resolve => setTimeout(resolve, 800));
           onToolCall(toolCall.function.name, args);
         }
+        
+        // Hide overlay after actions
+        setTimeout(() => setAgenticAction(undefined), 1000);
         
         const botResponse: ChatMessage = {
           id: (Date.now() + 1).toString(),
           type: 'bot',
-          message: response.text || '✓ Action executed',
+          message: response.text || '✓ Actions completed',
           timestamp: new Date()
         };
         
@@ -109,6 +121,26 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
     }
   };
 
+  const getActionDescription = (toolName: string, args: any): string => {
+    const descriptions: Record<string, string> = {
+      change_city: `Switching to ${args.city_name}...`,
+      toggle_scenario: `Changing to ${args.scenario} scenario...`,
+      show_disasters: 'Loading disasters overlay...',
+      time_travel: `Time traveling to ${new Date().getFullYear() + args.years}...`,
+      show_quantum_analytics: 'Opening quantum analytics...',
+      compare_cities: `Comparing ${args.cities.join(', ')}...`,
+      set_theme: `Applying ${args.theme} theme...`
+    };
+    return descriptions[toolName] || 'Executing action...';
+  };
+
+  const themeColors = {
+    quantum: 'from-blue-500/20 to-purple-500/20',
+    earth: 'from-green-500/20 to-blue-500/20',
+    space: 'from-indigo-500/20 to-pink-500/20',
+    minimal: 'from-gray-500/20 to-gray-700/20'
+  };
+
   if (!isOpen) {
     return (
       <div className="fixed bottom-6 right-6 z-50">
@@ -127,23 +159,57 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-96 h-96">
-      <Card className="glass h-full flex flex-col animate-scale-in">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-primary/20">
-          <div className="flex items-center gap-2">
-            <Bot className="w-5 h-5 text-primary" />
-            <span className="font-medium">Enviro AI</span>
-            <Badge variant="default" className="text-xs bg-accent">Beta - Agentic</Badge>
+    <>
+      <AgenticOverlay isActive={!!agenticAction} action={agenticAction} />
+      
+      <div className="fixed bottom-6 right-6 z-50 w-96 h-96">
+        <Card className={`glass h-full flex flex-col animate-scale-in bg-gradient-to-br ${themeColors[theme]}`}>
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-primary/20">
+            <div className="flex items-center gap-2">
+              <Bot className="w-5 h-5 text-primary animate-pulse" />
+              <span className="font-medium">Enviro AI</span>
+              <Badge variant="default" className="text-xs bg-gradient-to-r from-blue-500 to-purple-500">
+                Quantum-Agentic
+              </Badge>
+            </div>
+            <div className="flex gap-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowSettings(!showSettings)}
+              >
+                <Palette className="w-4 h-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setIsOpen(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => setIsOpen(false)}
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
+
+          {/* Settings Panel */}
+          {showSettings && (
+            <div className="p-4 border-b border-primary/20 space-y-2">
+              <p className="text-xs text-muted-foreground mb-2">Theme</p>
+              <div className="flex gap-2">
+                {(['quantum', 'earth', 'space', 'minimal'] as const).map((t) => (
+                  <Button
+                    key={t}
+                    size="sm"
+                    variant={theme === t ? 'default' : 'outline'}
+                    onClick={() => setTheme(t)}
+                    className="capitalize"
+                  >
+                    {t}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
 
         {/* Messages */}
         <ScrollArea className="flex-1 p-4">
@@ -217,6 +283,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
         </div>
       </Card>
     </div>
+    </>
   );
 };
 

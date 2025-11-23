@@ -44,19 +44,22 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
       icon: Satellite,
       title: 'Live Satellites',
       description: 'Interactive ISS and Earth observation satellites',
-      highlight: 'Real-time tracking'
+      highlight: 'Real-time tracking',
+      featured: false
     },
     {
       icon: TrendingUp,
       title: '2030 Predictions',
-      description: 'Enviro AI forecasting',
-      highlight: 'IBM Quantum'
+      description: 'Quantum-enhanced AI forecasting powered by IBM Quantum',
+      highlight: 'IBM Quantum',
+      featured: false
     },
     {
       icon: MessageCircle,
-      title: 'Enviro AI',
-      description: 'Ask questions about air quality and climate data',
-      highlight: 'Enviro AI'
+      title: 'Enviro AI Assistant',
+      description: 'Quantum-enhanced agentic AI that controls the entire interface - switch cities, time travel, analyze data, all by voice',
+      highlight: 'Quantum-Agentic',
+      featured: true
     }
   ];
 
@@ -124,14 +127,32 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {features.map((feature, index) => (
-              <div key={index} className="group flex items-start gap-4 glass p-6 rounded-xl hover:scale-105 transition-all duration-300 border border-white/10 hover:border-white/20">
-                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
-                  <feature.icon className="w-6 h-6 text-primary" />
+              <div 
+                key={index} 
+                className={`group flex items-start gap-4 glass p-6 rounded-xl hover:scale-105 transition-all duration-300 border ${
+                  feature.featured 
+                    ? 'border-blue-400/50 bg-gradient-to-br from-blue-500/10 to-purple-500/10 hover:border-blue-400/70 shadow-lg shadow-blue-500/20' 
+                    : 'border-white/10 hover:border-white/20'
+                }`}
+              >
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0 ${
+                  feature.featured 
+                    ? 'bg-gradient-to-br from-blue-500/30 to-purple-500/30 animate-pulse' 
+                    : 'bg-gradient-to-br from-primary/20 to-secondary/20'
+                }`}>
+                  <feature.icon className={`w-6 h-6 ${feature.featured ? 'text-blue-400' : 'text-primary'}`} />
                 </div>
                 <div className="flex-1 relative z-10">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h4 className="font-semibold text-foreground">{feature.title}</h4>
-                    <Badge variant="outline" className="text-xs px-2 py-0 border-primary/30 text-primary shrink-0">
+                    <Badge 
+                      variant="outline" 
+                      className={`text-xs px-2 py-0 shrink-0 ${
+                        feature.featured 
+                          ? 'border-blue-400/50 text-blue-400 bg-blue-500/10' 
+                          : 'border-primary/30 text-primary'
+                      }`}
+                    >
                       {feature.highlight}
                     </Badge>
                   </div>
