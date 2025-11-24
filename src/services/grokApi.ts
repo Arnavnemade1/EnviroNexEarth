@@ -19,25 +19,32 @@ class Grok4ApiService {
     currentYear?: number;
   }): Promise<string | { text: string; tool_calls?: any[] }> {
     try {
+      console.log('Sending message to edge function:', message, context);
       const { data, error } = await supabase.functions.invoke<Grok4Response>('chat-grok', {
         body: { message, context }
       });
 
+      console.log('Edge function response:', { data, error });
+
       if (error) {
-        console.error('Grok-4 Fast API error via edge function:', error);
+        console.error('Edge function error:', error);
         return this.getFallbackResponse(message, context);
       }
 
-      if (data?.response) {
+      if (data?.response !== undefined) {
+        console.log('Data response:', data.response);
+        console.log('Tool calls:', data.tool_calls);
         if (data.tool_calls && data.tool_calls.length > 0) {
+          console.log('Returning with tool calls');
           return { text: data.response, tool_calls: data.tool_calls };
         }
         return data.response;
       }
 
-      throw new Error('Invalid response format from Grok-4 API');
+      console.error('Invalid response format:', data);
+      throw new Error('Invalid response format from AI');
     } catch (error) {
-      console.error('Grok-4 API error:', error);
+      console.error('Service error:', error);
       return this.getFallbackResponse(message, context);
     }
   }
