@@ -67,16 +67,24 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
         { selectedCity, currentScenario, currentYear }
       );
       
+      console.log('Chatbot received response:', response);
+      
       // Check if response contains tool calls
       if (typeof response === 'object' && response.tool_calls && onToolCall) {
+        console.log('Processing tool calls:', response.tool_calls);
         // Show agentic overlay
         setAgenticAction('Executing actions...');
         
         for (const toolCall of response.tool_calls) {
-          const args = JSON.parse(toolCall.function.arguments);
-          setAgenticAction(getActionDescription(toolCall.function.name, args));
-          await new Promise(resolve => setTimeout(resolve, 800));
-          onToolCall(toolCall.function.name, args);
+          try {
+            const args = JSON.parse(toolCall.function.arguments);
+            console.log('Executing tool:', toolCall.function.name, args);
+            setAgenticAction(getActionDescription(toolCall.function.name, args));
+            await new Promise(resolve => setTimeout(resolve, 800));
+            onToolCall(toolCall.function.name, args);
+          } catch (err) {
+            console.error('Error executing tool call:', err);
+          }
         }
         
         // Hide overlay after actions
@@ -101,6 +109,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
         setMessages(prev => [...prev, botResponse]);
       }
     } catch (error) {
+      console.error('Chatbot error:', error);
       const errorResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
