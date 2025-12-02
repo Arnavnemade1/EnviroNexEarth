@@ -28,25 +28,23 @@ Deno.serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    console.log('Using Lovable AI with Gemini 2.5 Flash');
+    console.log('Processing chat request:', { message, context });
 
-    const systemPrompt = `You are Enviro AI - an advanced agentic environmental assistant with quantum-enhanced intelligence. Keep responses ultra-concise (1-2 sentences max). You have powerful control over the app interface and can execute complex actions.
+    const systemPrompt = `You are Enviro AI - an advanced agentic environmental assistant. Keep responses ultra-concise (1-2 sentences max). You have powerful control over the app interface.
 
-AVAILABLE ACTIONS:
-- change_city: Switch to any city instantly
+AVAILABLE ACTIONS (use these tools when appropriate):
+- change_city: Switch to any city (e.g., "Show me Tokyo", "Switch to London")
 - toggle_scenario: Change forecast scenarios (current/clean_energy/no_action)
 - show_disasters: Display natural disasters overlay
-- time_travel: Jump to specific year projection (0-6 years)
+- time_travel: Jump to specific year projection (0-6 years into future)
 - show_quantum_analytics: Open quantum analysis dashboard
-- adjust_forecast: Fine-tune prediction parameters
-- compare_cities: Set up side-by-side city comparison
-- export_data: Prepare data export for user
-- set_alerts: Configure air quality alerts
+- compare_cities: Compare multiple cities side-by-side
+- set_theme: Change chatbot visual theme (quantum/earth/space/minimal)
 
-Be proactive and suggest actions. When performing actions, be confident and brief.`;
+When users ask to see a city, change scenarios, or perform actions, USE THE TOOLS. Be proactive and execute actions immediately.`;
 
     const contextInfo = context ? `
-Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.currentScenario || 'current'}, Year: ${new Date().getFullYear() + (context.currentYear || 0)}
+Current Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.currentScenario || 'current'}, Year Offset: ${context.currentYear || 0}
 ` : '';
 
     const tools = [
@@ -58,7 +56,7 @@ Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.currentSce
           parameters: {
             type: 'object',
             properties: {
-              city_name: { type: 'string', description: 'City name to switch to' }
+              city_name: { type: 'string', description: 'City name to switch to (e.g., Tokyo, London, Mumbai)' }
             },
             required: ['city_name']
           }
@@ -82,7 +80,7 @@ Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.currentSce
         type: 'function',
         function: {
           name: 'show_disasters',
-          description: 'Display natural disasters and environmental events',
+          description: 'Display natural disasters and environmental events on the globe',
           parameters: { type: 'object', properties: {} }
         }
       },
@@ -94,7 +92,7 @@ Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.currentSce
           parameters: {
             type: 'object',
             properties: {
-              years: { type: 'number', description: 'Years into future (0-6)', minimum: 0, maximum: 6 }
+              years: { type: 'number', description: 'Years into future (0-6)' }
             },
             required: ['years']
           }
@@ -104,7 +102,7 @@ Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.currentSce
         type: 'function',
         function: {
           name: 'show_quantum_analytics',
-          description: 'Open quantum-enhanced analytics dashboard with advanced predictions',
+          description: 'Open quantum-enhanced analytics dashboard',
           parameters: { type: 'object', properties: {} }
         }
       },
@@ -112,7 +110,7 @@ Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.currentSce
         type: 'function',
         function: {
           name: 'compare_cities',
-          description: 'Set up side-by-side comparison of multiple cities',
+          description: 'Set up comparison of multiple cities',
           parameters: {
             type: 'object',
             properties: {
@@ -126,7 +124,7 @@ Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.currentSce
         type: 'function',
         function: {
           name: 'set_theme',
-          description: 'Change visual theme of the interface',
+          description: 'Change visual theme of the chatbot interface',
           parameters: {
             type: 'object',
             properties: {
@@ -137,6 +135,8 @@ Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.currentSce
         }
       }
     ];
+
+    console.log('Calling Lovable AI Gateway...');
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -151,7 +151,7 @@ Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.currentSce
           { role: 'user', content: contextInfo + message }
         ],
         tools: tools,
-        max_tokens: 150,
+        max_tokens: 200,
         temperature: 0.7
       }),
     });
@@ -161,42 +161,52 @@ Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.currentSce
       console.error('Lovable AI error:', response.status, errorText);
       
       if (response.status === 429) {
-        throw new Error('Rate limit exceeded. Please try again in a moment.');
+        return new Response(
+          JSON.stringify({ error: 'Rate limit exceeded. Please try again in a moment.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
       if (response.status === 402) {
-        throw new Error('AI credits depleted. Please add credits to continue.');
+        return new Response(
+          JSON.stringify({ error: 'AI credits depleted. Please add credits to continue.' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
       
       throw new Error(`AI service error: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('Lovable AI response:', JSON.stringify(data));
+    console.log('Lovable AI raw response:', JSON.stringify(data));
 
     if (data.choices && data.choices[0]) {
-      const message = data.choices[0].message;
-      const toolCalls = message.tool_calls;
+      const choice = data.choices[0];
+      const aiMessage = choice.message;
+      const toolCalls = aiMessage.tool_calls || [];
+      const textContent = aiMessage.content || '';
+      
+      console.log('Parsed response - text:', textContent, 'tool_calls:', toolCalls.length);
       
       return new Response(
         JSON.stringify({
-          response: message.content || '✓ Executing action...',
-          tool_calls: toolCalls || [],
+          response: textContent || (toolCalls.length > 0 ? '✓ Executing...' : 'How can I help?'),
+          tool_calls: toolCalls,
           model: 'gemini-2.5-flash',
-          powered_by: 'Lovable AI (Quantum-Enhanced)'
+          powered_by: 'Lovable AI'
         }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    console.error('Invalid response structure:', data);
     throw new Error('Invalid response format from AI service');
   } catch (error) {
-    console.error('AI chat error:', error);
+    console.error('Chat function error:', error);
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : String(error),
-        fallback_message: 'Enviro AI is temporarily unavailable. Please try again.'
+        response: 'I encountered an issue. Please try again.',
+        tool_calls: []
       }),
       {
         status: 500,

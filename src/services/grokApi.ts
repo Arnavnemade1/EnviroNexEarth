@@ -1,10 +1,13 @@
 import { supabase } from '@/integrations/supabase/client';
 
-interface Grok4Response {
+interface ChatResponse {
   response: string;
-  model: string;
+  model?: string;
   powered_by?: string;
+  error?: string;
   tool_calls?: Array<{
+    id?: string;
+    type?: string;
     function: {
       name: string;
       arguments: string;
@@ -12,39 +15,48 @@ interface Grok4Response {
   }>;
 }
 
-class Grok4ApiService {
+class EnviroAIService {
   async generateResponse(message: string, context?: {
     selectedCity?: string;
     currentScenario?: string;
     currentYear?: number;
   }): Promise<string | { text: string; tool_calls?: any[] }> {
     try {
-      console.log('Sending message to edge function:', message, context);
-      const { data, error } = await supabase.functions.invoke<Grok4Response>('chat-grok', {
+      console.log('[EnviroAI] Sending request:', { message, context });
+      
+      const { data, error } = await supabase.functions.invoke<ChatResponse>('chat-grok', {
         body: { message, context }
       });
 
-      console.log('Edge function response:', { data, error });
+      console.log('[EnviroAI] Response received:', { data, error });
 
       if (error) {
-        console.error('Edge function error:', error);
+        console.error('[EnviroAI] Function error:', error);
         return this.getFallbackResponse(message, context);
       }
 
-      if (data?.response !== undefined) {
-        console.log('Data response:', data.response);
-        console.log('Tool calls:', data.tool_calls);
-        if (data.tool_calls && data.tool_calls.length > 0) {
-          console.log('Returning with tool calls');
-          return { text: data.response, tool_calls: data.tool_calls };
-        }
-        return data.response;
+      if (!data) {
+        console.error('[EnviroAI] No data returned');
+        return this.getFallbackResponse(message, context);
       }
 
-      console.error('Invalid response format:', data);
-      throw new Error('Invalid response format from AI');
+      if (data.error && !data.response) {
+        console.error('[EnviroAI] API error:', data.error);
+        return data.error;
+      }
+
+      const responseText = data.response || 'Action completed';
+      const toolCalls = data.tool_calls || [];
+
+      console.log('[EnviroAI] Parsed - text:', responseText, 'tools:', toolCalls.length);
+
+      if (toolCalls.length > 0) {
+        return { text: responseText, tool_calls: toolCalls };
+      }
+
+      return responseText;
     } catch (error) {
-      console.error('Service error:', error);
+      console.error('[EnviroAI] Service error:', error);
       return this.getFallbackResponse(message, context);
     }
   }
@@ -53,27 +65,19 @@ class Grok4ApiService {
     const msg = message.toLowerCase();
 
     if (msg.includes('quantum') || msg.includes('ibm')) {
-      return "Our quantum-enhanced predictions use IBM Quantum circuits to analyze air quality patterns. The quantum advantage provides up to 3-5x speedup in complex environmental modeling!";
-    }
-
-    if (msg.includes('satellite') || msg.includes('red lines')) {
-      return "Those red lines are solar panels on Earth observation satellites! The ISS, Hubble, TERRA, and Landsat-8 continuously monitor global air quality using quantum-enhanced sensor arrays.";
+      return "Quantum predictions analyze air quality with IBM Quantum for 3-5x speedup!";
     }
 
     if (msg.includes('air quality') || msg.includes('pollution')) {
-      return "Air pollution comes from vehicles, industry, and power generation. Enviro AI analyzes NASA satellite data to track pollution trends with high accuracy.";
+      return "I can show air quality data for any city - just ask!";
     }
 
-    if (msg.includes('grok') || msg.includes('ai')) {
-      return "I'm Enviro AI, specialized in environmental science and quantum analytics. Ask me anything about air quality, climate predictions, or satellite data!";
+    if (context?.selectedCity) {
+      return `Viewing ${context.selectedCity}. Try 'change scenario' or 'jump to 2029'!`;
     }
 
-    if (context?.selectedCity && (msg.includes('this city') || msg.includes('here'))) {
-      return `For ${context.selectedCity}, the ${context.currentScenario} scenario shows ${context.currentScenario === 'clean_energy' ? 'significant improvements with quantum-predicted 40% AQI reduction' : context.currentScenario === 'no_action' ? 'concerning deterioration with 60% worsening' : 'gradual changes'} in air quality by ${new Date().getFullYear() + (context.currentYear || 0)}.`;
-    }
-
-    return "I'm Enviro AI, your environmental assistant. Ask me about air quality, climate predictions, satellite observations, or anything related to environmental science.";
+    return "I'm Enviro AI! Try 'Show Tokyo', 'Jump to 2029', or 'Show disasters'!";
   }
 }
 
-export const grokService = new Grok4ApiService();
+export const grokService = new EnviroAIService();
