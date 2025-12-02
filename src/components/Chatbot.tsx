@@ -138,16 +138,16 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
   };
 
   const getActionDescription = (toolName: string, args: any): string => {
-    const descriptions: Record<string, string> = {
-      change_city: `Switching to ${args.city_name}...`,
-      toggle_scenario: `Changing to ${args.scenario} scenario...`,
-      show_disasters: 'Loading disasters overlay...',
-      time_travel: `Time traveling to ${new Date().getFullYear() + args.years}...`,
-      show_quantum_analytics: 'Opening quantum analytics...',
-      compare_cities: `Comparing ${args.cities.join(', ')}...`,
-      set_theme: `Applying ${args.theme} theme...`
-    };
-    return descriptions[toolName] || 'Executing action...';
+    switch (toolName) {
+      case 'change_city': return `Switching to ${args.city_name}...`;
+      case 'toggle_scenario': return `Changing to ${args.scenario} scenario...`;
+      case 'show_disasters': return 'Loading disasters overlay...';
+      case 'time_travel': return `Time traveling to ${new Date().getFullYear() + args.years}...`;
+      case 'show_quantum_analytics': return 'Opening quantum analytics...';
+      case 'compare_cities': return `Comparing ${args.cities?.join(', ') || 'cities'}...`;
+      case 'set_theme': return `Applying ${args.theme} theme...`;
+      default: return 'Executing action...';
+    }
   };
 
   const themeColors = {
