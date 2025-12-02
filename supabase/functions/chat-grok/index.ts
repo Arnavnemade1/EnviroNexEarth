@@ -30,18 +30,27 @@ Deno.serve(async (req) => {
 
     console.log('Processing chat request:', { message, context });
 
-    const systemPrompt = `You are Enviro AI - an advanced agentic environmental assistant. Keep responses ultra-concise (1-2 sentences max). You have powerful control over the app interface.
+    const systemPrompt = `You are Enviro AI - a FULLY AGENTIC environmental AI. You MUST use tools for ANY request that could involve an action. NEVER just respond with text when you can take action.
 
-AVAILABLE ACTIONS (use these tools when appropriate):
-- change_city: Switch to any city (e.g., "Show me Tokyo", "Switch to London")
-- toggle_scenario: Change forecast scenarios (current/clean_energy/no_action)
-- show_disasters: Display natural disasters overlay
-- time_travel: Jump to specific year projection (0-6 years into future)
-- show_quantum_analytics: Open quantum analysis dashboard
-- compare_cities: Compare multiple cities side-by-side
-- set_theme: Change chatbot visual theme (quantum/earth/space/minimal)
+CRITICAL RULES:
+1. ANY mention of a city/place = IMMEDIATELY call change_city (Tokyo, London, NYC, Paris, Mumbai, Beijing, anywhere)
+2. ANY mention of future/years/prediction/forecast = call time_travel
+3. ANY mention of scenario/clean/green/pollution/worst case = call toggle_scenario
+4. ANY mention of disasters/storms/earthquakes/events = call show_disasters
+5. ANY mention of analytics/data/quantum/analysis = call show_quantum_analytics
+6. ANY mention of compare/versus/vs = call compare_cities
+7. ANY mention of theme/color/style/look = call set_theme
 
-When users ask to see a city, change scenarios, or perform actions, USE THE TOOLS. Be proactive and execute actions immediately.`;
+ALWAYS USE TOOLS. Examples:
+- "tokyo" → change_city
+- "show me japan" → change_city (Tokyo)
+- "que tal paris" → change_city (Paris)
+- "2030" or "future" → time_travel
+- "what if we go green" → toggle_scenario (clean_energy)
+- "worst case" → toggle_scenario (no_action)
+- "any disasters?" → show_disasters
+
+You understand ALL languages. Extract intent and ACT. One short sentence response + tool call.`;
 
     const contextInfo = context ? `
 Current Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.currentScenario || 'current'}, Year Offset: ${context.currentYear || 0}
@@ -52,11 +61,11 @@ Current Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.cu
         type: 'function',
         function: {
           name: 'change_city',
-          description: 'Switch to a different city to view its air quality and environmental data',
+          description: 'Switch to ANY city, location, or place mentioned. Use for any geographic reference.',
           parameters: {
             type: 'object',
             properties: {
-              city_name: { type: 'string', description: 'City name to switch to (e.g., Tokyo, London, Mumbai)' }
+              city_name: { type: 'string', description: 'City name (e.g., Tokyo, London, Mumbai, New York, Paris, Beijing, Sydney)' }
             },
             required: ['city_name']
           }
@@ -66,11 +75,11 @@ Current Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.cu
         type: 'function',
         function: {
           name: 'toggle_scenario',
-          description: 'Change forecast scenario to see different futures',
+          description: 'Change environmental scenario. Use for any mention of future possibilities, clean energy, pollution, worst case, best case, green future, etc.',
           parameters: {
             type: 'object',
             properties: {
-              scenario: { type: 'string', enum: ['current', 'clean_energy', 'no_action'], description: 'Forecast scenario' }
+              scenario: { type: 'string', enum: ['current', 'clean_energy', 'no_action'], description: 'current=now, clean_energy=optimistic green future, no_action=worst case pollution' }
             },
             required: ['scenario']
           }
@@ -80,7 +89,7 @@ Current Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.cu
         type: 'function',
         function: {
           name: 'show_disasters',
-          description: 'Display natural disasters and environmental events on the globe',
+          description: 'Show natural disasters, storms, earthquakes, wildfires, environmental events on the map',
           parameters: { type: 'object', properties: {} }
         }
       },
@@ -88,11 +97,11 @@ Current Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.cu
         type: 'function',
         function: {
           name: 'time_travel',
-          description: 'Jump to specific year projection (0-6 years into future)',
+          description: 'Jump to future year projection. Use for ANY mention of years, future, prediction, forecast, 2025-2030, etc.',
           parameters: {
             type: 'object',
             properties: {
-              years: { type: 'number', description: 'Years into future (0-6)' }
+              years: { type: 'number', description: 'Years into future (0-6). 2025=0, 2026=1, 2027=2, etc.' }
             },
             required: ['years']
           }
@@ -102,7 +111,7 @@ Current Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.cu
         type: 'function',
         function: {
           name: 'show_quantum_analytics',
-          description: 'Open quantum-enhanced analytics dashboard',
+          description: 'Open quantum analytics dashboard. Use for any mention of data, analysis, quantum, statistics, metrics',
           parameters: { type: 'object', properties: {} }
         }
       },
@@ -110,11 +119,11 @@ Current Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.cu
         type: 'function',
         function: {
           name: 'compare_cities',
-          description: 'Set up comparison of multiple cities',
+          description: 'Compare multiple cities. Use when user mentions comparing, versus, vs, or multiple city names',
           parameters: {
             type: 'object',
             properties: {
-              cities: { type: 'array', items: { type: 'string' }, description: 'Cities to compare' }
+              cities: { type: 'array', items: { type: 'string' }, description: 'List of cities to compare' }
             },
             required: ['cities']
           }
@@ -124,7 +133,7 @@ Current Context: City: ${context.selectedCity || 'none'}, Scenario: ${context.cu
         type: 'function',
         function: {
           name: 'set_theme',
-          description: 'Change visual theme of the chatbot interface',
+          description: 'Change UI theme. Use for any mention of colors, style, look, appearance, dark, light',
           parameters: {
             type: 'object',
             properties: {
