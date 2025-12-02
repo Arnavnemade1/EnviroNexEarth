@@ -28,7 +28,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
     {
       id: '1',
       type: 'bot',
-      message: "Hi! I'm Enviro AI - your quantum-enhanced agentic assistant. I can control everything: switch cities, time travel through predictions, analyze quantum data, and more. Try: 'Show Mumbai' or 'Jump to 2029'",
+      message: "I'm Enviro AI! I can: show any city, change scenarios, show disasters, time travel (0-6 years). Try: 'Show Tokyo' or 'Jump to 2028'",
       timestamp: new Date()
     }
   ]);
@@ -67,56 +67,63 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
         { selectedCity, currentScenario, currentYear }
       );
       
-      console.log('Chatbot received response:', response);
+      console.log('[Chatbot] Response:', response);
       
       // Check if response contains tool calls
-      if (typeof response === 'object' && response.tool_calls && onToolCall) {
-        console.log('Processing tool calls:', response.tool_calls);
-        // Show agentic overlay
-        setAgenticAction('Executing actions...');
+      if (typeof response === 'object' && response.tool_calls && response.tool_calls.length > 0) {
+        console.log('[Chatbot] Processing', response.tool_calls.length, 'tool calls');
+        setAgenticAction('Analyzing request...');
         
         for (const toolCall of response.tool_calls) {
           try {
-            const args = JSON.parse(toolCall.function.arguments);
-            console.log('Executing tool:', toolCall.function.name, args);
+            // Parse arguments - handle both string and object formats
+            let args: any;
+            if (typeof toolCall.function.arguments === 'string') {
+              args = JSON.parse(toolCall.function.arguments);
+            } else {
+              args = toolCall.function.arguments || {};
+            }
+            
+            console.log('[Chatbot] Executing:', toolCall.function.name, args);
             setAgenticAction(getActionDescription(toolCall.function.name, args));
-            await new Promise(resolve => setTimeout(resolve, 800));
-            onToolCall(toolCall.function.name, args);
-          } catch (err) {
-            console.error('Error executing tool call:', err);
+            
+            await new Promise(resolve => setTimeout(resolve, 600));
+            
+            if (onToolCall) {
+              onToolCall(toolCall.function.name, args);
+            }
+          } catch (parseErr) {
+            console.error('[Chatbot] Tool parse error:', parseErr, toolCall);
           }
         }
         
-        // Hide overlay after actions
-        setTimeout(() => setAgenticAction(undefined), 1000);
+        setTimeout(() => setAgenticAction(undefined), 800);
         
         const botResponse: ChatMessage = {
           id: (Date.now() + 1).toString(),
           type: 'bot',
-          message: response.text || '✓ Actions completed',
+          message: response.text || '✓ Done!',
           timestamp: new Date()
         };
-        
         setMessages(prev => [...prev, botResponse]);
       } else {
+        // Regular text response
         const botResponse: ChatMessage = {
           id: (Date.now() + 1).toString(),
           type: 'bot',
-          message: typeof response === 'string' ? response : response.text,
+          message: typeof response === 'string' ? response : (response.text || 'How can I help?'),
           timestamp: new Date()
         };
-        
         setMessages(prev => [...prev, botResponse]);
       }
     } catch (error) {
-      console.error('Chatbot error:', error);
+      console.error('[Chatbot] Error:', error);
       const errorResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        message: 'Sorry, I encountered an error. Please try again later.',
+        message: 'Connection issue. Please try again.',
         timestamp: new Date()
       };
-      
       setMessages(prev => [...prev, errorResponse]);
     }
     
