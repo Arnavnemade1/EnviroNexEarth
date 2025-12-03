@@ -30,7 +30,8 @@ import { AirQualityData, PredictionData } from '@/types';
    onBackToHome?: () => void;
   onShowQuantumAnalytics?: () => void;
   onShowHealth?: () => void;
- }
+  onShowClimatePredictions?: () => void;
+}
 
 export const DataPanel = ({
   cityName,
@@ -44,7 +45,8 @@ export const DataPanel = ({
   onYearChange,
   onBackToHome,
   onShowQuantumAnalytics,
-  onShowHealth
+  onShowHealth,
+  onShowClimatePredictions
 }: DataPanelProps) => {
   const [selectedScenario, setSelectedScenario] = useState<'current' | 'clean_energy' | 'no_action'>('current');
   const [animationSpeed, setAnimationSpeed] = useState(1);
@@ -387,6 +389,21 @@ export const DataPanel = ({
               <Sparkles className="w-5 h-5 mr-2 group-hover:animate-spin" />
               <span className="font-semibold">Enviro AI Impact Analysis</span>
             </Button>
+
+            {/* ClimatePredict AI Button */}
+            {onShowClimatePredictions && (
+              <Button
+                onClick={onShowClimatePredictions}
+                className="w-full mt-2 bg-gradient-to-r from-secondary via-accent to-primary hover:opacity-90 transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-secondary/30 hover:shadow-xl hover:shadow-accent/40 group relative overflow-hidden"
+                size="lg"
+              >
+                <div className="absolute top-1 right-1">
+                  <span className="text-[9px] font-bold bg-accent/90 text-accent-foreground px-1.5 py-0.5 rounded">BETA</span>
+                </div>
+                <TrendingUp className="w-5 h-5 mr-2 group-hover:animate-bounce" />
+                <span className="font-semibold">ClimatePredict AI</span>
+              </Button>
+            )}
           </div>
         </Card>
       )}

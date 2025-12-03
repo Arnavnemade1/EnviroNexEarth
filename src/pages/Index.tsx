@@ -9,6 +9,7 @@ import Chatbot from '@/components/Chatbot';
 import HomeScreen from '@/components/HomeScreen';
 import UserProfile from '@/components/UserProfile';
 import QuantumAnalytics from '@/components/QuantumAnalytics';
+import { ClimatePredictions } from '@/components/ClimatePredictions';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { User, Settings } from 'lucide-react';
@@ -36,6 +37,7 @@ const Index = () => {
   const [showDisasters, setShowDisasters] = useState(false);
   const [showQuantumAnalytics, setShowQuantumAnalytics] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
+  const [showClimatePredictions, setShowClimatePredictions] = useState(false);
 
   // Auto-hide intro after 5 seconds
   useEffect(() => {
@@ -238,6 +240,18 @@ const Index = () => {
         <UserProfile onClose={() => setShowUserProfile(false)} />
       )}
 
+      {/* Climate Predictions Modal */}
+      {selectedCity && airQuality && (
+        <ClimatePredictions
+          isOpen={showClimatePredictions}
+          onClose={() => setShowClimatePredictions(false)}
+          cityName={`${selectedCity.name}, ${selectedCity.country}`}
+          lat={selectedCity.lat}
+          lon={selectedCity.lng}
+          airQuality={airQuality}
+        />
+      )}
+
       {/* User Controls */}
       {!showHomeScreen && (
         <div className="absolute top-6 right-6 z-40 flex flex-col gap-2">
@@ -315,6 +329,7 @@ const Index = () => {
           currentYear={currentYear}
           onYearChange={handleYearChange}
           onShowQuantumAnalytics={quantumForecast ? () => setShowQuantumAnalytics(true) : undefined}
+          onShowClimatePredictions={() => setShowClimatePredictions(true)}
           onBackToHome={() => {
             setShowHomeScreen(true);
             setSelectedCity(null);

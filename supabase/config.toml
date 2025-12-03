@@ -24,3 +24,5 @@ verify_jwt = false
 [functions.quantum-aer-simulation]
 verify_jwt = false
 
+[functions.climate-predictions]
+verify_jwt = false
