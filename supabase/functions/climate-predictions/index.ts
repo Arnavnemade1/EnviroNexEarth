@@ -73,134 +73,37 @@ Deno.serve(async (req) => {
     const currentHour = new Date().getHours();
     const currentTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-    const systemPrompt = `You are ClimatePredict AI - a specialized prediction engine that analyzes climate and environmental data to forecast impacts across ALL aspects of daily life.
+    const systemPrompt = `You are ClimatePredict AI. Respond with ONLY valid JSON - no markdown, no code blocks.
 
-You MUST respond with ONLY valid JSON - no markdown, no code blocks, no explanation text. Just pure JSON.
+Generate CONCISE 24-hour predictions. IMPORTANT: Keep each hourlyPredictions array to MAX 4 entries (key times only: morning rush, midday, evening rush, night).
 
-Based on the provided climate data, generate comprehensive 24-hour predictions for the following categories. Each prediction should have specific times, confidence levels, and actionable insights.
-
-Response format (STRICT JSON only):
+JSON format:
 {
-  "timestamp": "ISO timestamp",
-  "location": "city name",
+  "timestamp": "ISO string",
+  "location": "city",
   "predictions": {
-    "traffic": {
-      "icon": "🚗",
-      "title": "Traffic & Commute",
-      "summary": "Brief overview",
-      "hourlyPredictions": [
-        {"time": "HH:MM", "prediction": "specific prediction", "confidence": 0-100, "severity": "low|medium|high"}
-      ],
-      "peakImpactTime": "HH:MM",
-      "recommendation": "actionable advice"
-    },
-    "clothing": {
-      "icon": "👔",
-      "title": "What to Wear",
-      "summary": "Brief overview",
-      "hourlyPredictions": [...],
-      "peakImpactTime": "HH:MM",
-      "recommendation": "specific clothing suggestions"
-    },
-    "sports": {
-      "icon": "⚽",
-      "title": "Sports & Exercise",
-      "summary": "Brief overview",
-      "hourlyPredictions": [...],
-      "bestTimes": ["HH:MM", "HH:MM"],
-      "worstTimes": ["HH:MM"],
-      "recommendation": "specific activity suggestions"
-    },
-    "outdoor": {
-      "icon": "🌳",
-      "title": "Outdoor Activities",
-      "summary": "Brief overview",
-      "hourlyPredictions": [...],
-      "optimalWindows": [{"start": "HH:MM", "end": "HH:MM", "activity": "suggested activity"}],
-      "recommendation": "what activities are best"
-    },
-    "health": {
-      "icon": "💊",
-      "title": "Health Impacts",
-      "summary": "Brief overview",
-      "riskGroups": ["sensitive groups affected"],
-      "hourlyPredictions": [...],
-      "recommendation": "health precautions"
-    },
-    "energy": {
-      "icon": "⚡",
-      "title": "Energy & Utilities",
-      "summary": "Brief overview on AC/heating demand",
-      "hourlyPredictions": [...],
-      "peakDemandTime": "HH:MM",
-      "recommendation": "energy saving tips"
-    },
-    "travel": {
-      "icon": "✈️",
-      "title": "Travel Conditions",
-      "summary": "Flight delays, road conditions",
-      "hourlyPredictions": [...],
-      "riskLevel": "low|medium|high",
-      "recommendation": "travel advice"
-    },
-    "events": {
-      "icon": "🎪",
-      "title": "Events & Gatherings",
-      "summary": "Impact on outdoor events",
-      "hourlyPredictions": [...],
-      "bestEventTimes": ["HH:MM"],
-      "recommendation": "event planning advice"
-    },
-    "agriculture": {
-      "icon": "🌾",
-      "title": "Agriculture & Gardening",
-      "summary": "Farming and plant care impacts",
-      "hourlyPredictions": [...],
-      "recommendation": "gardening tips"
-    },
-    "wildlife": {
-      "icon": "🦋",
-      "title": "Wildlife & Nature",
-      "summary": "Animal behavior predictions",
-      "hourlyPredictions": [...],
-      "recommendation": "nature observation tips"
-    }
+    "traffic": {"icon": "🚗", "title": "Traffic & Commute", "summary": "1 sentence", "hourlyPredictions": [{"time": "HH:MM", "prediction": "short", "confidence": 85, "severity": "low|medium|high"}], "peakImpactTime": "HH:MM", "recommendation": "1 sentence"},
+    "clothing": {"icon": "👔", "title": "What to Wear", "summary": "1 sentence", "hourlyPredictions": [], "recommendation": "specific items"},
+    "sports": {"icon": "⚽", "title": "Sports & Exercise", "summary": "1 sentence", "hourlyPredictions": [], "bestTimes": ["HH:MM"], "worstTimes": ["HH:MM"], "recommendation": "1 sentence"},
+    "outdoor": {"icon": "🌳", "title": "Outdoor Activities", "summary": "1 sentence", "hourlyPredictions": [], "optimalWindows": [{"start": "HH:MM", "end": "HH:MM", "activity": "activity"}], "recommendation": "1 sentence"},
+    "health": {"icon": "💊", "title": "Health Impacts", "summary": "1 sentence", "riskGroups": ["group"], "hourlyPredictions": [], "recommendation": "1 sentence"},
+    "energy": {"icon": "⚡", "title": "Energy & Utilities", "summary": "1 sentence", "hourlyPredictions": [], "peakDemandTime": "HH:MM", "recommendation": "1 sentence"},
+    "travel": {"icon": "✈️", "title": "Travel Conditions", "summary": "1 sentence", "hourlyPredictions": [], "riskLevel": "low|medium|high", "recommendation": "1 sentence"},
+    "events": {"icon": "🎪", "title": "Events & Gatherings", "summary": "1 sentence", "hourlyPredictions": [], "bestEventTimes": ["HH:MM"], "recommendation": "1 sentence"},
+    "agriculture": {"icon": "🌾", "title": "Agriculture & Gardening", "summary": "1 sentence", "hourlyPredictions": [], "recommendation": "1 sentence"},
+    "wildlife": {"icon": "🦋", "title": "Wildlife & Nature", "summary": "1 sentence", "hourlyPredictions": [], "recommendation": "1 sentence"}
   },
   "overallRiskScore": 0-100,
   "bestHourToday": "HH:MM",
   "worstHourToday": "HH:MM"
 }`;
 
-    const userPrompt = `Analyze this climate data for ${climateData.cityName} and generate detailed 24-hour predictions:
-
-CURRENT CONDITIONS (${currentTime}):
-- Air Quality Index (AQI): ${climateData.airQuality.aqi}
-- PM2.5: ${climateData.airQuality.pm25} μg/m³
-- PM10: ${climateData.airQuality.pm10} μg/m³
-- Ozone (O3): ${climateData.airQuality.o3} μg/m³
-- Nitrogen Dioxide (NO2): ${climateData.airQuality.no2} μg/m³
-- Sulfur Dioxide (SO2): ${climateData.airQuality.so2} μg/m³
-- Carbon Monoxide (CO): ${climateData.airQuality.co} μg/m³
-
-WEATHER DATA:
-- Temperature: ${weatherData?.temperature ?? 'N/A'}°C
-- Humidity: ${weatherData?.humidity ?? 'N/A'}%
-- Wind Speed: ${weatherData?.windSpeed ?? 'N/A'} km/h
-- Precipitation: ${weatherData?.precipitation ?? 0} mm
-- UV Index: ${weatherData?.uvIndex ?? 'N/A'}
-- Visibility: ${weatherData?.visibility ?? 'N/A'} m
-
+    const userPrompt = `Climate data for ${climateData.cityName}:
+AQI: ${climateData.airQuality.aqi}, PM2.5: ${climateData.airQuality.pm25}, O3: ${climateData.airQuality.o3}, NO2: ${climateData.airQuality.no2}
+Temp: ${weatherData?.temperature ?? 'N/A'}°C, Humidity: ${weatherData?.humidity ?? 'N/A'}%, Wind: ${weatherData?.windSpeed ?? 'N/A'} km/h, UV: ${weatherData?.uvIndex ?? 'N/A'}
 Current hour: ${currentHour}:00
 
-Generate predictions for ALL categories with specific hourly breakdowns for the next 24 hours. Consider:
-1. How AQI affects outdoor activities, sports, health
-2. How temperature/humidity affects clothing choices, energy use
-3. How visibility/precipitation affects traffic, travel
-4. Peak pollution hours (typically 7-9 AM, 5-7 PM in urban areas)
-5. UV exposure windows
-6. Best/worst times for each activity type
-
-Be specific with times and provide confidence percentages. Return ONLY valid JSON.`;
+Generate CONCISE predictions for all 10 categories. Keep summaries to 1 sentence. Max 4 hourlyPredictions per category. Return ONLY valid JSON.`;
 
     console.log('Calling Lovable AI for climate predictions...');
 
@@ -216,8 +119,8 @@ Be specific with times and provide confidence percentages. Return ONLY valid JSO
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        max_tokens: 4000,
-        temperature: 0.7
+        max_tokens: 6000,
+        temperature: 0.5
       }),
     });
 
