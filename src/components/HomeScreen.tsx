@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Globe, Search, AlertTriangle, ArrowRight, Sparkles, Zap, Bot, Brain, Cpu } from 'lucide-react';
+import { Globe, Search, AlertTriangle, ArrowRight, Sparkles, Zap } from 'lucide-react';
 
 interface HomeScreenProps {
   onStartExploring: () => void;
@@ -10,6 +10,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
   const [hoveredAction, setHoveredAction] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [scrollY, setScrollY] = useState(0);
+  const [visibleElements, setVisibleElements] = useState<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -23,10 +24,31 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
         setScrollY(containerRef.current.scrollTop);
       }
     };
-    
+
     const container = containerRef.current;
     container?.addEventListener('scroll', handleScroll);
     return () => container?.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisibleElements((prev) => new Set([...prev, entry.target.id]));
+          }
+        });
+      },
+      { threshold: 0.2, rootMargin: '0px 0px -100px 0px' }
+    );
+
+    const container = containerRef.current;
+    const elements = container?.querySelectorAll('[data-animate]');
+    elements?.forEach((el) => observer.observe(el));
+
+    return () => {
+      elements?.forEach((el) => observer.unobserve(el));
+    };
   }, []);
 
   return (
@@ -111,7 +133,15 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
         </p>
 
         {/* Action Cards */}
-        <div className={`flex flex-col sm:flex-row items-center gap-4 mb-16 transition-all duration-700 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+        <div
+          data-animate
+          id="action-cards"
+          className={`flex flex-col sm:flex-row items-center gap-4 mb-16 transition-all duration-700 ${
+            visibleElements.has('action-cards')
+              ? 'opacity-100 translate-y-0 delay-0'
+              : 'opacity-0 translate-y-8'
+          }`}
+        >
           {[
             { id: 'search', label: 'Search City', icon: Search, description: 'Find any location' },
             { id: 'globe', label: 'Explore Globe', icon: Globe, description: 'Interactive 3D view' },
@@ -122,7 +152,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
               onClick={() => onQuickStart(action.id as 'search' | 'globe' | 'disasters')}
               onMouseEnter={() => setHoveredAction(action.id)}
               onMouseLeave={() => setHoveredAction(null)}
-              style={{ transitionDelay: `${800 + index * 100}ms` }}
+              style={{ transitionDelay: `${index * 100}ms` }}
               className={`group relative flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-500 min-w-[200px] ${
                 hoveredAction === action.id
                   ? 'bg-white/[0.1] border-white/20 shadow-2xl shadow-blue-500/10 scale-[1.02]'
@@ -143,8 +173,8 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
                 <div className="text-xs text-gray-500">{action.description}</div>
               </div>
               <ArrowRight className={`w-4 h-4 ml-auto transition-all duration-300 ${
-                hoveredAction === action.id 
-                  ? 'opacity-100 translate-x-0 text-blue-400' 
+                hoveredAction === action.id
+                  ? 'opacity-100 translate-x-0 text-blue-400'
                   : 'opacity-0 -translate-x-2 text-gray-600'
               }`} />
             </button>
@@ -152,80 +182,64 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
         </div>
       </main>
 
-      {/* Features section promoting Quantum, AI, Agentic */}
-      <section className={`relative z-10 px-8 py-24 max-w-6xl mx-auto transition-all duration-700 delay-[1000ms] ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-4">
-          Powered by <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Next-Gen Technology</span>
-        </h2>
-        <p className="text-gray-400 text-center mb-16 max-w-xl mx-auto">
-          Experience the future of environmental intelligence with cutting-edge quantum computing and autonomous AI agents.
-        </p>
-        
-        <div className="grid md:grid-cols-3 gap-8">
-          {[
-            { 
-              icon: Cpu, 
-              title: 'IBM Quantum', 
-              description: 'Harness real quantum hardware for predictions that classical computers simply cannot achieve. 127-qubit processing power.',
-              gradient: 'from-blue-500/20 to-indigo-500/20',
-              iconColor: 'text-blue-400'
-            },
-            { 
-              icon: Bot, 
-              title: 'Agentic AI', 
-              description: 'Autonomous AI agents that understand context, execute complex tasks, and adapt to your needs in real-time.',
-              gradient: 'from-cyan-500/20 to-teal-500/20',
-              iconColor: 'text-cyan-400'
-            },
-            { 
-              icon: Brain, 
-              title: 'EnviroAI', 
-              description: 'Advanced neural networks trained on petabytes of environmental data for unmatched accuracy and insights.',
-              gradient: 'from-emerald-500/20 to-green-500/20',
-              iconColor: 'text-emerald-400'
-            }
-          ].map((feature, index) => (
-            <div 
-              key={feature.title}
-              className="group p-8 rounded-2xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-sm hover:bg-white/[0.05] hover:border-white/10 transition-all duration-500 hover:scale-[1.02]"
-              style={{ transitionDelay: `${1100 + index * 100}ms` }}
-            >
-              <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                <feature.icon className={`w-7 h-7 ${feature.iconColor}`} />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">{feature.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Visual Animations Section */}
+      <section
+        data-animate
+        id="visual-animations"
+        className={`relative z-10 px-8 py-24 max-w-6xl mx-auto transition-all duration-700 ${
+          visibleElements.has('visual-animations')
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 translate-y-8'
+        }`}
+      >
+        <div className="flex items-center justify-center gap-12">
+          {/* Animated Orbs */}
+          <div className="relative w-64 h-64 flex items-center justify-center">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/30 to-cyan-500/30 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute w-48 h-48 bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 rounded-full animate-bounce" style={{ animationDuration: '3s' }} />
+            <div className="absolute w-32 h-32 bg-gradient-to-tr from-blue-400/30 to-transparent rounded-full animate-spin" style={{ animationDuration: '4s' }} />
+            <Sparkles className="relative w-12 h-12 text-cyan-400 z-10" />
+          </div>
 
-      {/* Stats section */}
-      <section className={`relative z-10 px-8 py-16 max-w-6xl mx-auto transition-all duration-700 delay-[1200ms] ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {[
-            { value: '10K+', label: 'Cities Monitored' },
-            { value: '127', label: 'Qubits Processing' },
-            { value: '99.7%', label: 'Prediction Accuracy' },
-            { value: '24/7', label: 'Real-time Updates' }
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-2">
-                {stat.value}
-              </div>
-              <div className="text-sm text-gray-500">{stat.label}</div>
-            </div>
-          ))}
+          {/* Text Content */}
+          <div className="flex-1 max-w-xl">
+            <p className="text-sm text-blue-400 font-medium mb-3">Experience Intelligence</p>
+            <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Real-time Environmental Intelligence
+            </h3>
+            <p className="text-gray-400 leading-relaxed mb-6">
+              Monitor global air quality, track natural disasters, and receive predictive insights powered by quantum computing and advanced AI—all in one intuitive platform.
+            </p>
+            <ul className="space-y-3">
+              {['Real-time global monitoring', 'Quantum-enhanced predictions', 'Autonomous AI agents'].map((item, i) => (
+                <li key={i} className="flex items-center gap-3 text-gray-300">
+                  <div className="w-2 h-2 rounded-full bg-gradient-to-r from-cyan-400 to-blue-400" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 
       {/* Bottom CTA */}
-      <section className={`relative z-10 px-8 py-24 text-center transition-all duration-700 delay-[1300ms] ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-        <button 
+      <section
+        data-animate
+        id="bottom-cta"
+        className={`relative z-10 px-8 py-24 text-center transition-all duration-700 ${
+          visibleElements.has('bottom-cta')
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 translate-y-8'
+        }`}
+      >
+        <button
           onClick={onStartExploring}
-          className="px-8 py-4 text-lg font-medium bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:scale-105"
+          className="px-8 py-4 text-lg font-medium bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:scale-105 group"
         >
-          Start Exploring Now
+          <span className="flex items-center gap-2">
+            Start Exploring Now
+            <Zap className="w-4 h-4 group-hover:scale-125 transition-transform" />
+          </span>
         </button>
       </section>
 
