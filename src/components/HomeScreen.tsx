@@ -186,61 +186,81 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
       <section
         data-animate
         id="visual-animations"
-        className={`relative z-10 px-8 py-24 max-w-6xl mx-auto transition-all duration-700 ${
+        className={`relative z-10 px-8 py-24 max-w-7xl mx-auto transition-all duration-700 ${
           visibleElements.has('visual-animations')
             ? 'opacity-100 translate-y-0'
             : 'opacity-0 translate-y-8'
         }`}
       >
-        <div className="flex items-center justify-center gap-12">
-          {/* Animated Orbs */}
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-16">
+          {/* Bubble 1 - Classic */}
           <div className="relative w-64 h-64 flex items-center justify-center">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/30 to-cyan-500/30 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute w-48 h-48 bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 rounded-full animate-bounce" style={{ animationDuration: '3s' }} />
-            <div className="absolute w-32 h-32 bg-gradient-to-tr from-blue-400/30 to-transparent rounded-full animate-spin" style={{ animationDuration: '4s' }} />
+            <style>{`
+              @keyframes orb-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+              @keyframes orb-bounce { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+              @keyframes orb-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+              .bubble-1 { animation: orb-pulse 4s ease-in-out infinite; }
+              .bubble-1-inner { animation: orb-bounce 3s ease-in-out infinite; }
+              .bubble-1-spinner { animation: orb-spin 4s linear infinite; }
+            `}</style>
+            <div className="bubble-1 absolute inset-0 bg-gradient-to-r from-blue-500/30 to-cyan-500/30 rounded-full blur-3xl" />
+            <div className="bubble-1-inner absolute w-48 h-48 bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 rounded-full" />
+            <div className="bubble-1-spinner absolute w-32 h-32 bg-gradient-to-tr from-blue-400/30 to-transparent rounded-full" />
             <Sparkles className="relative w-12 h-12 text-cyan-400 z-10" />
           </div>
 
-          {/* Text Content */}
-          <div className="flex-1 max-w-xl">
-            <p className="text-sm text-blue-400 font-medium mb-3">Experience Intelligence</p>
-            <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Real-time Environmental Intelligence
-            </h3>
-            <p className="text-gray-400 leading-relaxed mb-6">
-              Monitor global air quality, track natural disasters, and receive predictive insights powered by quantum computing and advanced AI—all in one intuitive platform.
-            </p>
-            <ul className="space-y-3">
-              {['Real-time global monitoring', 'Quantum-enhanced predictions', 'Autonomous AI agents'].map((item, i) => (
-                <li key={i} className="flex items-center gap-3 text-gray-300">
-                  <div className="w-2 h-2 rounded-full bg-gradient-to-r from-cyan-400 to-blue-400" />
-                  {item}
-                </li>
-              ))}
-            </ul>
+          {/* Bubble 2 - Orbiting */}
+          <div className="relative w-64 h-64 flex items-center justify-center">
+            <style>{`
+              @keyframes orbit-float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
+              @keyframes orbit-circle { 0% { transform: rotate(0deg) translateX(60px) rotate(0deg); } 100% { transform: rotate(360deg) translateX(60px) rotate(-360deg); } }
+              .bubble-2-base { animation: orbit-float 3s ease-in-out infinite; }
+              .bubble-2-particle { animation: orbit-circle 6s linear infinite; }
+            `}</style>
+            <div className="bubble-2-base absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/15 to-rose-500/10 rounded-full blur-3xl" />
+            <div className="absolute w-40 h-40 rounded-full border border-purple-500/30 opacity-60" />
+            <div className="absolute w-32 h-32 rounded-full border border-pink-500/20 opacity-40" />
+            <div className="absolute w-4 h-4 bg-pink-500/60 rounded-full bubble-2-particle" />
+            <div className="relative w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full shadow-lg shadow-purple-500/40 z-10" />
+          </div>
+
+          {/* Bubble 3 - Shimmer */}
+          <div className="relative w-64 h-64 flex items-center justify-center">
+            <style>{`
+              @keyframes shimmer-pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.05); } }
+              @keyframes shimmer-rotate { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.08); } 100% { transform: rotate(360deg) scale(1); } }
+              @keyframes glow-pulse { 0%, 100% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.3), inset 0 0 20px rgba(34, 197, 94, 0.1); } 50% { box-shadow: 0 0 40px rgba(34, 197, 94, 0.6), inset 0 0 30px rgba(34, 197, 94, 0.2); } }
+              .bubble-3-base { animation: shimmer-pulse 3.5s ease-in-out infinite; }
+              .bubble-3-spinner { animation: shimmer-rotate 5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+              .bubble-3-glow { animation: glow-pulse 3s ease-in-out infinite; }
+            `}</style>
+            <div className="bubble-3-base absolute inset-0 bg-gradient-to-r from-emerald-500/25 via-teal-500/15 to-cyan-500/10 rounded-full blur-3xl" />
+            <div className="bubble-3-glow absolute w-52 h-52 border-2 border-emerald-500/40 rounded-full" />
+            <div className="bubble-3-spinner absolute w-40 h-40 border border-emerald-400/50 rounded-full" />
+            <div className="absolute w-2 h-2 bg-emerald-400 rounded-full" style={{ top: '40%', left: '60%' }} />
+            <div className="absolute w-2 h-2 bg-emerald-400 rounded-full" style={{ top: '60%', right: '30%' }} />
+            <div className="relative w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full shadow-lg shadow-emerald-500/50 z-10" />
           </div>
         </div>
-      </section>
 
-      {/* Bottom CTA */}
-      <section
-        data-animate
-        id="bottom-cta"
-        className={`relative z-10 px-8 py-24 text-center transition-all duration-700 ${
-          visibleElements.has('bottom-cta')
-            ? 'opacity-100 translate-y-0'
-            : 'opacity-0 translate-y-8'
-        }`}
-      >
-        <button
-          onClick={onStartExploring}
-          className="px-8 py-4 text-lg font-medium bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:scale-105 group"
-        >
-          <span className="flex items-center gap-2">
-            Start Exploring Now
-            <Zap className="w-4 h-4 group-hover:scale-125 transition-transform" />
-          </span>
-        </button>
+        {/* Text Content */}
+        <div className="mt-16 text-center max-w-2xl mx-auto">
+          <p className="text-sm text-blue-400 font-medium mb-3">Experience Intelligence</p>
+          <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Real-time Environmental Intelligence
+          </h3>
+          <p className="text-gray-400 leading-relaxed mb-6">
+            Monitor global air quality, track natural disasters, and receive predictive insights powered by quantum computing and advanced AI—all in one intuitive platform.
+          </p>
+          <ul className="space-y-3 inline-flex flex-col items-start">
+            {['Real-time global monitoring', 'Quantum-enhanced predictions', 'Autonomous AI agents'].map((item, i) => (
+              <li key={i} className="flex items-center gap-3 text-gray-300">
+                <div className="w-2 h-2 rounded-full bg-gradient-to-r from-cyan-400 to-blue-400" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       {/* Bottom gradient line */}
