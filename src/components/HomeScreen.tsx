@@ -1,47 +1,69 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Globe, Search, AlertTriangle, ArrowRight, Sparkles, Zap, Cpu, Bot, Brain, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Globe, Search, AlertTriangle, ArrowRight, Sparkles, Cpu, Bot, Brain, ChevronDown } from 'lucide-react';
 
 interface HomeScreenProps {
   onStartExploring: () => void;
   onQuickStart: (type: 'search' | 'globe' | 'disasters') => void;
 }
 
-// Custom hook for scroll-triggered animations with stagger support
-const useScrollReveal = () => {
-  const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
-  
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  
-  useEffect(() => {
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisibleItems((prev) => new Set([...prev, entry.target.id]));
+// Floating particle component
+const FloatingParticles = () => {
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      {[...Array(30)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute w-1 h-1 rounded-full bg-white/20"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animation: `float-particle ${8 + Math.random() * 12}s ease-in-out infinite`,
+            animationDelay: `${Math.random() * 5}s`,
+          }}
+        />
+      ))}
+      {[...Array(15)].map((_, i) => (
+        <div
+          key={`glow-${i}`}
+          className="absolute w-2 h-2 rounded-full bg-blue-400/30 blur-sm"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animation: `float-particle ${10 + Math.random() * 10}s ease-in-out infinite`,
+            animationDelay: `${Math.random() * 8}s`,
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes float-particle {
+          0%, 100% { 
+            transform: translateY(0) translateX(0) scale(1); 
+            opacity: 0.3;
           }
-        });
-      },
-      { threshold: 0.15, rootMargin: '0px 0px -80px 0px' }
-    );
-    
-    return () => observerRef.current?.disconnect();
-  }, []);
-  
-  const observe = useCallback((element: HTMLElement | null) => {
-    if (element && observerRef.current) {
-      observerRef.current.observe(element);
-    }
-  }, []);
-  
-  return { visibleItems, observe };
+          25% { 
+            transform: translateY(-30px) translateX(10px) scale(1.2); 
+            opacity: 0.6;
+          }
+          50% { 
+            transform: translateY(-50px) translateX(-10px) scale(1); 
+            opacity: 0.4;
+          }
+          75% { 
+            transform: translateY(-20px) translateX(15px) scale(0.8); 
+            opacity: 0.5;
+          }
+        }
+      `}</style>
+    </div>
+  );
 };
 
 export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) => {
   const [hoveredAction, setHoveredAction] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [scrollY, setScrollY] = useState(0);
+  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
-  const { visibleItems, observe } = useScrollReveal();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 100);
@@ -49,22 +71,54 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
   }, []);
 
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
     const handleScroll = () => {
-      if (containerRef.current) {
-        setScrollY(containerRef.current.scrollTop);
-      }
+      setScrollY(container.scrollTop);
     };
 
-    const container = containerRef.current;
-    container?.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container?.removeEventListener('scroll', handleScroll);
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Intersection Observer for scroll-triggered animations
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.target.id) {
+            setVisibleSections((prev) => new Set([...prev, entry.target.id]));
+          }
+        });
+      },
+      { 
+        root: container,
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      }
+    );
+
+    // Observe all sections with data-animate attribute
+    const sections = container.querySelectorAll('[data-animate]');
+    sections.forEach((section) => observer.observe(section));
+
+    return () => observer.disconnect();
+  }, [isLoaded]);
+
+  const isVisible = (id: string) => visibleSections.has(id);
 
   return (
     <div 
       ref={containerRef}
       className="fixed inset-0 bg-[hsl(222,47%,6%)] z-50 flex flex-col overflow-y-auto overflow-x-hidden scrollbar-thin"
     >
+      {/* Floating particles */}
+      <FloatingParticles />
+
       {/* Animated gradient orbs with parallax */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div 
@@ -141,12 +195,8 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
           <span className="text-blue-400 font-medium"> Agentic AI</span> that autonomously monitors, predicts, and protects.
         </p>
 
-        {/* Action Cards with staggered scroll animation */}
-        <div
-          ref={observe}
-          id="action-cards"
-          className="flex flex-col sm:flex-row items-center gap-4 mb-16"
-        >
+        {/* Action Cards */}
+        <div className={`flex flex-col sm:flex-row items-center gap-4 mb-16 transition-all duration-700 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           {[
             { id: 'search', label: 'Search City', icon: Search, description: 'Find any location' },
             { id: 'globe', label: 'Explore Globe', icon: Globe, description: 'Interactive 3D view' },
@@ -154,16 +204,12 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
           ].map((action, index) => (
             <button
               key={action.id}
-              ref={observe}
-              id={`action-card-${index}`}
               onClick={() => onQuickStart(action.id as 'search' | 'globe' | 'disasters')}
               onMouseEnter={() => setHoveredAction(action.id)}
               onMouseLeave={() => setHoveredAction(null)}
-              style={{ transitionDelay: `${index * 150}ms` }}
-              className={`group relative flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-700 min-w-[200px] ${
-                visibleItems.has(`action-card-${index}`) || isLoaded
-                  ? 'opacity-100 translate-y-0 scale-100'
-                  : 'opacity-0 translate-y-12 scale-95'
+              style={{ transitionDelay: `${700 + index * 100}ms` }}
+              className={`group relative flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-500 min-w-[200px] ${
+                isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               } ${
                 hoveredAction === action.id
                   ? 'bg-white/[0.1] border-white/20 shadow-2xl shadow-blue-500/10 scale-[1.02]'
@@ -198,15 +244,15 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
         </div>
       </main>
 
-      {/* Features Section with staggered scroll animations */}
+      {/* Features Section */}
       <section
-        ref={observe}
         id="features-section"
-        className="relative z-10 px-8 py-24 max-w-7xl mx-auto"
+        data-animate
+        className={`relative z-10 px-8 py-24 max-w-7xl mx-auto transition-all duration-1000 ${
+          isVisible('features-section') ? 'opacity-100 translate-y-0' : 'opacity-100 translate-y-0'
+        }`}
       >
-        <div className={`text-center mb-16 transition-all duration-700 ${
-          visibleItems.has('features-section') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}>
+        <div className="text-center mb-16">
           <p className="text-sm text-blue-400 font-medium mb-3">Powered by Advanced Technology</p>
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Next-Generation Environmental Intelligence
@@ -224,13 +270,9 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
           ].map((feature, index) => (
             <div
               key={feature.title}
-              ref={observe}
               id={`feature-card-${index}`}
-              className={`text-center transition-all duration-700 ${
-                visibleItems.has(`feature-card-${index}`) 
-                  ? 'opacity-100 translate-y-0 scale-100' 
-                  : 'opacity-0 translate-y-16 scale-95'
-              }`}
+              data-animate
+              className={`text-center transition-all duration-700 opacity-100 translate-y-0`}
               style={{ transitionDelay: `${index * 200}ms` }}
             >
               <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mx-auto mb-6 shadow-lg shadow-primary/20 transform transition-transform duration-500 hover:scale-110`}>
@@ -245,13 +287,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
         {/* Animated Orbs */}
         <div className="flex flex-col lg:flex-row items-center justify-center gap-16">
           {/* Bubble 1 - Classic */}
-          <div 
-            ref={observe}
-            id="bubble-1"
-            className={`relative w-64 h-64 flex items-center justify-center transition-all duration-1000 ${
-              visibleItems.has('bubble-1') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
-            }`}
-          >
+          <div className="relative w-64 h-64 flex items-center justify-center">
             <style>{`
               @keyframes orb-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
               @keyframes orb-bounce { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
@@ -267,13 +303,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
           </div>
 
           {/* Bubble 2 - Orbiting */}
-          <div 
-            ref={observe}
-            id="bubble-2"
-            className={`relative w-64 h-64 flex items-center justify-center transition-all duration-1000 delay-200 ${
-              visibleItems.has('bubble-2') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
-            }`}
-          >
+          <div className="relative w-64 h-64 flex items-center justify-center">
             <style>{`
               @keyframes orbit-float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
               @keyframes orbit-circle { 0% { transform: rotate(0deg) translateX(60px) rotate(0deg); } 100% { transform: rotate(360deg) translateX(60px) rotate(-360deg); } }
@@ -288,13 +318,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
           </div>
 
           {/* Bubble 3 - Shimmer */}
-          <div 
-            ref={observe}
-            id="bubble-3"
-            className={`relative w-64 h-64 flex items-center justify-center transition-all duration-1000 delay-400 ${
-              visibleItems.has('bubble-3') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
-            }`}
-          >
+          <div className="relative w-64 h-64 flex items-center justify-center">
             <style>{`
               @keyframes shimmer-pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.05); } }
               @keyframes shimmer-rotate { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.08); } 100% { transform: rotate(360deg) scale(1); } }
@@ -313,10 +337,10 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
         </div>
       </section>
 
-      {/* Stats Section with scroll animation */}
+      {/* Stats Section */}
       <section
-        ref={observe}
         id="stats-section"
+        data-animate
         className="relative z-10 px-8 py-24 bg-gradient-to-b from-transparent via-blue-500/5 to-transparent"
       >
         <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -328,13 +352,7 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
           ].map((stat, index) => (
             <div
               key={stat.label}
-              ref={observe}
-              id={`stat-${index}`}
-              className={`text-center transition-all duration-700 ${
-                visibleItems.has(`stat-${index}`) 
-                  ? 'opacity-100 translate-y-0 scale-100' 
-                  : 'opacity-0 translate-y-8 scale-90'
-              }`}
+              className="text-center"
               style={{ transitionDelay: `${index * 100}ms` }}
             >
               <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-2">{stat.value}</div>
@@ -344,13 +362,11 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
         </div>
       </section>
 
-      {/* CTA Section with scroll animation */}
+      {/* CTA Section */}
       <section
-        ref={observe}
         id="cta-section"
-        className={`relative z-10 px-8 py-24 transition-all duration-700 ${
-          visibleItems.has('cta-section') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}
+        data-animate
+        className="relative z-10 px-8 py-24"
       >
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
