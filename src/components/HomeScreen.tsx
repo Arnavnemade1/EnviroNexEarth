@@ -1,17 +1,47 @@
-import { useState, useEffect, useRef } from 'react';
-import { Globe, Search, AlertTriangle, ArrowRight, Sparkles, Zap } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Globe, Search, AlertTriangle, ArrowRight, Sparkles, Zap, Cpu, Bot, Brain, ChevronDown } from 'lucide-react';
 
 interface HomeScreenProps {
   onStartExploring: () => void;
   onQuickStart: (type: 'search' | 'globe' | 'disasters') => void;
 }
 
+// Custom hook for scroll-triggered animations with stagger support
+const useScrollReveal = () => {
+  const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
+  
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisibleItems((prev) => new Set([...prev, entry.target.id]));
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -80px 0px' }
+    );
+    
+    return () => observerRef.current?.disconnect();
+  }, []);
+  
+  const observe = useCallback((element: HTMLElement | null) => {
+    if (element && observerRef.current) {
+      observerRef.current.observe(element);
+    }
+  }, []);
+  
+  return { visibleItems, observe };
+};
+
 export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) => {
   const [hoveredAction, setHoveredAction] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [scrollY, setScrollY] = useState(0);
-  const [visibleElements, setVisibleElements] = useState<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
+  const { visibleItems, observe } = useScrollReveal();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 100);
@@ -26,29 +56,8 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
     };
 
     const container = containerRef.current;
-    container?.addEventListener('scroll', handleScroll);
+    container?.addEventListener('scroll', handleScroll, { passive: true });
     return () => container?.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisibleElements((prev) => new Set([...prev, entry.target.id]));
-          }
-        });
-      },
-      { threshold: 0.2, rootMargin: '0px 0px -100px 0px' }
-    );
-
-    const container = containerRef.current;
-    const elements = container?.querySelectorAll('[data-animate]');
-    elements?.forEach((el) => observer.observe(el));
-
-    return () => {
-      elements?.forEach((el) => observer.unobserve(el));
-    };
   }, []);
 
   return (
@@ -132,15 +141,11 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
           <span className="text-blue-400 font-medium"> Agentic AI</span> that autonomously monitors, predicts, and protects.
         </p>
 
-        {/* Action Cards */}
+        {/* Action Cards with staggered scroll animation */}
         <div
-          data-animate
+          ref={observe}
           id="action-cards"
-          className={`flex flex-col sm:flex-row items-center gap-4 mb-16 transition-all duration-700 ${
-            visibleElements.has('action-cards')
-              ? 'opacity-100 translate-y-0 delay-0'
-              : 'opacity-0 translate-y-8'
-          }`}
+          className="flex flex-col sm:flex-row items-center gap-4 mb-16"
         >
           {[
             { id: 'search', label: 'Search City', icon: Search, description: 'Find any location' },
@@ -149,11 +154,17 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
           ].map((action, index) => (
             <button
               key={action.id}
+              ref={observe}
+              id={`action-card-${index}`}
               onClick={() => onQuickStart(action.id as 'search' | 'globe' | 'disasters')}
               onMouseEnter={() => setHoveredAction(action.id)}
               onMouseLeave={() => setHoveredAction(null)}
-              style={{ transitionDelay: `${index * 100}ms` }}
-              className={`group relative flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-500 min-w-[200px] ${
+              style={{ transitionDelay: `${index * 150}ms` }}
+              className={`group relative flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-700 min-w-[200px] ${
+                visibleItems.has(`action-card-${index}`) || isLoaded
+                  ? 'opacity-100 translate-y-0 scale-100'
+                  : 'opacity-0 translate-y-12 scale-95'
+              } ${
                 hoveredAction === action.id
                   ? 'bg-white/[0.1] border-white/20 shadow-2xl shadow-blue-500/10 scale-[1.02]'
                   : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
@@ -180,21 +191,67 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
             </button>
           ))}
         </div>
+
+        {/* Scroll indicator */}
+        <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 transition-all duration-700 delay-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <ChevronDown className="w-6 h-6 text-gray-500 animate-bounce" />
+        </div>
       </main>
 
-      {/* Visual Animations Section */}
+      {/* Features Section with staggered scroll animations */}
       <section
-        data-animate
-        id="visual-animations"
-        className={`relative z-10 px-8 py-24 max-w-7xl mx-auto transition-all duration-700 ${
-          visibleElements.has('visual-animations')
-            ? 'opacity-100 translate-y-0'
-            : 'opacity-0 translate-y-8'
-        }`}
+        ref={observe}
+        id="features-section"
+        className="relative z-10 px-8 py-24 max-w-7xl mx-auto"
       >
+        <div className={`text-center mb-16 transition-all duration-700 ${
+          visibleItems.has('features-section') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}>
+          <p className="text-sm text-blue-400 font-medium mb-3">Powered by Advanced Technology</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Next-Generation Environmental Intelligence
+          </h2>
+          <p className="text-gray-400 max-w-xl mx-auto">
+            Experience the future of environmental monitoring with our cutting-edge tech stack
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          {[
+            { icon: Cpu, title: 'IBM Quantum', description: 'Leverage real quantum computing for unprecedented prediction accuracy', color: 'from-violet-500 to-purple-600' },
+            { icon: Bot, title: 'Agentic AI', description: 'Intelligent assistant that controls and navigates the entire platform', color: 'from-cyan-500 to-blue-600' },
+            { icon: Brain, title: 'EnviroAI', description: 'Advanced environmental analysis powered by cutting-edge AI models', color: 'from-emerald-500 to-green-600' }
+          ].map((feature, index) => (
+            <div
+              key={feature.title}
+              ref={observe}
+              id={`feature-card-${index}`}
+              className={`text-center transition-all duration-700 ${
+                visibleItems.has(`feature-card-${index}`) 
+                  ? 'opacity-100 translate-y-0 scale-100' 
+                  : 'opacity-0 translate-y-16 scale-95'
+              }`}
+              style={{ transitionDelay: `${index * 200}ms` }}
+            >
+              <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mx-auto mb-6 shadow-lg shadow-primary/20 transform transition-transform duration-500 hover:scale-110`}>
+                <feature.icon className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
+              <p className="text-gray-400 text-sm">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Animated Orbs */}
         <div className="flex flex-col lg:flex-row items-center justify-center gap-16">
           {/* Bubble 1 - Classic */}
-          <div className="relative w-64 h-64 flex items-center justify-center">
+          <div 
+            ref={observe}
+            id="bubble-1"
+            className={`relative w-64 h-64 flex items-center justify-center transition-all duration-1000 ${
+              visibleItems.has('bubble-1') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
+            }`}
+          >
             <style>{`
               @keyframes orb-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
               @keyframes orb-bounce { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
@@ -210,7 +267,13 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
           </div>
 
           {/* Bubble 2 - Orbiting */}
-          <div className="relative w-64 h-64 flex items-center justify-center">
+          <div 
+            ref={observe}
+            id="bubble-2"
+            className={`relative w-64 h-64 flex items-center justify-center transition-all duration-1000 delay-200 ${
+              visibleItems.has('bubble-2') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
+            }`}
+          >
             <style>{`
               @keyframes orbit-float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
               @keyframes orbit-circle { 0% { transform: rotate(0deg) translateX(60px) rotate(0deg); } 100% { transform: rotate(360deg) translateX(60px) rotate(-360deg); } }
@@ -225,7 +288,13 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
           </div>
 
           {/* Bubble 3 - Shimmer */}
-          <div className="relative w-64 h-64 flex items-center justify-center">
+          <div 
+            ref={observe}
+            id="bubble-3"
+            className={`relative w-64 h-64 flex items-center justify-center transition-all duration-1000 delay-400 ${
+              visibleItems.has('bubble-3') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
+            }`}
+          >
             <style>{`
               @keyframes shimmer-pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.05); } }
               @keyframes shimmer-rotate { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.08); } 100% { transform: rotate(360deg) scale(1); } }
@@ -242,26 +311,78 @@ export const HomeScreen = ({ onStartExploring, onQuickStart }: HomeScreenProps) 
             <div className="relative w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full shadow-lg shadow-emerald-500/50 z-10" />
           </div>
         </div>
+      </section>
 
-        {/* Text Content */}
-        <div className="mt-16 text-center max-w-2xl mx-auto">
-          <p className="text-sm text-blue-400 font-medium mb-3">Experience Intelligence</p>
-          <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Real-time Environmental Intelligence
-          </h3>
-          <p className="text-gray-400 leading-relaxed mb-6">
-            Monitor global air quality, track natural disasters, and receive predictive insights powered by quantum computing and advanced AI—all in one intuitive platform.
-          </p>
-          <ul className="space-y-3 inline-flex flex-col items-start">
-            {['Real-time global monitoring', 'Quantum-enhanced predictions', 'Autonomous AI agents'].map((item, i) => (
-              <li key={i} className="flex items-center gap-3 text-gray-300">
-                <div className="w-2 h-2 rounded-full bg-gradient-to-r from-cyan-400 to-blue-400" />
-                {item}
-              </li>
-            ))}
-          </ul>
+      {/* Stats Section with scroll animation */}
+      <section
+        ref={observe}
+        id="stats-section"
+        className="relative z-10 px-8 py-24 bg-gradient-to-b from-transparent via-blue-500/5 to-transparent"
+      >
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+          {[
+            { value: '500+', label: 'Cities Monitored' },
+            { value: '99.9%', label: 'Uptime' },
+            { value: '< 1s', label: 'Response Time' },
+            { value: '24/7', label: 'Real-time Updates' }
+          ].map((stat, index) => (
+            <div
+              key={stat.label}
+              ref={observe}
+              id={`stat-${index}`}
+              className={`text-center transition-all duration-700 ${
+                visibleItems.has(`stat-${index}`) 
+                  ? 'opacity-100 translate-y-0 scale-100' 
+                  : 'opacity-0 translate-y-8 scale-90'
+              }`}
+              style={{ transitionDelay: `${index * 100}ms` }}
+            >
+              <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-2">{stat.value}</div>
+              <div className="text-sm text-gray-400">{stat.label}</div>
+            </div>
+          ))}
         </div>
       </section>
+
+      {/* CTA Section with scroll animation */}
+      <section
+        ref={observe}
+        id="cta-section"
+        className={`relative z-10 px-8 py-24 transition-all duration-700 ${
+          visibleItems.has('cta-section') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}
+      >
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+            Ready to explore?
+          </h2>
+          <p className="text-gray-400 mb-8 max-w-lg mx-auto">
+            Join thousands of users monitoring Earth's environmental health with quantum-powered precision.
+          </p>
+          <button
+            onClick={onStartExploring}
+            className="px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 group"
+          >
+            Get Started Free
+            <ArrowRight className="w-4 h-4 ml-2 inline-block group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 px-8 py-8 border-t border-white/10">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <Globe className="w-5 h-5 text-blue-400" />
+            <span className="text-sm text-gray-500">EnviroNex © 2024</span>
+          </div>
+          <div className="flex items-center gap-6 text-sm text-gray-500">
+            <span className="hover:text-white cursor-pointer transition-colors">Privacy</span>
+            <span className="hover:text-white cursor-pointer transition-colors">Terms</span>
+            <span className="hover:text-white cursor-pointer transition-colors">Contact</span>
+          </div>
+        </div>
+      </footer>
 
       {/* Bottom gradient line */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
