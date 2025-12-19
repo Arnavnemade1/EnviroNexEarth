@@ -217,23 +217,25 @@ const Index = () => {
         />
       )}
 
-      {/* Globe Container */}
-      <div className="absolute inset-0">
-        <GlobeComponent
-          onCityClick={handleGlobeClick}
-          selectedCity={selectedCity ? { lat: selectedCity.lat, lng: selectedCity.lng } : null}
-          pollutionData={pollutionData}
-          showSatellites={true}
-        />
-        {/* Globe Hue Overlay */}
-        <div 
-          className={`absolute inset-0 pointer-events-none transition-all duration-1000 ${
-            globeHue === 'green' ? 'bg-clean-green/10' : 
-            globeHue === 'red' ? 'bg-pollution-red/10' :
-            globeHue === 'orange' ? 'bg-accent/10' : 'bg-transparent'
-          }`} 
-        />
-      </div>
+      {/* Globe Container - Only show when not on home screen */}
+      {!showHomeScreen && (
+        <div className="absolute inset-0">
+          <GlobeComponent
+            onCityClick={handleGlobeClick}
+            selectedCity={selectedCity ? { lat: selectedCity.lat, lng: selectedCity.lng } : null}
+            pollutionData={pollutionData}
+            showSatellites={true}
+          />
+          {/* Globe Hue Overlay */}
+          <div 
+            className={`absolute inset-0 pointer-events-none transition-all duration-1000 ${
+              globeHue === 'green' ? 'bg-clean-green/10' : 
+              globeHue === 'red' ? 'bg-pollution-red/10' :
+              globeHue === 'orange' ? 'bg-accent/10' : 'bg-transparent'
+            }`} 
+          />
+        </div>
+      )}
 
       {/* User Profile Modal */}
       {showUserProfile && (
