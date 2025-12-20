@@ -6,11 +6,44 @@ interface HomeScreenProps {
   onQuickStart: (type: 'search' | 'globe' | 'disasters') => void;
 }
 
+// Custom hook for scroll-triggered animations
+const useScrollAnimation = () => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, isVisible };
+};
+
 export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Animation refs for each section
+  const techAnim = useScrollAnimation();
+  const capAnim = useScrollAnimation();
+  const ctaAnim = useScrollAnimation();
+  const video1Anim = useScrollAnimation();
+  const video2Anim = useScrollAnimation();
+  const video3Anim = useScrollAnimation();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 100);
@@ -82,7 +115,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
             className="absolute w-full h-full object-cover"
             style={{ filter: 'brightness(0.5)' }}
           >
-            <source src="https://cdn.pixabay.com/video/2020/05/25/40130-424930032_large.mp4" type="video/mp4" />
+            <source src="https://videos.pexels.com/video-files/856974/856974-hd_1920_1080_30fps.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50" />
@@ -129,7 +162,10 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
       </section>
 
       {/* Video Divider 1 - Ocean */}
-      <section className="relative h-[60vh] overflow-hidden">
+      <section 
+        ref={video1Anim.ref}
+        className={`relative h-[60vh] overflow-hidden transition-all duration-1000 ${video1Anim.isVisible ? 'opacity-100' : 'opacity-0'}`}
+      >
         <video
           autoPlay
           muted
@@ -138,10 +174,10 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           className="absolute w-full h-full object-cover"
           style={{ filter: 'brightness(0.4)' }}
         >
-          <source src="https://cdn.pixabay.com/video/2019/07/29/25602-351715498_large.mp4" type="video/mp4" />
+          <source src="https://videos.pexels.com/video-files/1918465/1918465-uhd_2560_1440_24fps.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
-        <div className="relative z-10 h-full flex items-center justify-center">
+        <div className={`relative z-10 h-full flex items-center justify-center transition-all duration-1000 delay-300 ${video1Anim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="text-center">
             <span className="text-sm font-medium text-cyan-400 uppercase tracking-widest block mb-4">Ocean Intelligence</span>
             <h3 className="text-3xl md:text-5xl font-bold text-white">Monitoring Earth's Waters</h3>
@@ -150,10 +186,14 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
       </section>
 
       {/* Technology Section */}
-      <section id="technology" className="relative min-h-screen flex items-center py-32 px-8 bg-black">
+      <section 
+        id="technology" 
+        ref={techAnim.ref}
+        className={`relative min-h-screen flex items-center py-32 px-8 bg-black transition-all duration-1000 ${techAnim.isVisible ? 'opacity-100' : 'opacity-0'}`}
+      >
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
+            <div className={`transition-all duration-1000 delay-200 ${techAnim.isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`}>
               <span className="text-sm font-medium text-cyan-400 uppercase tracking-widest mb-4 block">Technology</span>
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
                 Built on<br />
@@ -169,8 +209,12 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
                   { icon: Zap, title: 'IBM Quantum Runtime', desc: 'Real quantum circuit execution for complex climate modeling' },
                   { icon: Shield, title: 'Agentic AI Systems', desc: 'Autonomous agents that navigate, analyze, and act on environmental data' },
                   { icon: Activity, title: 'Real-Time Processing', desc: 'Sub-second data ingestion from 500+ global monitoring stations' }
-                ].map((item) => (
-                  <div key={item.title} className="group flex gap-4 p-4 rounded-xl hover:bg-white/5 transition-all cursor-pointer border border-transparent hover:border-white/10">
+                ].map((item, i) => (
+                  <div 
+                    key={item.title} 
+                    className={`group flex gap-4 p-4 rounded-xl hover:bg-white/5 transition-all cursor-pointer border border-transparent hover:border-white/10 duration-700`}
+                    style={{ transitionDelay: `${400 + i * 100}ms`, opacity: techAnim.isVisible ? 1 : 0, transform: techAnim.isVisible ? 'translateY(0)' : 'translateY(20px)' }}
+                  >
                     <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">
                       <item.icon className="w-5 h-5 text-cyan-400" />
                     </div>
@@ -184,7 +228,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
             </div>
 
             {/* Visual Element */}
-            <div className="relative aspect-square hidden lg:flex items-center justify-center">
+            <div className={`relative aspect-square hidden lg:flex items-center justify-center transition-all duration-1000 delay-500 ${techAnim.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
               <div className="absolute w-96 h-96 rounded-full border border-white/10 animate-[spin_30s_linear_infinite]" />
               <div className="absolute w-80 h-80 rounded-full border border-white/5 animate-[spin_25s_linear_infinite_reverse]" />
               <div className="absolute w-64 h-64 rounded-full border border-white/5 animate-[spin_20s_linear_infinite]" />
@@ -196,7 +240,10 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
       </section>
 
       {/* Video Divider 2 - Forest */}
-      <section className="relative h-[60vh] overflow-hidden">
+      <section 
+        ref={video2Anim.ref}
+        className={`relative h-[60vh] overflow-hidden transition-all duration-1000 ${video2Anim.isVisible ? 'opacity-100' : 'opacity-0'}`}
+      >
         <video
           autoPlay
           muted
@@ -205,10 +252,10 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           className="absolute w-full h-full object-cover"
           style={{ filter: 'brightness(0.4)' }}
         >
-          <source src="https://cdn.pixabay.com/video/2020/09/06/49042-456055099_large.mp4" type="video/mp4" />
+          <source src="https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
-        <div className="relative z-10 h-full flex items-center justify-center">
+        <div className={`relative z-10 h-full flex items-center justify-center transition-all duration-1000 delay-300 ${video2Anim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="text-center">
             <span className="text-sm font-medium text-emerald-400 uppercase tracking-widest block mb-4">Forest Systems</span>
             <h3 className="text-3xl md:text-5xl font-bold text-white">Protecting Global Ecosystems</h3>
@@ -217,9 +264,13 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
       </section>
 
       {/* Capabilities Section */}
-      <section id="capabilities" className="relative py-32 px-8 bg-black">
+      <section 
+        id="capabilities" 
+        ref={capAnim.ref}
+        className={`relative py-32 px-8 bg-black transition-all duration-1000 ${capAnim.isVisible ? 'opacity-100' : 'opacity-0'}`}
+      >
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
+          <div className={`text-center mb-20 transition-all duration-1000 ${capAnim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <span className="text-sm font-medium text-cyan-400 uppercase tracking-widest mb-4 block">Capabilities</span>
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
               Environmental Defense<br />
@@ -235,10 +286,15 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
               { title: 'Agentic Response', value: '24/7', desc: 'Autonomous monitoring and intervention', gradient: 'from-emerald-500 to-green-600' },
               { title: 'Data Processing', value: '10TB+', desc: 'Environmental data analyzed daily', gradient: 'from-amber-500 to-orange-600' },
               { title: 'API Uptime', value: '99.99%', desc: 'Enterprise-grade reliability', gradient: 'from-pink-500 to-rose-600' },
-            ].map((cap) => (
+            ].map((cap, i) => (
               <div 
                 key={cap.title}
                 className="group relative p-8 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-white/20 transition-all duration-500 hover:bg-white/[0.04] overflow-hidden"
+                style={{ 
+                  transitionDelay: `${200 + i * 100}ms`, 
+                  opacity: capAnim.isVisible ? 1 : 0, 
+                  transform: capAnim.isVisible ? 'translateY(0)' : 'translateY(30px)' 
+                }}
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${cap.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
                 <div className="relative z-10">
@@ -255,7 +311,10 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
       </section>
 
       {/* Video Divider 3 - Atmosphere */}
-      <section className="relative h-[60vh] overflow-hidden">
+      <section 
+        ref={video3Anim.ref}
+        className={`relative h-[60vh] overflow-hidden transition-all duration-1000 ${video3Anim.isVisible ? 'opacity-100' : 'opacity-0'}`}
+      >
         <video
           autoPlay
           muted
@@ -264,10 +323,10 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           className="absolute w-full h-full object-cover"
           style={{ filter: 'brightness(0.4)' }}
         >
-          <source src="https://cdn.pixabay.com/video/2016/09/01/4811-182028559_large.mp4" type="video/mp4" />
+          <source src="https://videos.pexels.com/video-files/857195/857195-hd_1920_1080_25fps.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
-        <div className="relative z-10 h-full flex items-center justify-center">
+        <div className={`relative z-10 h-full flex items-center justify-center transition-all duration-1000 delay-300 ${video3Anim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="text-center">
             <span className="text-sm font-medium text-blue-400 uppercase tracking-widest block mb-4">Atmospheric Analysis</span>
             <h3 className="text-3xl md:text-5xl font-bold text-white">Predicting Climate Patterns</h3>
@@ -276,7 +335,10 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
       </section>
 
       {/* Final CTA */}
-      <section className="relative min-h-[70vh] flex items-center justify-center py-32 px-8 overflow-hidden">
+      <section 
+        ref={ctaAnim.ref}
+        className={`relative min-h-[70vh] flex items-center justify-center py-32 px-8 overflow-hidden transition-all duration-1000 ${ctaAnim.isVisible ? 'opacity-100' : 'opacity-0'}`}
+      >
         <video
           autoPlay
           muted
@@ -285,11 +347,11 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           className="absolute w-full h-full object-cover"
           style={{ filter: 'brightness(0.25)' }}
         >
-          <source src="https://cdn.pixabay.com/video/2020/08/12/47021-449618339_large.mp4" type="video/mp4" />
+          <source src="https://videos.pexels.com/video-files/854224/854224-hd_1920_1080_24fps.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black" />
         
-        <div className="relative z-10 max-w-4xl mx-auto text-center">
+        <div className={`relative z-10 max-w-4xl mx-auto text-center transition-all duration-1000 delay-300 ${ctaAnim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-8">
             Ready to see the<br />
             <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">future of Earth?</span>
