@@ -113,9 +113,9 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
             loop
             playsInline
             className="absolute w-full h-full object-cover"
-            style={{ filter: 'brightness(0.5)' }}
+            style={{ filter: 'brightness(0.6)' }}
           >
-            <source src="https://videos.pexels.com/video-files/856974/856974-hd_1920_1080_30fps.mp4" type="video/mp4" />
+            <source src="https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_30fps.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50" />
@@ -172,9 +172,9 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           loop
           playsInline
           className="absolute w-full h-full object-cover"
-          style={{ filter: 'brightness(0.4)' }}
+          style={{ filter: 'brightness(0.5)' }}
         >
-          <source src="https://videos.pexels.com/video-files/1918465/1918465-uhd_2560_1440_24fps.mp4" type="video/mp4" />
+          <source src="https://videos.pexels.com/video-files/3194277/3194277-uhd_2560_1440_30fps.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
         <div className={`relative z-10 h-full flex items-center justify-center transition-all duration-1000 delay-300 ${video1Anim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -250,9 +250,9 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           loop
           playsInline
           className="absolute w-full h-full object-cover"
-          style={{ filter: 'brightness(0.4)' }}
+          style={{ filter: 'brightness(0.5)' }}
         >
-          <source src="https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4" type="video/mp4" />
+          <source src="https://videos.pexels.com/video-files/3141207/3141207-uhd_2560_1440_25fps.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
         <div className={`relative z-10 h-full flex items-center justify-center transition-all duration-1000 delay-300 ${video2Anim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -321,9 +321,9 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           loop
           playsInline
           className="absolute w-full h-full object-cover"
-          style={{ filter: 'brightness(0.4)' }}
+          style={{ filter: 'brightness(0.5)' }}
         >
-          <source src="https://videos.pexels.com/video-files/857195/857195-hd_1920_1080_25fps.mp4" type="video/mp4" />
+          <source src="https://videos.pexels.com/video-files/3129957/3129957-uhd_2560_1440_30fps.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
         <div className={`relative z-10 h-full flex items-center justify-center transition-all duration-1000 delay-300 ${video3Anim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -347,7 +347,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           className="absolute w-full h-full object-cover"
           style={{ filter: 'brightness(0.25)' }}
         >
-          <source src="https://videos.pexels.com/video-files/854224/854224-hd_1920_1080_24fps.mp4" type="video/mp4" />
+          <source src="https://videos.pexels.com/video-files/3129595/3129595-uhd_2560_1440_30fps.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black" />
         
