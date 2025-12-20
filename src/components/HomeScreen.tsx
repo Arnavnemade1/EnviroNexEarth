@@ -128,6 +128,27 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
         </div>
       </section>
 
+      {/* Video Divider 1 - Ocean */}
+      <section className="relative h-[60vh] overflow-hidden">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute w-full h-full object-cover"
+          style={{ filter: 'brightness(0.4)' }}
+        >
+          <source src="https://cdn.pixabay.com/video/2019/07/29/25602-351715498_large.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
+        <div className="relative z-10 h-full flex items-center justify-center">
+          <div className="text-center">
+            <span className="text-sm font-medium text-cyan-400 uppercase tracking-widest block mb-4">Ocean Intelligence</span>
+            <h3 className="text-3xl md:text-5xl font-bold text-white">Monitoring Earth's Waters</h3>
+          </div>
+        </div>
+      </section>
+
       {/* Technology Section */}
       <section id="technology" className="relative min-h-screen flex items-center py-32 px-8 bg-black">
         <div className="max-w-7xl mx-auto w-full">
@@ -174,6 +195,27 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
         </div>
       </section>
 
+      {/* Video Divider 2 - Forest */}
+      <section className="relative h-[60vh] overflow-hidden">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute w-full h-full object-cover"
+          style={{ filter: 'brightness(0.4)' }}
+        >
+          <source src="https://cdn.pixabay.com/video/2020/09/06/49042-456055099_large.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
+        <div className="relative z-10 h-full flex items-center justify-center">
+          <div className="text-center">
+            <span className="text-sm font-medium text-emerald-400 uppercase tracking-widest block mb-4">Forest Systems</span>
+            <h3 className="text-3xl md:text-5xl font-bold text-white">Protecting Global Ecosystems</h3>
+          </div>
+        </div>
+      </section>
+
       {/* Capabilities Section */}
       <section id="capabilities" className="relative py-32 px-8 bg-black">
         <div className="max-w-7xl mx-auto">
@@ -212,9 +254,40 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
         </div>
       </section>
 
+      {/* Video Divider 3 - Atmosphere */}
+      <section className="relative h-[60vh] overflow-hidden">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute w-full h-full object-cover"
+          style={{ filter: 'brightness(0.4)' }}
+        >
+          <source src="https://cdn.pixabay.com/video/2016/09/01/4811-182028559_large.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
+        <div className="relative z-10 h-full flex items-center justify-center">
+          <div className="text-center">
+            <span className="text-sm font-medium text-blue-400 uppercase tracking-widest block mb-4">Atmospheric Analysis</span>
+            <h3 className="text-3xl md:text-5xl font-bold text-white">Predicting Climate Patterns</h3>
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
-      <section className="relative min-h-[70vh] flex items-center justify-center py-32 px-8 bg-black">
-        <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/5 via-transparent to-transparent" />
+      <section className="relative min-h-[70vh] flex items-center justify-center py-32 px-8 overflow-hidden">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute w-full h-full object-cover"
+          style={{ filter: 'brightness(0.25)' }}
+        >
+          <source src="https://cdn.pixabay.com/video/2020/08/12/47021-449618339_large.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black" />
         
         <div className="relative z-10 max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-8">
