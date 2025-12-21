@@ -64,12 +64,12 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
 
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.play().catch(() => {});
+      videoRef.current.play().catch(() => { });
     }
   }, []);
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className="fixed inset-0 bg-black z-50 flex flex-col overflow-y-auto overflow-x-hidden"
     >
@@ -82,7 +82,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
             </div>
             <span className="text-xl font-semibold text-white tracking-tight">EnviroCast</span>
           </div>
-          
+
           <div className="hidden md:flex items-center gap-10">
             <a href="#technology" className="text-sm text-white/60 hover:text-white transition-colors">Technology</a>
             <a href="#capabilities" className="text-sm text-white/60 hover:text-white transition-colors">Capabilities</a>
@@ -91,7 +91,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
 
           <div className="flex items-center gap-4">
             <a href="/auth" className="text-sm text-white/60 hover:text-white transition-colors">Sign In</a>
-            <button 
+            <button
               onClick={onStartExploring}
               className="group px-5 py-2.5 text-sm font-medium bg-white text-black rounded-lg hover:bg-white/90 transition-all flex items-center gap-2"
             >
@@ -115,7 +115,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
             className="absolute w-full h-full object-cover"
             style={{ filter: 'brightness(0.6)' }}
           >
-            <source src="https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_30fps.mp4" type="video/mp4" />
+            <source src="https://svs.gsfc.nasa.gov/vis/a000000/a004500/a004515/ISS_Crew_Earth_Observations_2160p.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50" />
@@ -136,13 +136,13 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           </h1>
 
           <p className={`text-xl md:text-2xl text-white/70 max-w-3xl mx-auto mb-12 leading-relaxed font-light transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            The first platform combining <span className="text-white font-medium">IBM Quantum Computing</span>, 
-            <span className="text-white font-medium"> Agentic AI</span>, and real-time environmental data 
+            The first platform combining <span className="text-white font-medium">IBM Quantum Computing</span>,
+            <span className="text-white font-medium"> Agentic AI</span>, and real-time environmental data
             to predict and protect our planet's future.
           </p>
 
           <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 transition-all duration-1000 delay-900 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <button 
+            <button
               onClick={onStartExploring}
               className="group px-10 py-5 bg-white text-black font-semibold rounded-xl hover:bg-white/90 transition-all hover:shadow-2xl hover:shadow-white/20 text-lg flex items-center gap-3"
             >
@@ -162,7 +162,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
       </section>
 
       {/* Video Divider 1 - Ocean */}
-      <section 
+      <section
         ref={video1Anim.ref}
         className={`relative h-[60vh] overflow-hidden transition-all duration-1000 ${video1Anim.isVisible ? 'opacity-100' : 'opacity-0'}`}
       >
@@ -186,8 +186,8 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
       </section>
 
       {/* Technology Section */}
-      <section 
-        id="technology" 
+      <section
+        id="technology"
         ref={techAnim.ref}
         className={`relative min-h-screen flex items-center py-32 px-8 bg-black transition-all duration-1000 ${techAnim.isVisible ? 'opacity-100' : 'opacity-0'}`}
       >
@@ -200,7 +200,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
                 <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Next-Gen</span> Architecture
               </h2>
               <p className="text-lg text-white/60 mb-10 leading-relaxed">
-                EnviroNex leverages the most advanced computing paradigms to deliver environmental predictions 
+                EnviroNex leverages the most advanced computing paradigms to deliver environmental predictions
                 with unprecedented accuracy and speed.
               </p>
 
@@ -210,8 +210,8 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
                   { icon: Shield, title: 'Agentic AI Systems', desc: 'Autonomous agents that navigate, analyze, and act on environmental data' },
                   { icon: Activity, title: 'Real-Time Processing', desc: 'Sub-second data ingestion from 500+ global monitoring stations' }
                 ].map((item, i) => (
-                  <div 
-                    key={item.title} 
+                  <div
+                    key={item.title}
                     className={`group flex gap-4 p-4 rounded-xl hover:bg-white/5 transition-all cursor-pointer border border-transparent hover:border-white/10 duration-700`}
                     style={{ transitionDelay: `${400 + i * 100}ms`, opacity: techAnim.isVisible ? 1 : 0, transform: techAnim.isVisible ? 'translateY(0)' : 'translateY(20px)' }}
                   >
@@ -240,7 +240,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
       </section>
 
       {/* Video Divider 2 - Forest */}
-      <section 
+      <section
         ref={video2Anim.ref}
         className={`relative h-[60vh] overflow-hidden transition-all duration-1000 ${video2Anim.isVisible ? 'opacity-100' : 'opacity-0'}`}
       >
@@ -264,8 +264,8 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
       </section>
 
       {/* Capabilities Section */}
-      <section 
-        id="capabilities" 
+      <section
+        id="capabilities"
         ref={capAnim.ref}
         className={`relative py-32 px-8 bg-black transition-all duration-1000 ${capAnim.isVisible ? 'opacity-100' : 'opacity-0'}`}
       >
@@ -287,13 +287,13 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
               { title: 'Data Processing', value: '10TB+', desc: 'Environmental data analyzed daily', gradient: 'from-amber-500 to-orange-600' },
               { title: 'API Uptime', value: '99.99%', desc: 'Enterprise-grade reliability', gradient: 'from-pink-500 to-rose-600' },
             ].map((cap, i) => (
-              <div 
+              <div
                 key={cap.title}
                 className="group relative p-8 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-white/20 transition-all duration-500 hover:bg-white/[0.04] overflow-hidden"
-                style={{ 
-                  transitionDelay: `${200 + i * 100}ms`, 
-                  opacity: capAnim.isVisible ? 1 : 0, 
-                  transform: capAnim.isVisible ? 'translateY(0)' : 'translateY(30px)' 
+                style={{
+                  transitionDelay: `${200 + i * 100}ms`,
+                  opacity: capAnim.isVisible ? 1 : 0,
+                  transform: capAnim.isVisible ? 'translateY(0)' : 'translateY(30px)'
                 }}
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${cap.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
@@ -311,7 +311,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
       </section>
 
       {/* Video Divider 3 - Atmosphere */}
-      <section 
+      <section
         ref={video3Anim.ref}
         className={`relative h-[60vh] overflow-hidden transition-all duration-1000 ${video3Anim.isVisible ? 'opacity-100' : 'opacity-0'}`}
       >
@@ -335,7 +335,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
       </section>
 
       {/* Final CTA */}
-      <section 
+      <section
         ref={ctaAnim.ref}
         className={`relative min-h-[70vh] flex items-center justify-center py-32 px-8 overflow-hidden transition-all duration-1000 ${ctaAnim.isVisible ? 'opacity-100' : 'opacity-0'}`}
       >
@@ -350,18 +350,18 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           <source src="https://videos.pexels.com/video-files/3129595/3129595-uhd_2560_1440_30fps.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black" />
-        
+
         <div className={`relative z-10 max-w-4xl mx-auto text-center transition-all duration-1000 delay-300 ${ctaAnim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-8">
             Ready to see the<br />
             <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">future of Earth?</span>
           </h2>
-          
+
           <p className="text-lg text-white/60 mb-12 max-w-2xl mx-auto">
             Join the platform redefining environmental intelligence with quantum computing and autonomous AI.
           </p>
 
-          <button 
+          <button
             onClick={onStartExploring}
             className="group inline-flex items-center gap-3 px-12 py-6 bg-white text-black font-semibold rounded-xl hover:bg-white/90 transition-all hover:shadow-2xl hover:shadow-white/10 text-lg"
           >
@@ -378,7 +378,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
             <Globe className="w-5 h-5 text-cyan-400" />
             <span className="text-sm text-white/50">EnviroNex © 2024. All rights reserved.</span>
           </div>
-          
+
           <div className="flex items-center gap-8 text-sm text-white/50">
             <a href="#" className="hover:text-white transition-colors">Privacy</a>
             <a href="#" className="hover:text-white transition-colors">Terms</a>
