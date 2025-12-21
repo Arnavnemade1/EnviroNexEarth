@@ -66,14 +66,14 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
         userMessage.message,
         { selectedCity, currentScenario, currentYear }
       );
-      
+
       console.log('[Chatbot] Response:', response);
-      
+
       // Check if response contains tool calls
       if (typeof response === 'object' && response.tool_calls && response.tool_calls.length > 0) {
         console.log('[Chatbot] Processing', response.tool_calls.length, 'tool calls');
         setAgenticAction('Analyzing request...');
-        
+
         for (const toolCall of response.tool_calls) {
           try {
             // Parse arguments - handle both string and object formats
@@ -83,12 +83,12 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
             } else {
               args = toolCall.function.arguments || {};
             }
-            
+
             console.log('[Chatbot] Executing:', toolCall.function.name, args);
             setAgenticAction(getActionDescription(toolCall.function.name, args));
-            
+
             await new Promise(resolve => setTimeout(resolve, 600));
-            
+
             if (onToolCall) {
               onToolCall(toolCall.function.name, args);
             }
@@ -96,9 +96,9 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
             console.error('[Chatbot] Tool parse error:', parseErr, toolCall);
           }
         }
-        
+
         setTimeout(() => setAgenticAction(undefined), 800);
-        
+
         const botResponse: ChatMessage = {
           id: (Date.now() + 1).toString(),
           type: 'bot',
@@ -126,7 +126,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
       };
       setMessages(prev => [...prev, errorResponse]);
     }
-    
+
     setIsTyping(false);
   };
 
@@ -137,6 +137,19 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
     }
   };
 
+  // Proactive Insights
+  useEffect(() => {
+    if (selectedCity && !messages.some(m => m.message.includes(selectedCity))) {
+      const insight = `I've detected you're exploring ${selectedCity}. Would you like a quantum analysis of its environmental timeline?`;
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        type: 'bot',
+        message: insight,
+        timestamp: new Date()
+      }]);
+    }
+  }, [selectedCity]);
+
   const getActionDescription = (toolName: string, args: any): string => {
     switch (toolName) {
       case 'change_city': return `Switching to ${args.city_name}...`;
@@ -146,6 +159,8 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
       case 'show_quantum_analytics': return 'Opening quantum analytics...';
       case 'compare_cities': return `Comparing ${args.cities?.join(', ') || 'cities'}...`;
       case 'set_theme': return `Applying ${args.theme} theme...`;
+      case 'analyze_quantum_state': return 'Analyzing quantum probability fields...';
+      case 'optimize_reality': return 'Optimizing environmental parameters...';
       default: return 'Executing action...';
     }
   };
@@ -177,7 +192,7 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
   return (
     <>
       <AgenticOverlay isActive={!!agenticAction} action={agenticAction} />
-      
+
       <div className="fixed bottom-6 right-6 z-50 w-96 h-96">
         <Card className={`glass h-full flex flex-col animate-scale-in bg-gradient-to-br ${themeColors[theme]}`}>
           {/* Header */}
@@ -227,78 +242,77 @@ export const Chatbot = ({ selectedCity, currentScenario, currentYear, onToolCall
             </div>
           )}
 
-        {/* Messages */}
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`flex gap-2 max-w-[80%] ${message.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                    {message.type === 'user' ? (
-                      <User className="w-4 h-4" />
-                    ) : (
-                      <Bot className="w-4 h-4 text-primary" />
-                    )}
-                  </div>
-                  <div
-                    className={`rounded-lg px-3 py-2 text-sm ${
-                      message.type === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-foreground'
-                    }`}
-                  >
-                    {message.message}
-                  </div>
-                </div>
-              </div>
-            ))}
-            
-            {isTyping && (
-              <div className="flex gap-3 justify-start">
-                <div className="flex gap-2 max-w-[80%]">
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                    <Bot className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="bg-muted rounded-lg px-3 py-2 text-sm">
-                    <div className="flex gap-1">
-                      <div className="w-2 h-2 bg-primary/50 rounded-full animate-pulse" />
-                      <div className="w-2 h-2 bg-primary/50 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
-                      <div className="w-2 h-2 bg-primary/50 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
+          {/* Messages */}
+          <ScrollArea className="flex-1 p-4">
+            <div className="space-y-4">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`flex gap-2 max-w-[80%] ${message.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      {message.type === 'user' ? (
+                        <User className="w-4 h-4" />
+                      ) : (
+                        <Bot className="w-4 h-4 text-primary" />
+                      )}
+                    </div>
+                    <div
+                      className={`rounded-lg px-3 py-2 text-sm ${message.type === 'user'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-foreground'
+                        }`}
+                    >
+                      {message.message}
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        </ScrollArea>
+              ))}
 
-        {/* Input */}
-        <div className="p-4 border-t border-primary/20">
-          <div className="flex gap-2">
-            <Input
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask about quantum predictions, air quality..."
-              className="glass flex-1"
-              disabled={isTyping}
-            />
-            <Button
-              onClick={handleSendMessage}
-              size="sm"
-              disabled={isTyping}
-              className="glass"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
+              {isTyping && (
+                <div className="flex gap-3 justify-start">
+                  <div className="flex gap-2 max-w-[80%]">
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="bg-muted rounded-lg px-3 py-2 text-sm">
+                      <div className="flex gap-1">
+                        <div className="w-2 h-2 bg-primary/50 rounded-full animate-pulse" />
+                        <div className="w-2 h-2 bg-primary/50 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
+                        <div className="w-2 h-2 bg-primary/50 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          </ScrollArea>
+
+          {/* Input */}
+          <div className="p-4 border-t border-primary/20">
+            <div className="flex gap-2">
+              <Input
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask about quantum predictions, air quality..."
+                className="glass flex-1"
+                disabled={isTyping}
+              />
+              <Button
+                onClick={handleSendMessage}
+                size="sm"
+                disabled={isTyping}
+                className="glass"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
-        </div>
-      </Card>
-    </div>
+        </Card>
+      </div>
     </>
   );
 };
