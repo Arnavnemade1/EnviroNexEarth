@@ -35,7 +35,8 @@ import {
   Atom,
   TrendingUp,
   Baby,
-  User
+  User,
+  Sparkles
 } from 'lucide-react';
 import {
   calculateQuantumHealthRisk,
