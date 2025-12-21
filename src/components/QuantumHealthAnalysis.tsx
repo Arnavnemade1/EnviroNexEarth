@@ -36,7 +36,8 @@ import {
   TrendingUp,
   Baby,
   User,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import {
   calculateQuantumHealthRisk,
@@ -80,6 +81,7 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
   });
   const [healthAnalysis, setHealthAnalysis] = useState<QuantumHealthAnalysisType | null>(null);
   const [healthTrend, setHealthTrend] = useState<Array<{ hour: number; riskScore: number; trend: string }>>([]);
+  const [isOptimizing, setIsOptimizing] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
@@ -481,24 +483,61 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
                   </div>
                   <Button
                     variant="outline"
-                    className="border-purple-500/50 hover:bg-purple-500/20"
+                    className="border-purple-500/50 hover:bg-purple-500/20 relative overflow-hidden group"
                     onClick={() => {
-                      // Simulate optimization
-                      const newTrend = healthTrend.map(t => ({
-                        ...t,
-                        riskScore: Math.max(0, t.riskScore - 10)
-                      }));
-                      setHealthTrend(newTrend);
+                      setIsOptimizing(true);
+                      // Simulate quantum processing
+                      setTimeout(() => {
+                        const newTrend = healthTrend.map(t => ({
+                          ...t,
+                          riskScore: Math.max(0, t.riskScore * 0.7) // 30% reduction
+                        }));
+                        setHealthTrend(newTrend);
+                        setIsOptimizing(false);
+                      }, 3000);
                     }}
+                    disabled={isOptimizing}
                   >
-                    <Sparkles className="w-4 h-4 mr-2 text-purple-400" />
-                    Optimize Reality
+                    {isOptimizing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Optimizing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2 text-purple-400 group-hover:animate-pulse" />
+                        Optimize Reality
+                      </>
+                    )}
+                    {/* Button glow effect */}
+                    <div className="absolute inset-0 bg-purple-500/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                   </Button>
                 </div>
 
                 <div className="h-96 mb-4 relative">
                   {/* Quantum background effect */}
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-pulse pointer-events-none" />
+
+                  {/* Optimization Overlay */}
+                  {isOptimizing && (
+                    <div className="absolute inset-0 z-10 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-300">
+                      <div className="relative">
+                        <Atom className="w-16 h-16 text-purple-500 animate-spin duration-1000" />
+                        <div className="absolute inset-0 w-16 h-16 animate-ping opacity-30">
+                          <Sparkles className="w-16 h-16 text-purple-400" />
+                        </div>
+                      </div>
+                      <h3 className="text-xl font-bold mt-4 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent animate-pulse">
+                        Collapsing Wave Functions...
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Simulating 1,024 environmental interventions
+                      </p>
+                      <div className="w-64 mt-4 h-1 bg-muted overflow-hidden rounded-full">
+                        <div className="h-full bg-purple-500 animate-progress-indeterminate" />
+                      </div>
+                    </div>
+                  )}
 
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={healthTrend} margin={{ top: 5, right: 30, left: 20, bottom: 50 }}>

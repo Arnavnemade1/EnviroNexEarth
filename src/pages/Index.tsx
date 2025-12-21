@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import GlobeComponent from '@/components/Globe';
@@ -23,6 +24,7 @@ import { AirQualityData, PredictionData, CityData } from '@/types';
 
 const Index = () => {
   const { toast } = useToast();
+  const location = useLocation();
   const { user, userProfile, loading: authLoading } = useAuth();
   const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
   const [airQuality, setAirQuality] = useState<AirQualityData | null>(null);
@@ -45,6 +47,21 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Handle return from Health page
+  useEffect(() => {
+    const state = location.state as { returnToCity?: string };
+    if (state?.returnToCity) {
+      // Search for the city and select it
+      geocodingService.searchCity(state.returnToCity).then(cities => {
+        if (cities.length > 0) {
+          handleCitySelect(cities[0]);
+          // Clear the state to prevent re-triggering on refresh (optional, but good practice)
+          window.history.replaceState({}, document.title);
+        }
+      });
+    }
+  }, [location.state]);
+
   // Globe hue effect based on scenario
   useEffect(() => {
     if (currentScenario === 'clean_energy') {
@@ -62,7 +79,7 @@ const Index = () => {
       setShowIntro(false);
       setShowDisasters(false);
       setShowQuantumAnalytics(false);
-      
+
       toast({
         title: "Loading city data...",
         description: `Fetching air quality data for ${city.name}`,
@@ -80,9 +97,9 @@ const Index = () => {
           historicalAQI,
           { shots: 2048, qubits: 5 }
         );
-        
+
         qForecast = await quantumPredictor.get24hForecast(city, aqData);
-        
+
         // Enhance with IBM Quantum metrics
         if (qForecast) {
           const metrics = ibmQuantumAer.getQuantumAdvantageMetrics(quantumResult);
@@ -115,18 +132,18 @@ const Index = () => {
       const baseValue = aqData.aqi;
       const radius = 5; // degrees
       const points = 80;
-      
+
       for (let i = 0; i < points; i++) {
         const angle = (i / points) * 2 * Math.PI;
         const distance = (i % 4) * (radius / 4);
         const lat = city.lat + Math.cos(angle) * distance;
         const lng = city.lng + Math.sin(angle) * distance;
-        
+
         // Value varies based on distance from city center and actual AQI
         const distanceFactor = 1 - (distance / radius) * 0.3;
         const value = baseValue * distanceFactor;
         const color = value > 100 ? '#ef4444' : value > 50 ? '#f59e0b' : '#10b981';
-        
+
         pollutionPoints.push({ lat, lng, value, color });
       }
       setPollutionData(pollutionPoints);
@@ -164,7 +181,7 @@ const Index = () => {
   const handleQuickStart = (type: 'search' | 'globe' | 'disasters') => {
     setShowHomeScreen(false);
     setShowIntro(false);
-    
+
     if (type === 'disasters') {
       setShowDisasters(true);
     } else if (type === 'search') {
@@ -176,7 +193,7 @@ const Index = () => {
 
   const handleForecastToggle = (scenario: 'current' | 'clean_energy' | 'no_action') => {
     setCurrentScenario(scenario);
-    
+
     // Update pollution data based on scenario
     if (selectedCity) {
       const multiplier = scenario === 'clean_energy' ? 0.7 : scenario === 'no_action' ? 1.4 : 1.0;
@@ -211,7 +228,7 @@ const Index = () => {
 
       {/* Home Screen */}
       {showHomeScreen && (
-        <HomeScreen 
+        <HomeScreen
           onStartExploring={() => setShowHomeScreen(false)}
           onQuickStart={handleQuickStart}
         />
@@ -227,12 +244,11 @@ const Index = () => {
             showSatellites={true}
           />
           {/* Globe Hue Overlay */}
-          <div 
-            className={`absolute inset-0 pointer-events-none transition-all duration-1000 ${
-              globeHue === 'green' ? 'bg-clean-green/10' : 
-              globeHue === 'red' ? 'bg-pollution-red/10' :
-              globeHue === 'orange' ? 'bg-accent/10' : 'bg-transparent'
-            }`} 
+          <div
+            className={`absolute inset-0 pointer-events-none transition-all duration-1000 ${globeHue === 'green' ? 'bg-clean-green/10' :
+                globeHue === 'red' ? 'bg-pollution-red/10' :
+                  globeHue === 'orange' ? 'bg-accent/10' : 'bg-transparent'
+              }`}
           />
         </div>
       )}
@@ -347,7 +363,7 @@ const Index = () => {
 
       {/* Chatbot - Only show when not on home screen */}
       {!showHomeScreen && (
-        <Chatbot 
+        <Chatbot
           selectedCity={selectedCity ? `${selectedCity.name}, ${selectedCity.country}` : undefined}
           currentScenario={currentScenario}
           currentYear={currentYear}
@@ -378,8 +394,8 @@ const Index = () => {
       {/* Bottom Credits - Only show when not on home screen */}
       {!showHomeScreen && (
         <div className="absolute bottom-6 left-6 z-40 group">
-          <Badge 
-            variant="outline" 
+          <Badge
+            variant="outline"
             className="glass text-xs px-2 py-1 bg-transparent border-white/10 transition-all duration-300 group-hover:px-4 group-hover:py-2 cursor-default"
           >
             <span className="inline group-hover:hidden"></span>
