@@ -115,7 +115,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
             className="absolute w-full h-full object-cover"
             style={{ filter: 'brightness(0.6)' }}
           >
-            <source src="https://svs.gsfc.nasa.gov/vis/a000000/a004500/a004515/ISS_Crew_Earth_Observations_2160p.mp4" type="video/mp4" />
+            <source src="https://videos.pexels.com/video-files/1851190/1851190-uhd_3840_2160_25fps.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50" />
