@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { MapPin, Clock, Cloud, Zap, X } from 'lucide-react';
 
-// Import Cesium CSS
-import "cesium/Build/Cesium/Widgets/widgets.css";
+// CSS is handled by vite-plugin-cesium, manual import can cause issues
+// import "cesium/Build/Cesium/Widgets/widgets.css";
 
 interface GlobeComponentProps {
   onCityClick?: (lat: number, lng: number) => void;
@@ -112,19 +112,25 @@ export const GlobeComponent = ({
     }
   }, [viewer, selectedCity]);
 
+  console.log("GlobeComponent rendering");
+
   return (
     <div className="relative w-full h-full overflow-hidden">
       <Viewer
         full
         timeline={false}
         animation={false}
-        baseLayerPicker={false}
+        baseLayerPicker={false} // Disable default layer picker to avoid token issues with default Bing maps
         navigationHelpButton={false}
         homeButton={false}
         geocoder={false}
         sceneModePicker={false}
         selectionIndicator={false}
         infoBox={false}
+        // Use OpenStreetMap to avoid Ion Token requirements for default imagery
+        imageryProvider={new Cesium.OpenStreetMapImageryProvider({
+          url: "https://tile.openstreetmap.org/"
+        })}
         ref={(e) => {
           if (e && e.cesiumElement) {
             setViewer(e.cesiumElement);
