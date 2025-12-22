@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Viewer, Entity, PointGraphics } from 'resium';
+import { Viewer, Entity, PointGraphics, CloudCollection, CumulusCloud } from 'resium';
 import * as Cesium from 'cesium';
 import { SatelliteData } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { MapPin, Clock, Cloud, Zap, X } from 'lucide-react';
 
-// CSS is handled by vite-plugin-cesium, manual import can cause issues
-// import "cesium/Build/Cesium/Widgets/widgets.css";
+// Import Cesium CSS
+import "cesium/Build/Cesium/Widgets/widgets.css";
 
 interface GlobeComponentProps {
   onCityClick?: (lat: number, lng: number) => void;
@@ -112,26 +112,19 @@ export const GlobeComponent = ({
     }
   }, [viewer, selectedCity]);
 
-  // Remove console log in production
-  // console.log("GlobeComponent rendering");
-
   return (
     <div className="relative w-full h-full overflow-hidden">
       <Viewer
         full
         timeline={false}
         animation={false}
-        baseLayerPicker={false} // Disable default layer picker to avoid token issues with default Bing maps
+        baseLayerPicker={false}
         navigationHelpButton={false}
         homeButton={false}
         geocoder={false}
         sceneModePicker={false}
         selectionIndicator={false}
         infoBox={false}
-        // Use OpenStreetMap to avoid Ion Token requirements for default imagery
-        imageryProvider={new Cesium.OpenStreetMapImageryProvider({
-          url: 'https://a.tile.openstreetmap.org/'
-        })}
         ref={(e) => {
           if (e && e.cesiumElement) {
             setViewer(e.cesiumElement);
@@ -155,14 +148,14 @@ export const GlobeComponent = ({
             key={`city-${i}`}
             position={Cesium.Cartesian3.fromDegrees(city.lng, city.lat)}
             name="City Light"
-          >
-            <PointGraphics
-              pixelSize={city.size}
-              color={Cesium.Color.YELLOW}
-              outlineColor={Cesium.Color.BLACK}
-              outlineWidth={1}
-            />
-          </Entity>
+            point={{
+              pixelSize: city.size,
+              color: Cesium.Color.YELLOW,
+              outlineColor: Cesium.Color.BLACK,
+              outlineWidth: 1
+            }}
+            onClick={() => onCityClick?.(city.lat, city.lng)}
+          />
         ))}
 
         {/* Satellites */}
@@ -171,14 +164,14 @@ export const GlobeComponent = ({
             key={sat.id}
             position={Cesium.Cartesian3.fromDegrees(sat.lng, sat.lat, sat.altitude)}
             name={sat.name}
-          >
-            <PointGraphics
-              pixelSize={10}
-              color={sat.id === 'iss' ? Cesium.Color.ORANGE : Cesium.Color.CYAN}
-              outlineColor={Cesium.Color.WHITE}
-              outlineWidth={2}
-            />
-          </Entity>
+            point={{
+              pixelSize: 10,
+              color: sat.id === 'iss' ? Cesium.Color.ORANGE : Cesium.Color.CYAN,
+              outlineColor: Cesium.Color.WHITE,
+              outlineWidth: 2
+            }}
+            onClick={() => setSelectedSatellite(sat)}
+          />
         ))}
 
         {/* Selected City Marker */}
@@ -186,17 +179,24 @@ export const GlobeComponent = ({
           <Entity
             position={Cesium.Cartesian3.fromDegrees(selectedCity.lng, selectedCity.lat)}
             name="Selected City"
-          >
-            <PointGraphics
-              pixelSize={15}
-              color={Cesium.Color.CYAN}
-              outlineColor={Cesium.Color.WHITE}
-              outlineWidth={2}
-            />
-          </Entity>
+            point={{
+              pixelSize: 15,
+              color: Cesium.Color.fromCssColorString('hsl(var(--accent))'),
+              outlineColor: Cesium.Color.WHITE,
+              outlineWidth: 2
+            }}
+          />
         )}
 
-        {/* Clouds removed - experimental feature causing issues */}
+        {/* Clouds (Example using CloudCollection) */}
+        <CloudCollection>
+          <CumulusCloud
+            position={Cesium.Cartesian3.fromDegrees(-74.0, 40.0, 5000)}
+            scale={new Cesium.Cartesian2(2500, 1000)}
+            maximumSize={new Cesium.Cartesian3(500, 500, 200)}
+          />
+          {/* Add more clouds randomly if needed */}
+        </CloudCollection>
 
       </Viewer>
 
