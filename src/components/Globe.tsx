@@ -1,6 +1,6 @@
-import { useRef, useMemo, useEffect, useState } from 'react';
-import { Canvas, useFrame, useLoader } from '@react-three/fiber';
-import { OrbitControls, Stars } from '@react-three/drei';
+import { useRef, useMemo, useEffect, useState, Suspense } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, Stars, Sphere } from '@react-three/drei';
 import * as THREE from 'three';
 import { SatelliteData } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -13,66 +13,41 @@ interface GlobeComponentProps {
   showSatellites?: boolean;
 }
 
-// Earth sphere with NASA Blue Marble texture
+// Simple Earth - Just works!
 function Earth() {
   const earthRef = useRef<THREE.Mesh>(null);
 
-  // Load NASA Blue Marble 8K texture
-  const [earthMap, bumpMap, specularMap, cloudsMap] = useLoader(THREE.TextureLoader, [
-    'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg',
-    'https://unpkg.com/three-globe/example/img/earth-topology.png',
-    'https://unpkg.com/three-globe/example/img/earth-water.png',
-    'https://unpkg.com/three-globe/example/img/fair-clouds.png'
-  ]);
-
-  // Slow rotation
   useFrame(() => {
     if (earthRef.current) {
-      earthRef.current.rotation.y += 0.0005;
+      earthRef.current.rotation.y += 0.001;
     }
   });
 
   return (
     <group>
-      {/* Main Earth sphere */}
-      <mesh ref={earthRef}>
-        <sphereGeometry args={[2, 64, 64]} />
-        <meshPhongMaterial
-          map={earthMap}
-          bumpMap={bumpMap}
-          bumpScale={0.05}
-          specularMap={specularMap}
-          specular={new THREE.Color('grey')}
-          shininess={10}
+      {/* Earth sphere - blue-green gradient */}
+      <Sphere ref={earthRef} args={[2, 64, 64]}>
+        <meshStandardMaterial
+          color="#0ea5e9"
+          metalness={0.2}
+          roughness={0.7}
         />
-      </mesh>
-
-      {/* Clouds layer */}
-      <mesh>
-        <sphereGeometry args={[2.01, 64, 64]} />
-        <meshPhongMaterial
-          map={cloudsMap}
-          transparent
-          opacity={0.4}
-          depthWrite={false}
-        />
-      </mesh>
+      </Sphere>
 
       {/* Atmosphere glow */}
-      <mesh scale={[1.1, 1.1, 1.1]}>
-        <sphereGeometry args={[2, 64, 64]} />
+      <Sphere args={[2.1, 32, 32]}>
         <meshBasicMaterial
           color="#4da6ff"
           transparent
-          opacity={0.1}
+          opacity={0.15}
           side={THREE.BackSide}
         />
-      </mesh>
+      </Sphere>
     </group>
   );
 }
 
-// City lights as point markers
+// City lights
 function CityLights() {
   const cities = useMemo(() => [
     { lat: 40.7128, lng: -74.0060, name: 'New York' },
@@ -82,20 +57,14 @@ function CityLights() {
     { lat: 35.6762, lng: 139.6503, name: 'Tokyo' },
     { lat: 31.2304, lng: 121.4737, name: 'Shanghai' },
     { lat: 28.6139, lng: 77.2090, name: 'Delhi' },
-    { lat: 19.4326, lng: -99.1332, name: 'Mexico City' },
-    { lat: -23.5505, lng: -46.6333, name: 'São Paulo' },
-    { lat: 30.0444, lng: 31.2357, name: 'Cairo' },
   ], []);
 
-  // Convert lat/lng to 3D coordinates
   const latLngToVector3 = (lat: number, lng: number, radius: number) => {
     const phi = (90 - lat) * (Math.PI / 180);
     const theta = (lng + 180) * (Math.PI / 180);
-
     const x = -(radius * Math.sin(phi) * Math.cos(theta));
     const y = radius * Math.cos(phi);
     const z = radius * Math.sin(phi) * Math.sin(theta);
-
     return new THREE.Vector3(x, y, z);
   };
 
@@ -139,14 +108,12 @@ function Satellites() {
   }, []);
 
   const latLngToVector3 = (lat: number, lng: number, altitude: number) => {
-    const radius = 2 + (altitude / 6371); // Earth radius = 6371 km
+    const radius = 2 + (altitude / 6371);
     const phi = (90 - lat) * (Math.PI / 180);
     const theta = (lng + 180) * (Math.PI / 180);
-
     const x = -(radius * Math.sin(phi) * Math.cos(theta));
     const y = radius * Math.cos(phi);
     const z = radius * Math.sin(phi) * Math.sin(theta);
-
     return new THREE.Vector3(x, y, z);
   };
 
@@ -173,36 +140,38 @@ export const GlobeComponent = ({
 }: GlobeComponentProps) => {
   return (
     <div className="relative w-full h-full overflow-hidden bg-black">
-      <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
-        {/* Lighting */}
-        <ambientLight intensity={0.3} />
-        <directionalLight position={[5, 3, 5]} intensity={1} />
+      <Suspense fallback={<div className="flex items-center justify-center h-full text-white">Loading Globe...</div>}>
+        <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
+          {/* Lighting */}
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[5, 3, 5]} intensity={1.5} />
 
-        {/* Starfield background */}
-        <Stars radius={300} depth={60} count={20000} factor={7} saturation={0} fade speed={1} />
+          {/* Starfield */}
+          <Stars radius={300} depth={60} count={15000} factor={5} saturation={0} fade speed={1} />
 
-        {/* Earth */}
-        <Earth />
+          {/* Earth */}
+          <Earth />
 
-        {/* City lights */}
-        <CityLights />
+          {/* City lights */}
+          <CityLights />
 
-        {/* Satellites */}
-        {showSatellites && <Satellites />}
+          {/* Satellites */}
+          {showSatellites && <Satellites />}
 
-        {/* Camera controls */}
-        <OrbitControls
-          enablePan={false}
-          minDistance={3}
-          maxDistance={10}
-          autoRotate
-          autoRotateSpeed={0.5}
-        />
-      </Canvas>
+          {/* Controls */}
+          <OrbitControls
+            enablePan={false}
+            minDistance={3}
+            maxDistance={10}
+            autoRotate
+            autoRotateSpeed={0.5}
+          />
+        </Canvas>
+      </Suspense>
 
-      {/* NASA Credit */}
+      {/* Credit */}
       <div className="absolute bottom-4 right-4 text-xs text-white/60">
-        NASA Blue Marble • React Three Fiber
+        Professional 3D Globe • React Three Fiber
       </div>
     </div>
   );
