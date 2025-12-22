@@ -1,11 +1,11 @@
 import { useRef, Suspense } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { Sphere, MeshDistortMaterial, Float, Stars, Line } from '@react-three/drei';
 import * as THREE from 'three';
 
 const AnimatedSphere = () => {
   const meshRef = useRef<THREE.Mesh>(null);
-  
+
   useFrame((state) => {
     if (meshRef.current) {
       meshRef.current.rotation.y += 0.002;
@@ -14,7 +14,7 @@ const AnimatedSphere = () => {
   });
 
   return (
-    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
+    <group>
       <Sphere ref={meshRef} args={[2.5, 128, 128]} position={[0, 0, 0]}>
         <MeshDistortMaterial
           color="#0ea5e9"
@@ -25,7 +25,7 @@ const AnimatedSphere = () => {
           metalness={0.8}
         />
       </Sphere>
-      
+
       {/* Inner glow sphere */}
       <Sphere args={[2.3, 64, 64]} position={[0, 0, 0]}>
         <meshBasicMaterial
@@ -34,7 +34,7 @@ const AnimatedSphere = () => {
           opacity={0.3}
         />
       </Sphere>
-      
+
       {/* Atmosphere glow */}
       <Sphere args={[2.8, 64, 64]} position={[0, 0, 0]}>
         <meshBasicMaterial
@@ -44,13 +44,39 @@ const AnimatedSphere = () => {
           side={THREE.BackSide}
         />
       </Sphere>
-    </Float>
+    </group>
+  );
+};
+
+const Clouds = () => {
+  // Use live cloud data from Matt Eason's service (updated every 3 hours)
+  const cloudTexture = useLoader(THREE.TextureLoader, 'https://clouds.matteason.co.uk/images/4096x2048/clouds.jpg');
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y += 0.0005; // Realistic drift speed
+      // meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.1) * 0.05; // Remove tilt for more realistic orbital feel
+    }
+  });
+
+  return (
+    <mesh ref={meshRef}>
+      <sphereGeometry args={[2.55, 64, 64]} /> {/* Slightly larger than main sphere */}
+      <meshStandardMaterial
+        map={cloudTexture}
+        transparent
+        opacity={0.6}
+        blending={THREE.AdditiveBlending}
+        side={THREE.DoubleSide}
+      />
+    </mesh>
   );
 };
 
 const OrbitRing = ({ radius, speed, color, opacity }: { radius: number; speed: number; color: string; opacity: number }) => {
   const groupRef = useRef<THREE.Group>(null);
-  
+
   useFrame((state) => {
     if (groupRef.current) {
       groupRef.current.rotation.z = state.clock.elapsedTime * speed;
@@ -73,7 +99,7 @@ const OrbitRing = ({ radius, speed, color, opacity }: { radius: number; speed: n
 
 const OrbitingParticle = ({ radius, speed, size, color, offsetAngle = 0 }: { radius: number; speed: number; size: number; color: string; offsetAngle?: number }) => {
   const ref = useRef<THREE.Mesh>(null);
-  
+
   useFrame((state) => {
     if (ref.current) {
       const t = state.clock.elapsedTime * speed + offsetAngle;
@@ -98,16 +124,19 @@ const Scene = () => {
       <directionalLight position={[10, 10, 5]} intensity={1.2} />
       <pointLight position={[-10, -10, -10]} intensity={0.5} color="#22d3ee" />
       <pointLight position={[5, 5, 5]} intensity={0.3} color="#10b981" />
-      
+
       <Stars radius={100} depth={50} count={1500} factor={4} saturation={0} fade speed={0.5} />
-      
-      <AnimatedSphere />
-      
+
+      <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
+        <AnimatedSphere />
+        <Clouds />
+      </Float>
+
       {/* Orbit rings */}
       <OrbitRing radius={3.5} speed={0.15} color="#0ea5e9" opacity={0.4} />
       <OrbitRing radius={4.5} speed={-0.1} color="#22d3ee" opacity={0.25} />
       <OrbitRing radius={5.5} speed={0.08} color="#10b981" opacity={0.15} />
-      
+
       {/* Orbiting particles */}
       <OrbitingParticle radius={3.5} speed={0.4} size={0.1} color="#0ea5e9" />
       <OrbitingParticle radius={3.5} speed={0.4} size={0.06} color="#22d3ee" offsetAngle={Math.PI} />
