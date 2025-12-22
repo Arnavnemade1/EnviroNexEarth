@@ -119,12 +119,12 @@ export const GlobeComponent = ({
 
     // Initialize Globe with ULTRA-ENHANCED visuals (Full Package)
     const globe = new Globe(globeRef.current)
-      // 🗺️ Higher quality 8K Earth texture
-      .globeImageUrl('https://unpkg.com/three-globe@2.31.0/example/img/earth-blue-marble.jpg')
+      // 🗺️ Higher quality Earth texture (using reliable CDN)
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
       // Realistic terrain depth
-      .bumpImageUrl('https://unpkg.com/three-globe@2.31.0/example/img/earth-topology.png')
+      .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
       // 🌟 Starry space background
-      .backgroundImageUrl('https://unpkg.com/three-globe@2.31.0/example/img/night-sky.png')
+      .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
       .width(window.innerWidth)
       .height(window.innerHeight)
       // ✨ Enhanced atmosphere glow (brighter, higher)
