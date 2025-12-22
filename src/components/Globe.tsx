@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Viewer, Entity, PointGraphics, CloudCollection, CumulusCloud } from 'resium';
+import { Viewer, Entity } from 'resium';
 import * as Cesium from 'cesium';
 import { SatelliteData } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -187,22 +187,14 @@ export const GlobeComponent = ({
             name="Selected City"
             point={{
               pixelSize: 15,
-              color: Cesium.Color.fromCssColorString('hsl(var(--accent))'),
+              color: Cesium.Color.CYAN,
               outlineColor: Cesium.Color.WHITE,
               outlineWidth: 2
             }}
           />
         )}
 
-        {/* Clouds (Example using CloudCollection) */}
-        <CloudCollection>
-          <CumulusCloud
-            position={Cesium.Cartesian3.fromDegrees(-74.0, 40.0, 5000)}
-            scale={new Cesium.Cartesian2(2500, 1000)}
-            maximumSize={new Cesium.Cartesian3(500, 500, 200)}
-          />
-          {/* Add more clouds randomly if needed */}
-        </CloudCollection>
+        {/* Clouds removed - experimental feature causing issues */}
 
       </Viewer>
 
