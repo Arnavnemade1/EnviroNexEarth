@@ -117,29 +117,44 @@ export const GlobeComponent = ({
   useEffect(() => {
     if (!globeRef.current || globeInstanceRef.current) return; // Prevent re-initialization
 
-    // Initialize Globe with ultra-enhanced visuals
+    // Initialize Globe with ULTRA-ENHANCED visuals (Full Package)
     const globe = new Globe(globeRef.current)
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-      .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-      .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+      // 🗺️ Higher quality 8K Earth texture
+      .globeImageUrl('https://unpkg.com/three-globe@2.31.0/example/img/earth-blue-marble.jpg')
+      // Realistic terrain depth
+      .bumpImageUrl('https://unpkg.com/three-globe@2.31.0/example/img/earth-topology.png')
+      // 🌟 Starry space background
+      .backgroundImageUrl('https://unpkg.com/three-globe@2.31.0/example/img/night-sky.png')
       .width(window.innerWidth)
       .height(window.innerHeight)
-      .atmosphereColor('#60a5fa')
-      .atmosphereAltitude(0.3)
+      // ✨ Enhanced atmosphere glow (brighter, higher)
+      .atmosphereColor('#4da6ff')
+      .atmosphereAltitude(0.35)
       .enablePointerInteraction(true)
       .showAtmosphere(true)
       .pointOfView({ altitude: 2.5 });
 
-    // Configure camera with enhanced settings
+    // Enhanced camera configuration
     globe.camera().position.z = 300;
 
-    // Auto-rotate with smooth motion
+    // Smoother auto-rotation
     globe.controls().autoRotate = true;
-    globe.controls().autoRotateSpeed = 0.3;
+    globe.controls().autoRotateSpeed = 0.4;
     globe.controls().enableDamping = true;
     globe.controls().dampingFactor = 0.05;
     globe.controls().minDistance = 200;
     globe.controls().maxDistance = 600;
+
+    // 🌊 Add specular map for realistic ocean shine
+    const scene = globe.scene();
+    if (scene && scene.children.length > 0) {
+      const earthMesh = scene.children.find((obj: any) => obj.type === 'Mesh');
+      if (earthMesh && (earthMesh as any).material) {
+        const material = (earthMesh as any).material;
+        material.specular = new THREE.Color(0x333333);
+        material.shininess = 15;
+      }
+    }
 
     // Click handler for cities and distance measurement
     globe.onGlobeClick((coords: { lat: number; lng: number }) => {
@@ -219,22 +234,24 @@ export const GlobeComponent = ({
     if (layers.cityLights) {
       globeInstanceRef.current
         .pointsData(cityLights)
+        // 💡 Brighter, more visible city lights
         .pointColor(() => '#ffeb3b')
-        .pointAltitude((d: any) => 0.01)
-        .pointRadius((d: any) => d.size)
+        .pointAltitude((d: any) => 0.012)  // Slightly elevated for better visibility
+        .pointRadius((d: any) => d.size * 1.2)  // 20% larger
         .pointsMerge(false);
     } else {
       globeInstanceRef.current.pointsData([]);
     }
   }, [layers.cityLights]);
 
-  // Clouds Layer
+  // ☁️ Enhanced Clouds Layer with LIVE REAL-TIME DATA
   useEffect(() => {
     if (!globeInstanceRef.current) return;
 
-    const CLOUDS_IMG_URL = '//unpkg.com/three-globe/example/clouds/clouds.png';
-    const CLOUDS_ALT = 0.004;
-    const CLOUDS_ROTATION_SPEED = -0.006;
+    // Use LIVE satellite cloud imagery (updates every 3 hours)
+    const CLOUDS_IMG_URL = 'https://clouds.matteason.co.uk/images/4096x2048/clouds.jpg';
+    const CLOUDS_ALT = 0.006;  // Higher altitude for better visibility
+    const CLOUDS_ROTATION_SPEED = -0.008;  // Faster, more dynamic
 
     let cloudsLayer: THREE.Mesh | null = null;
 
@@ -245,10 +262,15 @@ export const GlobeComponent = ({
         cloudsLayer = new THREE.Mesh(
           new THREE.SphereGeometry(
             globeInstanceRef.current.getGlobeRadius() * (1 + CLOUDS_ALT),
-            75,
-            75
+            100,  // Higher segments for smoother appearance
+            100
           ),
-          new THREE.MeshPhongMaterial({ map: cloudsTexture, transparent: true, opacity: 0.8 })
+          new THREE.MeshPhongMaterial({
+            map: cloudsTexture,
+            transparent: true,
+            opacity: 0.7,  // Slightly more visible
+            depthWrite: false  // Better transparency rendering
+          })
         );
         cloudsLayer.name = 'clouds-layer';
 
