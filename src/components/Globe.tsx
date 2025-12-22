@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Viewer, Entity } from 'resium';
+import { Viewer, Entity, PointGraphics } from 'resium';
 import * as Cesium from 'cesium';
 import { SatelliteData } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -154,14 +154,14 @@ export const GlobeComponent = ({
             key={`city-${i}`}
             position={Cesium.Cartesian3.fromDegrees(city.lng, city.lat)}
             name="City Light"
-            point={{
-              pixelSize: city.size,
-              color: Cesium.Color.YELLOW,
-              outlineColor: Cesium.Color.BLACK,
-              outlineWidth: 1
-            }}
-            onClick={() => onCityClick?.(city.lat, city.lng)}
-          />
+          >
+            <PointGraphics
+              pixelSize={city.size}
+              color={Cesium.Color.YELLOW}
+              outlineColor={Cesium.Color.BLACK}
+              outlineWidth={1}
+            />
+          </Entity>
         ))}
 
         {/* Satellites */}
@@ -170,14 +170,14 @@ export const GlobeComponent = ({
             key={sat.id}
             position={Cesium.Cartesian3.fromDegrees(sat.lng, sat.lat, sat.altitude)}
             name={sat.name}
-            point={{
-              pixelSize: 10,
-              color: sat.id === 'iss' ? Cesium.Color.ORANGE : Cesium.Color.CYAN,
-              outlineColor: Cesium.Color.WHITE,
-              outlineWidth: 2
-            }}
-            onClick={() => setSelectedSatellite(sat)}
-          />
+          >
+            <PointGraphics
+              pixelSize={10}
+              color={sat.id === 'iss' ? Cesium.Color.ORANGE : Cesium.Color.CYAN}
+              outlineColor={Cesium.Color.WHITE}
+              outlineWidth={2}
+            />
+          </Entity>
         ))}
 
         {/* Selected City Marker */}
@@ -185,13 +185,14 @@ export const GlobeComponent = ({
           <Entity
             position={Cesium.Cartesian3.fromDegrees(selectedCity.lng, selectedCity.lat)}
             name="Selected City"
-            point={{
-              pixelSize: 15,
-              color: Cesium.Color.CYAN,
-              outlineColor: Cesium.Color.WHITE,
-              outlineWidth: 2
-            }}
-          />
+          >
+            <PointGraphics
+              pixelSize={15}
+              color={Cesium.Color.CYAN}
+              outlineColor={Cesium.Color.WHITE}
+              outlineWidth={2}
+            />
+          </Entity>
         )}
 
         {/* Clouds removed - experimental feature causing issues */}
