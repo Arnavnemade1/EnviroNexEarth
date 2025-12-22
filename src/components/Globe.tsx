@@ -6,9 +6,7 @@ import { SatelliteData } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { MapPin, Layers, Navigation, Ruler, Clock, Cloud, Zap, X } from 'lucide-react';
+import { MapPin, Clock, Cloud, Zap, X } from 'lucide-react';
 
 
 interface GlobeComponentProps {
@@ -29,8 +27,8 @@ export const GlobeComponent = ({
   const [satellites, setSatellites] = useState<SatelliteData[]>([]);
   const [selectedSatellite, setSelectedSatellite] = useState<SatelliteData | null>(null);
   const [dayNightCycle, setDayNightCycle] = useState(0);
-  const [shootingStars, setShootingStars] = useState<Array<{id: number, x: number, y: number}>>([]);
-  const [showControls, setShowControls] = useState(true);
+  const [shootingStars, setShootingStars] = useState<Array<{ id: number, x: number, y: number }>>([]);
+
   const [layers, setLayers] = useState({
     cityLights: true,
     clouds: true,
@@ -40,7 +38,7 @@ export const GlobeComponent = ({
   });
   const [timeOfDay, setTimeOfDay] = useState(12); // 0-24 hours
   const [measuringDistance, setMeasuringDistance] = useState(false);
-  const [measurePoints, setMeasurePoints] = useState<Array<{lat: number, lng: number}>>([]);
+  const [measurePoints, setMeasurePoints] = useState<Array<{ lat: number, lng: number }>>([]);
 
   // Famous locations for quick travel
   const famousLocations = [
@@ -109,7 +107,7 @@ export const GlobeComponent = ({
           description: 'NASA\'s flagship Earth observation satellite, monitoring climate and environmental change'
         }
       ];
-      
+
       setSatellites(sats);
     };
 
@@ -134,7 +132,7 @@ export const GlobeComponent = ({
 
     // Configure camera with enhanced settings
     globe.camera().position.z = 300;
-    
+
     // Auto-rotate with smooth motion
     globe.controls().autoRotate = true;
     globe.controls().autoRotateSpeed = 0.3;
@@ -155,13 +153,13 @@ export const GlobeComponent = ({
             const lat2 = newPoints[1].lat * Math.PI / 180;
             const deltaLat = (newPoints[1].lat - newPoints[0].lat) * Math.PI / 180;
             const deltaLng = (newPoints[1].lng - newPoints[0].lng) * Math.PI / 180;
-            
-            const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
-                     Math.cos(lat1) * Math.cos(lat2) *
-                     Math.sin(deltaLng/2) * Math.sin(deltaLng/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+              Math.cos(lat1) * Math.cos(lat2) *
+              Math.sin(deltaLng / 2) * Math.sin(deltaLng / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             const distance = R * c;
-            
+
             alert(`Distance: ${distance.toFixed(2)} km`);
             return [];
           }
@@ -243,7 +241,7 @@ export const GlobeComponent = ({
     if (layers.clouds) {
       new THREE.TextureLoader().load(CLOUDS_IMG_URL, (cloudsTexture) => {
         if (!globeInstanceRef.current) return;
-        
+
         cloudsLayer = new THREE.Mesh(
           new THREE.SphereGeometry(
             globeInstanceRef.current.getGlobeRadius() * (1 + CLOUDS_ALT),
@@ -253,7 +251,7 @@ export const GlobeComponent = ({
           new THREE.MeshPhongMaterial({ map: cloudsTexture, transparent: true, opacity: 0.8 })
         );
         cloudsLayer.name = 'clouds-layer';
-        
+
         const scene = globeInstanceRef.current.scene();
         if (scene) {
           scene.add(cloudsLayer);
@@ -302,7 +300,7 @@ export const GlobeComponent = ({
     };
 
     const interval = setInterval(animateSatellites, 100);
-    
+
     if (layers.satellites) {
       globeInstanceRef.current
         .objectsData(satellites)
@@ -405,7 +403,7 @@ export const GlobeComponent = ({
 
       globeInstanceRef.current
         .ringsData(auroraData)
-        .ringColor(() => (t: number) => `rgba(0, 255, 150, ${Math.sqrt(1-t) * 0.8})`)
+        .ringColor(() => (t: number) => `rgba(0, 255, 150, ${Math.sqrt(1 - t) * 0.8})`)
         .ringMaxRadius(8)
         .ringPropagationSpeed(3)
         .ringRepeatPeriod(2000);
@@ -439,111 +437,7 @@ export const GlobeComponent = ({
     <div className="relative w-full h-full overflow-hidden">
       <div ref={globeRef} className="w-full h-full" />
 
-      {/* Control Panel Toggle */}
-      <Button
-        onClick={() => setShowControls(!showControls)}
-        className="absolute top-4 left-4 z-50 glass"
-        size="icon"
-      >
-        <Layers className="w-5 h-5" />
-      </Button>
-
-      {/* Advanced Control Panel */}
-      {showControls && (
-        <Card className="absolute top-16 left-4 z-50 glass p-4 w-64 space-y-4">
-          <div>
-            <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
-              <Layers className="w-4 h-4" />
-              Visual Layers
-            </h3>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="cityLights" className="text-xs">City Lights</Label>
-                <Switch
-                  id="cityLights"
-                  checked={layers.cityLights}
-                  onCheckedChange={(checked) => setLayers(prev => ({ ...prev, cityLights: checked }))}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="clouds" className="text-xs">Clouds</Label>
-                <Switch
-                  id="clouds"
-                  checked={layers.clouds}
-                  onCheckedChange={(checked) => setLayers(prev => ({ ...prev, clouds: checked }))}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="satellites" className="text-xs">Satellites</Label>
-                <Switch
-                  id="satellites"
-                  checked={layers.satellites}
-                  onCheckedChange={(checked) => setLayers(prev => ({ ...prev, satellites: checked }))}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="orbitalPaths" className="text-xs">Orbital Paths</Label>
-                <Switch
-                  id="orbitalPaths"
-                  checked={layers.orbitalPaths}
-                  onCheckedChange={(checked) => setLayers(prev => ({ ...prev, orbitalPaths: checked }))}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="atmosphere" className="text-xs">Aurora</Label>
-                <Switch
-                  id="atmosphere"
-                  checked={layers.atmosphere}
-                  onCheckedChange={(checked) => setLayers(prev => ({ ...prev, atmosphere: checked }))}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
-              <Ruler className="w-4 h-4" />
-              Measurement Tool
-            </h3>
-            <Button
-              onClick={() => {
-                setMeasuringDistance(!measuringDistance);
-                setMeasurePoints([]);
-              }}
-              className={`w-full ${measuringDistance ? 'bg-accent' : ''}`}
-              size="sm"
-              variant={measuringDistance ? 'default' : 'outline'}
-            >
-              {measuringDistance ? 'Cancel Measuring' : 'Measure Distance'}
-            </Button>
-            {measuringDistance && (
-              <p className="text-xs text-muted-foreground mt-2">
-                Click 2 points on globe
-              </p>
-            )}
-          </div>
-
-          <div>
-            <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
-              <Navigation className="w-4 h-4" />
-              Quick Travel
-            </h3>
-            <div className="grid grid-cols-2 gap-2">
-              {famousLocations.map((loc) => (
-                <Button
-                  key={loc.name}
-                  onClick={() => travelTo(loc)}
-                  size="sm"
-                  variant="outline"
-                  className="text-xs"
-                >
-                  {loc.name}
-                </Button>
-              ))}
-            </div>
-          </div>
-        </Card>
-      )}
+      {/* Control Panel Removed */}
 
       {/* Shooting Stars */}
       {shootingStars.map(star => (
