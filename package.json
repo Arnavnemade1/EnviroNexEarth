@@ -64,8 +64,6 @@
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.179.1",
     "vaul": "^0.9.9",
-    "worldwind-react-globe": "^0.2.0",
-    "worldwindjs": "^1.7.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
