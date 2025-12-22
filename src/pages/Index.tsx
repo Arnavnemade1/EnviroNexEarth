@@ -10,6 +10,7 @@ import Chatbot from '@/components/Chatbot';
 import HomeScreen from '@/components/HomeScreen';
 import UserProfile from '@/components/UserProfile';
 import QuantumAnalytics from '@/components/QuantumAnalytics';
+import { QuantumHealthAnalysisComponent } from '@/components/QuantumHealthAnalysis';
 import { ClimatePredictions } from '@/components/ClimatePredictions';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +39,7 @@ const Index = () => {
   const [showHomeScreen, setShowHomeScreen] = useState(true);
   const [showDisasters, setShowDisasters] = useState(false);
   const [showQuantumAnalytics, setShowQuantumAnalytics] = useState(false);
+  const [showHealthAnalysis, setShowHealthAnalysis] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [showClimatePredictions, setShowClimatePredictions] = useState(false);
 
@@ -46,21 +48,6 @@ const Index = () => {
     const timer = setTimeout(() => setShowIntro(false), 5000);
     return () => clearTimeout(timer);
   }, []);
-
-  // Handle return from Health page
-  useEffect(() => {
-    const state = location.state as { returnToCity?: string };
-    if (state?.returnToCity) {
-      // Search for the city and select it
-      geocodingService.searchCity(state.returnToCity).then(cities => {
-        if (cities.length > 0) {
-          handleCitySelect(cities[0]);
-          // Clear the state to prevent re-triggering on refresh (optional, but good practice)
-          window.history.replaceState({}, document.title);
-        }
-      });
-    }
-  }, [location.state]);
 
   // Globe hue effect based on scenario
   useEffect(() => {
@@ -79,6 +66,7 @@ const Index = () => {
       setShowIntro(false);
       setShowDisasters(false);
       setShowQuantumAnalytics(false);
+      setShowHealthAnalysis(false);
 
       toast({
         title: "Loading city data...",
@@ -226,6 +214,21 @@ const Index = () => {
         />
       )}
 
+      {/* Quantum Health Analysis Overlay */}
+      {showHealthAnalysis && selectedCity && airQuality && (
+        <div className="fixed inset-0 z-[60] bg-background/95 backdrop-blur-xl animate-in fade-in zoom-in duration-300 p-6 overflow-auto">
+          <div className="max-w-7xl mx-auto">
+            <QuantumHealthAnalysisComponent
+              cityName={`${selectedCity.name}, ${selectedCity.country}`}
+              currentAQI={airQuality.aqi}
+              airQuality={airQuality}
+              forecast={quantumForecast?.hourly}
+              onBack={() => setShowHealthAnalysis(false)}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Home Screen */}
       {showHomeScreen && (
         <HomeScreen
@@ -246,8 +249,8 @@ const Index = () => {
           {/* Globe Hue Overlay */}
           <div
             className={`absolute inset-0 pointer-events-none transition-all duration-1000 ${globeHue === 'green' ? 'bg-clean-green/10' :
-                globeHue === 'red' ? 'bg-pollution-red/10' :
-                  globeHue === 'orange' ? 'bg-accent/10' : 'bg-transparent'
+              globeHue === 'red' ? 'bg-pollution-red/10' :
+                globeHue === 'orange' ? 'bg-accent/10' : 'bg-transparent'
               }`}
           />
         </div>
@@ -335,7 +338,7 @@ const Index = () => {
       </div>
 
       {/* Data Panel */}
-      {selectedCity && airQuality && predictions.length > 0 && !showQuantumAnalytics && (
+      {selectedCity && airQuality && predictions.length > 0 && !showQuantumAnalytics && !showHealthAnalysis && (
         <DataPanel
           cityName={`${selectedCity.name}, ${selectedCity.country}`}
           airQuality={airQuality}
@@ -347,6 +350,7 @@ const Index = () => {
           currentYear={currentYear}
           onYearChange={handleYearChange}
           onShowQuantumAnalytics={quantumForecast ? () => setShowQuantumAnalytics(true) : undefined}
+          onShowHealth={() => setShowHealthAnalysis(true)}
           onShowClimatePredictions={() => setShowClimatePredictions(true)}
           onBackToHome={() => {
             setShowHomeScreen(true);

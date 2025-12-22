@@ -10,24 +10,24 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Wind, Thermometer, Eye, Heart, Activity, TrendingUp, TrendingDown, Play, Pause, RotateCcw, Chrome as Home, ChartBar as BarChart3, Atom, Sparkles, Loader as Loader2 } from 'lucide-react';
 import { AirQualityData, PredictionData } from '@/types';
- 
- type QuantumForecast = {
-   model: { name: string; backend: string; horizonHours: number };
-   generatedAt: string;
-   hourly: Array<{ hourOffset: number; aqi: number; pm25: number; confidence: number }>;
- };
- 
- interface DataPanelProps {
-   cityName?: string;
-   airQuality: AirQualityData | null;
-   predictions: PredictionData[];
-   quantumForecast?: QuantumForecast;
-   onForecastToggle: (scenario: 'current' | 'clean_energy' | 'no_action') => void;
-   isAnimating: boolean;
-   onAnimationToggle: () => void;
-   currentYear: number;
-   onYearChange: (direction: 'next' | 'prev') => void;
-   onBackToHome?: () => void;
+
+type QuantumForecast = {
+  model: { name: string; backend: string; horizonHours: number };
+  generatedAt: string;
+  hourly: Array<{ hourOffset: number; aqi: number; pm25: number; confidence: number }>;
+};
+
+interface DataPanelProps {
+  cityName?: string;
+  airQuality: AirQualityData | null;
+  predictions: PredictionData[];
+  quantumForecast?: QuantumForecast;
+  onForecastToggle: (scenario: 'current' | 'clean_energy' | 'no_action') => void;
+  isAnimating: boolean;
+  onAnimationToggle: () => void;
+  currentYear: number;
+  onYearChange: (direction: 'next' | 'prev') => void;
+  onBackToHome?: () => void;
   onShowQuantumAnalytics?: () => void;
   onShowHealth?: () => void;
   onShowClimatePredictions?: () => void;
@@ -137,7 +137,9 @@ export const DataPanel = ({
   const healthImpact = calculateHealthImpact();
 
   const handleHealthNavigation = () => {
-    if (cityName && airQuality) {
+    if (onShowHealth) {
+      onShowHealth();
+    } else if (cityName && airQuality) {
       navigate('/health', {
         state: {
           cityName,
@@ -278,17 +280,17 @@ export const DataPanel = ({
                   if (line.startsWith('- ')) {
                     const content = line.replace('- ', '');
                     const icon = content.includes('AQI') ? <Activity className="w-4 h-4 text-primary" /> :
-                                 content.includes('PM') ? <Wind className="w-4 h-4 text-secondary" /> :
-                                 content.includes('health') || content.includes('Health') ? <Heart className="w-4 h-4 text-accent" /> :
-                                 <div className="w-2 h-2 bg-foreground/50 rounded-full" />;
-                    
+                      content.includes('PM') ? <Wind className="w-4 h-4 text-secondary" /> :
+                        content.includes('health') || content.includes('Health') ? <Heart className="w-4 h-4 text-accent" /> :
+                          <div className="w-2 h-2 bg-foreground/50 rounded-full" />;
+
                     return (
                       <Card key={idx} className="glass p-3 animate-fade-in hover-scale transition-all duration-300" style={{ animationDelay: `${idx * 0.05}s` }}>
                         <div className="flex items-start gap-3">
                           {icon}
-                          <span 
-                            className="text-sm text-foreground/90 leading-relaxed flex-1" 
-                            dangerouslySetInnerHTML={{ 
+                          <span
+                            className="text-sm text-foreground/90 leading-relaxed flex-1"
+                            dangerouslySetInnerHTML={{
                               __html: content.replace(/\*\*(.*?)\*\*/g, '<strong class="text-primary font-semibold">$1</strong>')
                             }}
                           />
@@ -320,313 +322,311 @@ export const DataPanel = ({
 
       <div className="fixed top-6 left-6 w-80 space-y-4 z-40 max-h-[calc(100vh-3rem)] overflow-y-auto scrollbar-thin">
         {/* Back to Home Button */}
-      {onBackToHome && (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={onBackToHome}
-          className="glass bg-transparent border-white/10 mb-2"
-        >
-          <Home className="w-4 h-4 mr-2" />
-          Back to Home
-        </Button>
-      )}
-      {/* City Info Card */}
-      {cityName && airQuality && (
-        <Card className="glass bg-transparent border-white/10 animate-fade-in-up">
-          <div className="p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-foreground">{cityName}</h2>
-                <p className="text-sm text-muted-foreground">Live Air Quality (OpenAQ)</p>
-              </div>
-              <Badge 
-                variant="outline" 
-                className={`text-lg font-bold ${getAQIColor(airQuality.aqi)} border-current`}
-              >
-                {airQuality.aqi}
-              </Badge>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Air Quality</span>
-                <span className={getAQIColor(airQuality.aqi)}>
-                  {getAQICategory(airQuality.aqi)}
-                </span>
-              </div>
-              <Progress 
-                value={(airQuality.aqi / 200) * 100} 
-                className="h-2"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="flex items-center gap-2">
-                <Wind className="w-4 h-4 text-primary" />
-                <span>PM2.5: {airQuality.pm25}μg/m³</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Thermometer className="w-4 h-4 text-secondary" />
-                <span>O₃: {airQuality.o3}μg/m³</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4 text-accent" />
-                <span>NO₂: {airQuality.no2}μg/m³</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-earth-blue" />
-                <span>SO₂: {airQuality.so2}μg/m³</span>
-              </div>
-            </div>
-
-            {/* Enviro AI Impact Summary Button */}
-            <Button
-              onClick={handleGenerateImpactSummary}
-              className="w-full mt-4 bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-secondary/40 group"
-              size="lg"
-            >
-              <Sparkles className="w-5 h-5 mr-2 group-hover:animate-spin" />
-              <span className="font-semibold">Enviro AI Impact Analysis</span>
-            </Button>
-
-            {/* ClimatePredict AI Button */}
-            {onShowClimatePredictions && (
-              <Button
-                onClick={onShowClimatePredictions}
-                className="w-full mt-2 bg-gradient-to-r from-secondary via-accent to-primary hover:opacity-90 transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-secondary/30 hover:shadow-xl hover:shadow-accent/40 group relative overflow-hidden"
-                size="lg"
-              >
-                <div className="absolute top-1 right-1">
-                  <span className="text-[9px] font-bold bg-accent/90 text-accent-foreground px-1.5 py-0.5 rounded">BETA</span>
+        {onBackToHome && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onBackToHome}
+            className="glass bg-transparent border-white/10 mb-2"
+          >
+            <Home className="w-4 h-4 mr-2" />
+            Back to Home
+          </Button>
+        )}
+        {/* City Info Card */}
+        {cityName && airQuality && (
+          <Card className="glass bg-transparent border-white/10 animate-fade-in-up">
+            <div className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-foreground">{cityName}</h2>
+                  <p className="text-sm text-muted-foreground">Live Air Quality (OpenAQ)</p>
                 </div>
-                <TrendingUp className="w-5 h-5 mr-2 group-hover:animate-bounce" />
-                <span className="font-semibold">ClimatePredict AI</span>
-              </Button>
-            )}
-          </div>
-        </Card>
-      )}
-
-      {/* Quantum 24h Forecast */}
-      {quantumForecast && (
-        <Card className="glass bg-transparent border-white/10 animate-fade-in-up border-2 border-primary/30">
-          <div className="p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Atom className="w-5 h-5 text-primary animate-spin" />
-                <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Quantum 24h Forecast
-                </h3>
-              </div>
-              <Badge variant="outline" className="border-primary text-primary">
-                IBM Quantum Circuits
-              </Badge>
-            </div>
-            <div className="text-xs text-muted-foreground bg-primary/5 p-2 rounded">
-              Powered by IBM Quantum Computing - leveraging quantum superposition for enhanced predictions.
-            </div>
-            <div className="text-sm text-muted-foreground">
-              Next hour AQI: <span className={getAQIColor(quantumForecast.hourly[0]?.aqi || 0)}>
-                {quantumForecast.hourly[0]?.aqi ?? '—'}
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <div className="text-muted-foreground">Min AQI (24h)</div>
-                <div className="font-medium">
-                  {Math.min(...quantumForecast.hourly.map(h => h.aqi))}
-                </div>
-              </div>
-              <div>
-                <div className="text-muted-foreground">Max AQI (24h)</div>
-                <div className="font-medium">
-                  {Math.max(...quantumForecast.hourly.map(h => h.aqi))}
-                </div>
-              </div>
-            </div>
-            {onShowQuantumAnalytics && (
-              <Button 
-                size="sm" 
-                className="w-full mt-3 bg-gradient-to-r from-primary to-secondary"
-                onClick={onShowQuantumAnalytics}
-              >
-                <BarChart3 className="w-4 h-4 mr-2" />
-                View Quantum Analytics
-              </Button>
-            )}
-            {cityName && airQuality && (
-              <Button 
-                size="sm" 
-                variant="outline"
-                className="w-full mt-2 glass"
-                onClick={handleHealthNavigation}
-              >
-                <Heart className="w-4 h-4 mr-2" />
-                Health Analysis
-              </Button>
-            )}
-            <div className="text-xs text-muted-foreground">
-              Horizon: {quantumForecast.model.horizonHours}h • Generated {new Date(quantumForecast.generatedAt).toLocaleTimeString()}
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {/* Forecast Controls */}
-      {predictions.length > 0 && (
-        <Card className="glass bg-transparent border-white/10 animate-fade-in-up">
-          <div className="p-4 border-b border-primary/20">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">2030 Forecast</h3>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => window.location.reload()}
-                className="glass"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-          
-          <div className="max-h-80 overflow-y-auto">
-            <div className="p-4 space-y-4">
-              {/* Scenario Buttons */}
-              <div className="grid grid-cols-1 gap-2">
-                <Button
-                  variant={selectedScenario === 'current' ? 'default' : 'outline'}
-                  onClick={() => handleScenarioChange('current')}
-                  className="justify-start text-left h-auto p-3 glass"
+                <Badge
+                  variant="outline"
+                  className={`text-lg font-bold ${getAQIColor(airQuality.aqi)} border-current`}
                 >
-                  <div>
-                    <div className="font-medium">Current Trends</div>
-                    <div className="text-xs text-muted-foreground">Continue as today</div>
-                  </div>
-                </Button>
-                
-                <Button
-                  variant={selectedScenario === 'clean_energy' ? 'default' : 'outline'}
-                  onClick={() => handleScenarioChange('clean_energy')}
-                  className="justify-start text-left h-auto p-3 glass hover:bg-secondary/20"
-                >
-                  <div className="flex items-center gap-2">
-                    <TrendingDown className="w-4 h-4 text-clean-green" />
-                    <div>
-                      <div className="font-medium text-clean-green">Clean Energy</div>
-                      <div className="text-xs text-muted-foreground">Rapid adoption</div>
-                    </div>
-                  </div>
-                </Button>
-                
-                <Button
-                  variant={selectedScenario === 'no_action' ? 'default' : 'outline'}
-                  onClick={() => handleScenarioChange('no_action')}
-                  className="justify-start text-left h-auto p-3 glass hover:bg-destructive/20"
-                >
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-pollution-red" />
-                    <div>
-                      <div className="font-medium text-pollution-red">No Action</div>
-                      <div className="text-xs text-muted-foreground">Business as usual</div>
-                    </div>
-                  </div>
-                </Button>
+                  {airQuality.aqi}
+                </Badge>
               </div>
 
-              {/* Year Controls */}
-              <div className="space-y-3 pt-3 border-t border-primary/20">
-                <div className="flex items-center justify-center gap-2 py-2">
-                  <span className="text-2xl font-bold text-primary">
-                    {new Date().getFullYear() + currentYear}
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Air Quality</span>
+                  <span className={getAQIColor(airQuality.aqi)}>
+                    {getAQICategory(airQuality.aqi)}
                   </span>
                 </div>
-                
-                <div className="flex items-center justify-between gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleYearChange('prev')}
-                    disabled={currentYear === 0}
-                    className="glass flex-1"
-                  >
-                    Previous Year
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleYearChange('next')}
-                    disabled={currentYear >= 6}
-                    className="glass flex-1"
-                  >
-                    Next Year
-                  </Button>
-                </div>
+                <Progress
+                  value={(airQuality.aqi / 200) * 100}
+                  className="h-2"
+                />
+              </div>
 
-                <div className="text-center text-sm text-muted-foreground">
-                  Year {currentYear + 1} of 7
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="flex items-center gap-2">
+                  <Wind className="w-4 h-4 text-primary" />
+                  <span>PM2.5: {airQuality.pm25}μg/m³</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Thermometer className="w-4 h-4 text-secondary" />
+                  <span>O₃: {airQuality.o3}μg/m³</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-accent" />
+                  <span>NO₂: {airQuality.no2}μg/m³</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-earth-blue" />
+                  <span>SO₂: {airQuality.so2}μg/m³</span>
                 </div>
               </div>
 
-              {/* Health Impact Preview */}
-              <div className="space-y-3 pt-3 border-t border-primary/20">
-                <h4 className="font-medium text-foreground">Health Impact Forecast</h4>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm flex items-center gap-2">
-                      <Heart className="w-4 h-4 text-clean-green" />
-                      Outdoor Activity Days
-                    </span>
-                    <span className={`text-sm font-medium ${
-                      selectedScenario === 'clean_energy' ? 'text-clean-green' : 
-                      selectedScenario === 'no_action' ? 'text-pollution-red' : 'text-accent'
-                    }`}>
-                      {Math.round(healthImpact.outdoorDays)} days/year
-                    </span>
+              {/* Enviro AI Impact Summary Button */}
+              <Button
+                onClick={handleGenerateImpactSummary}
+                className="w-full mt-4 bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-secondary/40 group"
+                size="lg"
+              >
+                <Sparkles className="w-5 h-5 mr-2 group-hover:animate-spin" />
+                <span className="font-semibold">Enviro AI Impact Analysis</span>
+              </Button>
+
+              {/* ClimatePredict AI Button */}
+              {onShowClimatePredictions && (
+                <Button
+                  onClick={onShowClimatePredictions}
+                  className="w-full mt-2 bg-gradient-to-r from-secondary via-accent to-primary hover:opacity-90 transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-secondary/30 hover:shadow-xl hover:shadow-accent/40 group relative overflow-hidden"
+                  size="lg"
+                >
+                  <div className="absolute top-1 right-1">
+                    <span className="text-[9px] font-bold bg-accent/90 text-accent-foreground px-1.5 py-0.5 rounded">BETA</span>
                   </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm flex items-center gap-2">
-                      <Activity className="w-4 h-4 text-accent" />
-                      Asthma Risk Index
-                    </span>
-                    <span className={`text-sm font-medium ${
-                      selectedScenario === 'clean_energy' ? 'text-clean-green' : 
-                      selectedScenario === 'no_action' ? 'text-pollution-red' : 'text-accent'
-                    }`}>
-                      {Math.round(healthImpact.asthmaRisk)}
+                  <TrendingUp className="w-5 h-5 mr-2 group-hover:animate-bounce" />
+                  <span className="font-semibold">ClimatePredict AI</span>
+                </Button>
+              )}
+            </div>
+          </Card>
+        )}
+
+        {/* Quantum 24h Forecast */}
+        {quantumForecast && (
+          <Card className="glass bg-transparent border-white/10 animate-fade-in-up border-2 border-primary/30">
+            <div className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Atom className="w-5 h-5 text-primary animate-spin" />
+                  <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    Quantum 24h Forecast
+                  </h3>
+                </div>
+                <Badge variant="outline" className="border-primary text-primary">
+                  IBM Quantum Circuits
+                </Badge>
+              </div>
+              <div className="text-xs text-muted-foreground bg-primary/5 p-2 rounded">
+                Powered by IBM Quantum Computing - leveraging quantum superposition for enhanced predictions.
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Next hour AQI: <span className={getAQIColor(quantumForecast.hourly[0]?.aqi || 0)}>
+                  {quantumForecast.hourly[0]?.aqi ?? '—'}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <div className="text-muted-foreground">Min AQI (24h)</div>
+                  <div className="font-medium">
+                    {Math.min(...quantumForecast.hourly.map(h => h.aqi))}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Max AQI (24h)</div>
+                  <div className="font-medium">
+                    {Math.max(...quantumForecast.hourly.map(h => h.aqi))}
+                  </div>
+                </div>
+              </div>
+              {onShowQuantumAnalytics && (
+                <Button
+                  size="sm"
+                  className="w-full mt-3 bg-gradient-to-r from-primary to-secondary"
+                  onClick={onShowQuantumAnalytics}
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  View Quantum Analytics
+                </Button>
+              )}
+              {cityName && airQuality && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full mt-2 glass"
+                  onClick={handleHealthNavigation}
+                >
+                  <Heart className="w-4 h-4 mr-2" />
+                  Health Analysis
+                </Button>
+              )}
+              <div className="text-xs text-muted-foreground">
+                Horizon: {quantumForecast.model.horizonHours}h • Generated {new Date(quantumForecast.generatedAt).toLocaleTimeString()}
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Forecast Controls */}
+        {predictions.length > 0 && (
+          <Card className="glass bg-transparent border-white/10 animate-fade-in-up">
+            <div className="p-4 border-b border-primary/20">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">2030 Forecast</h3>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => window.location.reload()}
+                  className="glass"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="max-h-80 overflow-y-auto">
+              <div className="p-4 space-y-4">
+                {/* Scenario Buttons */}
+                <div className="grid grid-cols-1 gap-2">
+                  <Button
+                    variant={selectedScenario === 'current' ? 'default' : 'outline'}
+                    onClick={() => handleScenarioChange('current')}
+                    className="justify-start text-left h-auto p-3 glass"
+                  >
+                    <div>
+                      <div className="font-medium">Current Trends</div>
+                      <div className="text-xs text-muted-foreground">Continue as today</div>
+                    </div>
+                  </Button>
+
+                  <Button
+                    variant={selectedScenario === 'clean_energy' ? 'default' : 'outline'}
+                    onClick={() => handleScenarioChange('clean_energy')}
+                    className="justify-start text-left h-auto p-3 glass hover:bg-secondary/20"
+                  >
+                    <div className="flex items-center gap-2">
+                      <TrendingDown className="w-4 h-4 text-clean-green" />
+                      <div>
+                        <div className="font-medium text-clean-green">Clean Energy</div>
+                        <div className="text-xs text-muted-foreground">Rapid adoption</div>
+                      </div>
+                    </div>
+                  </Button>
+
+                  <Button
+                    variant={selectedScenario === 'no_action' ? 'default' : 'outline'}
+                    onClick={() => handleScenarioChange('no_action')}
+                    className="justify-start text-left h-auto p-3 glass hover:bg-destructive/20"
+                  >
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-pollution-red" />
+                      <div>
+                        <div className="font-medium text-pollution-red">No Action</div>
+                        <div className="text-xs text-muted-foreground">Business as usual</div>
+                      </div>
+                    </div>
+                  </Button>
+                </div>
+
+                {/* Year Controls */}
+                <div className="space-y-3 pt-3 border-t border-primary/20">
+                  <div className="flex items-center justify-center gap-2 py-2">
+                    <span className="text-2xl font-bold text-primary">
+                      {new Date().getFullYear() + currentYear}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm flex items-center gap-2">
-                      <Eye className="w-4 h-4 text-earth-blue" />
-                      Projected AQI
-                    </span>
-                    <span className={`text-sm font-medium ${getAQIColor(healthImpact.projectedAQI)}`}>
-                      {Math.round(healthImpact.projectedAQI)}
-                    </span>
+                  <div className="flex items-center justify-between gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleYearChange('prev')}
+                      disabled={currentYear === 0}
+                      className="glass flex-1"
+                    >
+                      Previous Year
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleYearChange('next')}
+                      disabled={currentYear >= 6}
+                      className="glass flex-1"
+                    >
+                      Next Year
+                    </Button>
                   </div>
 
-                  <div className="text-xs text-muted-foreground mt-2 p-2 glass rounded">
-                    <strong>Scenario Impact:</strong><br/>
-                    {selectedScenario === 'clean_energy' && 
-                      "Clean energy adoption reduces pollution by 60-80%, improving health outcomes significantly."
-                    }
-                    {selectedScenario === 'no_action' && 
-                      "Without intervention, air quality deteriorates, increasing respiratory risks and reducing quality of life."
-                    }
-                    {selectedScenario === 'current' && 
-                      "Current trends show gradual improvement but not enough to meet WHO standards."
-                    }
+                  <div className="text-center text-sm text-muted-foreground">
+                    Year {currentYear + 1} of 7
+                  </div>
+                </div>
+
+                {/* Health Impact Preview */}
+                <div className="space-y-3 pt-3 border-t border-primary/20">
+                  <h4 className="font-medium text-foreground">Health Impact Forecast</h4>
+
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm flex items-center gap-2">
+                        <Heart className="w-4 h-4 text-clean-green" />
+                        Outdoor Activity Days
+                      </span>
+                      <span className={`text-sm font-medium ${selectedScenario === 'clean_energy' ? 'text-clean-green' :
+                          selectedScenario === 'no_action' ? 'text-pollution-red' : 'text-accent'
+                        }`}>
+                        {Math.round(healthImpact.outdoorDays)} days/year
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-accent" />
+                        Asthma Risk Index
+                      </span>
+                      <span className={`text-sm font-medium ${selectedScenario === 'clean_energy' ? 'text-clean-green' :
+                          selectedScenario === 'no_action' ? 'text-pollution-red' : 'text-accent'
+                        }`}>
+                        {Math.round(healthImpact.asthmaRisk)}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm flex items-center gap-2">
+                        <Eye className="w-4 h-4 text-earth-blue" />
+                        Projected AQI
+                      </span>
+                      <span className={`text-sm font-medium ${getAQIColor(healthImpact.projectedAQI)}`}>
+                        {Math.round(healthImpact.projectedAQI)}
+                      </span>
+                    </div>
+
+                    <div className="text-xs text-muted-foreground mt-2 p-2 glass rounded">
+                      <strong>Scenario Impact:</strong><br />
+                      {selectedScenario === 'clean_energy' &&
+                        "Clean energy adoption reduces pollution by 60-80%, improving health outcomes significantly."
+                      }
+                      {selectedScenario === 'no_action' &&
+                        "Without intervention, air quality deteriorates, increasing respiratory risks and reducing quality of life."
+                      }
+                      {selectedScenario === 'current' &&
+                        "Current trends show gradual improvement but not enough to meet WHO standards."
+                      }
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </Card>
-      )}
+          </Card>
+        )}
       </div>
     </>
   );

@@ -37,7 +37,8 @@ import {
   Baby,
   User,
   Sparkles,
-  Loader2
+  Loader2,
+  ArrowLeft
 } from 'lucide-react';
 import {
   calculateQuantumHealthRisk,
@@ -59,9 +60,10 @@ interface QuantumHealthProps {
     co: number;
   };
   forecast?: Array<{ aqi: number; pm25: number; confidence: number }>;
+  onBack?: () => void;
 }
 
-export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQuality, forecast }: QuantumHealthProps) => {
+export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQuality, forecast, onBack }: QuantumHealthProps) => {
   const [activeTab, setActiveTab] = useState('analysis');
   const [healthProfile, setHealthProfile] = useState<HealthProfile>({
     age: 30,
@@ -154,18 +156,25 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
         {/* Header with Overall Risk */}
         <Card className="glass p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                <Atom className="w-6 h-6 text-primary-foreground animate-pulse" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold">Quantum Health Analysis</h2>
-                <p className="text-muted-foreground">
-                  {cityName} • Real-time Risk Assessment
-                  <span className="text-xs block mt-1">
-                    Last updated: {lastUpdated.toLocaleTimeString()}
-                  </span>
-                </p>
+            <div className="flex items-center gap-4">
+              {onBack && (
+                <Button variant="ghost" size="icon" onClick={onBack} className="hover:bg-primary/10">
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+              )}
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                  <Atom className="w-6 h-6 text-primary-foreground animate-pulse" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold">Quantum Health Analysis</h2>
+                  <p className="text-muted-foreground">
+                    {cityName} • Real-time Risk Assessment
+                    <span className="text-xs block mt-1">
+                      Last updated: {lastUpdated.toLocaleTimeString()}
+                    </span>
+                  </p>
+                </div>
               </div>
             </div>
             <Badge
