@@ -112,7 +112,8 @@ export const GlobeComponent = ({
     }
   }, [viewer, selectedCity]);
 
-  console.log("GlobeComponent rendering");
+  // Remove console log in production
+  // console.log("GlobeComponent rendering");
 
   return (
     <div className="relative w-full h-full overflow-hidden">
@@ -129,7 +130,7 @@ export const GlobeComponent = ({
         infoBox={false}
         // Use OpenStreetMap to avoid Ion Token requirements for default imagery
         imageryProvider={new Cesium.OpenStreetMapImageryProvider({
-          url: "https://tile.openstreetmap.org/"
+          url: 'https://a.tile.openstreetmap.org/'
         })}
         ref={(e) => {
           if (e && e.cesiumElement) {
