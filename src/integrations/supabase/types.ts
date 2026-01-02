@@ -100,6 +100,69 @@ export type Database = {
           },
         ]
       }
+      algorithm_calibrations: {
+        Row: {
+          accuracy_after: number | null
+          accuracy_before: number | null
+          calibration_notes: string | null
+          calibration_type: string
+          created_at: string
+          data_points_analyzed: number | null
+          id: string
+          improvement_percentage: number | null
+          new_values: Json
+          previous_values: Json
+          triggered_by: string | null
+        }
+        Insert: {
+          accuracy_after?: number | null
+          accuracy_before?: number | null
+          calibration_notes?: string | null
+          calibration_type: string
+          created_at?: string
+          data_points_analyzed?: number | null
+          id?: string
+          improvement_percentage?: number | null
+          new_values?: Json
+          previous_values?: Json
+          triggered_by?: string | null
+        }
+        Update: {
+          accuracy_after?: number | null
+          accuracy_before?: number | null
+          calibration_notes?: string | null
+          calibration_type?: string
+          created_at?: string
+          data_points_analyzed?: number | null
+          id?: string
+          improvement_percentage?: number | null
+          new_values?: Json
+          previous_values?: Json
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
+      anonymous_actions: {
+        Row: {
+          action_type: string
+          created_at: string
+          fingerprint: string
+          id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          fingerprint: string
+          id?: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          fingerprint?: string
+          id?: string
+        }
+        Relationships: []
+      }
       base_models: {
         Row: {
           architecture: Json
@@ -719,6 +782,48 @@ export type Database = {
         }
         Relationships: []
       }
+      prediction_accuracy_log: {
+        Row: {
+          accuracy_score: number | null
+          actual_value: number | null
+          deviation_percentage: number | null
+          environmental_context: Json | null
+          id: string
+          location_name: string | null
+          predicted_value: number | null
+          prediction_id: string | null
+          prediction_made_at: string | null
+          prediction_type: string
+          verified_at: string
+        }
+        Insert: {
+          accuracy_score?: number | null
+          actual_value?: number | null
+          deviation_percentage?: number | null
+          environmental_context?: Json | null
+          id?: string
+          location_name?: string | null
+          predicted_value?: number | null
+          prediction_id?: string | null
+          prediction_made_at?: string | null
+          prediction_type: string
+          verified_at?: string
+        }
+        Update: {
+          accuracy_score?: number | null
+          actual_value?: number | null
+          deviation_percentage?: number | null
+          environmental_context?: Json | null
+          id?: string
+          location_name?: string | null
+          predicted_value?: number | null
+          prediction_id?: string | null
+          prediction_made_at?: string | null
+          prediction_type?: string
+          verified_at?: string
+        }
+        Relationships: []
+      }
       professionals: {
         Row: {
           availability_status: string | null
@@ -941,6 +1046,42 @@ export type Database = {
           user_id?: string
           video_url?: string
           views_count?: number | null
+        }
+        Relationships: []
+      }
+      research_insights: {
+        Row: {
+          applied_at: string | null
+          applied_to_model: boolean | null
+          confidence_score: number | null
+          created_at: string
+          id: string
+          impact_assessment: Json | null
+          insight_data: Json
+          insight_type: string
+          source: string
+        }
+        Insert: {
+          applied_at?: string | null
+          applied_to_model?: boolean | null
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          impact_assessment?: Json | null
+          insight_data: Json
+          insight_type: string
+          source: string
+        }
+        Update: {
+          applied_at?: string | null
+          applied_to_model?: boolean | null
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          impact_assessment?: Json | null
+          insight_data?: Json
+          insight_type?: string
+          source?: string
         }
         Relationships: []
       }
