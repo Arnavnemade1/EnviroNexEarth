@@ -9,6 +9,7 @@ import NaturalDisasters from '@/components/NaturalDisasters';
 import Chatbot from '@/components/Chatbot';
 import HomeScreen from '@/components/HomeScreen';
 import UserProfile from '@/components/UserProfile';
+import Dashboard from '@/components/Dashboard';
 import QuantumAnalytics from '@/components/QuantumAnalytics';
 import { QuantumHealthAnalysisComponent } from '@/components/QuantumHealthAnalysis';
 import { ClimatePredictions } from '@/components/ClimatePredictions';
@@ -41,6 +42,7 @@ const Index = () => {
   const [showQuantumAnalytics, setShowQuantumAnalytics] = useState(false);
   const [showHealthAnalysis, setShowHealthAnalysis] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
   const [showClimatePredictions, setShowClimatePredictions] = useState(false);
 
   // Auto-hide intro after 5 seconds
@@ -261,6 +263,18 @@ const Index = () => {
         <UserProfile onClose={() => setShowUserProfile(false)} />
       )}
 
+      {/* Dashboard Modal */}
+      {showDashboard && (
+        <Dashboard 
+          onClose={() => setShowDashboard(false)} 
+          onSelectCity={(city) => {
+            geocodingService.searchCity(city).then(cities => {
+              if (cities.length > 0) handleCitySelect(cities[0]);
+            });
+          }}
+        />
+      )}
+
       {/* Climate Predictions Modal */}
       {selectedCity && airQuality && (
         <ClimatePredictions
@@ -275,19 +289,18 @@ const Index = () => {
 
       {/* User Controls */}
       {!showHomeScreen && (
-        <div className="absolute top-6 right-6 z-40 flex flex-col gap-2">
-          {user && (
+        <div className="absolute top-6 right-6 z-40 flex gap-2">
+          {user ? (
             <Button
               size="sm"
               variant="outline"
-              onClick={() => setShowUserProfile(true)}
+              onClick={() => setShowDashboard(true)}
               className="glass bg-transparent border-white/10"
             >
               <User className="w-4 h-4 mr-2" />
-              Profile
+              Dashboard
             </Button>
-          )}
-          {!user && (
+          ) : (
             <Button
               size="sm"
               variant="outline"
