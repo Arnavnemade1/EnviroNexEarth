@@ -749,6 +749,56 @@ export type Database = {
           },
         ]
       }
+      model_stats: {
+        Row: {
+          created_at: string
+          environment: Json | null
+          id: string
+          model_id: string | null
+          percentile_data: Json | null
+          result_unit: string
+          result_value: number
+          stat_type: string
+          test_name: string
+          test_parameters: Json | null
+          tested_at: string
+        }
+        Insert: {
+          created_at?: string
+          environment?: Json | null
+          id?: string
+          model_id?: string | null
+          percentile_data?: Json | null
+          result_unit: string
+          result_value: number
+          stat_type: string
+          test_name: string
+          test_parameters?: Json | null
+          tested_at?: string
+        }
+        Update: {
+          created_at?: string
+          environment?: Json | null
+          id?: string
+          model_id?: string | null
+          percentile_data?: Json | null
+          result_unit?: string
+          result_value?: number
+          stat_type?: string
+          test_name?: string
+          test_parameters?: Json | null
+          tested_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "model_stats_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "base_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           content: string
