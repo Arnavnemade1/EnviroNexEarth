@@ -10,6 +10,7 @@ import Chatbot from '@/components/Chatbot';
 import HomeScreen from '@/components/HomeScreen';
 import UserProfile from '@/components/UserProfile';
 import Dashboard from '@/components/Dashboard';
+import { HealthProfileSetup } from '@/components/HealthProfileSetup';
 import QuantumAnalytics from '@/components/QuantumAnalytics';
 import { QuantumHealthAnalysisComponent } from '@/components/QuantumHealthAnalysis';
 import { ClimatePredictions } from '@/components/ClimatePredictions';
@@ -44,7 +45,18 @@ const Index = () => {
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
   const [showClimatePredictions, setShowClimatePredictions] = useState(false);
+  const [showHealthProfileSetup, setShowHealthProfileSetup] = useState(false);
 
+  // Check if user needs health profile setup
+  useEffect(() => {
+    if (user && userProfile && !userProfile.health_profile?.age_range) {
+      // Show setup prompt after a short delay
+      const timer = setTimeout(() => {
+        setShowHealthProfileSetup(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [user, userProfile]);
   // Auto-hide intro after 5 seconds
   useEffect(() => {
     const timer = setTimeout(() => setShowIntro(false), 5000);
@@ -231,11 +243,23 @@ const Index = () => {
         </div>
       )}
 
+      {/* Health Profile Setup */}
+      {showHealthProfileSetup && (
+        <HealthProfileSetup
+          onComplete={() => setShowHealthProfileSetup(false)}
+          onSkip={() => setShowHealthProfileSetup(false)}
+        />
+      )}
+
       {/* Home Screen */}
       {showHomeScreen && (
         <HomeScreen
           onStartExploring={() => setShowHomeScreen(false)}
           onQuickStart={handleQuickStart}
+          onOpenDashboard={() => {
+            setShowHomeScreen(false);
+            setShowDashboard(true);
+          }}
         />
       )}
 

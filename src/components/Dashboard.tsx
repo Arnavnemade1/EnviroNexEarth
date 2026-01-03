@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/hooks/useAuth';
 import { useHealthTracking } from '@/hooks/useHealthTracking';
 import { useToast } from '@/hooks/use-toast';
+import { HealthProfileSetup } from '@/components/HealthProfileSetup';
 import {
   Activity,
   Heart,
@@ -28,7 +29,11 @@ import {
   FileText,
   Wind,
   Droplets,
-  Calendar
+  Calendar,
+  Award,
+  Zap,
+  Target,
+  Edit
 } from 'lucide-react';
 import {
   LineChart,
@@ -54,6 +59,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [showHealthProfileSetup, setShowHealthProfileSetup] = useState(false);
   
   const {
     exposures,
@@ -613,10 +619,108 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
 
             {/* Settings Tab */}
             <TabsContent value="settings" className="space-y-6">
+              {/* Health Profile Card */}
+              <Card className="glass p-6 bg-gradient-to-r from-primary/5 to-secondary/5">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/20 rounded-lg">
+                      <Heart className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">Health Profile</h3>
+                      <p className="text-sm text-muted-foreground">Your personalized settings</p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowHealthProfileSetup(true)}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Profile
+                  </Button>
+                </div>
+                
+                {userProfile?.health_profile?.age_range ? (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="p-3 bg-background/50 rounded-lg text-center">
+                      <User className="w-5 h-5 text-muted-foreground mx-auto mb-1" />
+                      <p className="text-sm font-medium">{userProfile.health_profile.age_range}</p>
+                      <p className="text-xs text-muted-foreground">Age Range</p>
+                    </div>
+                    <div className="p-3 bg-background/50 rounded-lg text-center">
+                      <Activity className="w-5 h-5 text-muted-foreground mx-auto mb-1" />
+                      <p className="text-sm font-medium capitalize">{userProfile.health_profile.activity_level}</p>
+                      <p className="text-xs text-muted-foreground">Activity</p>
+                    </div>
+                    <div className="p-3 bg-background/50 rounded-lg text-center">
+                      <Wind className="w-5 h-5 text-muted-foreground mx-auto mb-1" />
+                      <p className="text-sm font-medium capitalize">{userProfile.health_profile.air_sensitivity}</p>
+                      <p className="text-xs text-muted-foreground">Sensitivity</p>
+                    </div>
+                    <div className="p-3 bg-background/50 rounded-lg text-center">
+                      <Shield className="w-5 h-5 text-muted-foreground mx-auto mb-1" />
+                      <p className="text-sm font-medium">{userProfile.health_profile.health_conditions?.length || 0}</p>
+                      <p className="text-xs text-muted-foreground">Conditions</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-6">
+                    <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <h4 className="font-medium mb-2">Complete Your Health Profile</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Get personalized health recommendations based on your profile
+                    </p>
+                    <Button onClick={() => setShowHealthProfileSetup(true)}>
+                      <Zap className="w-4 h-4 mr-2" />
+                      Setup Profile
+                    </Button>
+                  </div>
+                )}
+              </Card>
+
+              {/* Achievements */}
+              <Card className="glass p-6">
+                <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                  <Award className="w-5 h-5 text-yellow-500" />
+                  Achievements
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 bg-muted/20 rounded-lg text-center border border-yellow-500/30">
+                    <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Star className="w-6 h-6 text-yellow-500" />
+                    </div>
+                    <p className="text-sm font-medium">Early Adopter</p>
+                    <p className="text-xs text-muted-foreground">Joined EnviroNex</p>
+                  </div>
+                  <div className={`p-4 bg-muted/20 rounded-lg text-center ${savedLocations.length > 0 ? 'border border-green-500/30' : 'opacity-50'}`}>
+                    <div className={`w-12 h-12 ${savedLocations.length > 0 ? 'bg-green-500/20' : 'bg-muted'} rounded-full flex items-center justify-center mx-auto mb-2`}>
+                      <MapPin className={`w-6 h-6 ${savedLocations.length > 0 ? 'text-green-500' : 'text-muted-foreground'}`} />
+                    </div>
+                    <p className="text-sm font-medium">Explorer</p>
+                    <p className="text-xs text-muted-foreground">Saved a location</p>
+                  </div>
+                  <div className={`p-4 bg-muted/20 rounded-lg text-center ${userProfile?.health_profile?.age_range ? 'border border-blue-500/30' : 'opacity-50'}`}>
+                    <div className={`w-12 h-12 ${userProfile?.health_profile?.age_range ? 'bg-blue-500/20' : 'bg-muted'} rounded-full flex items-center justify-center mx-auto mb-2`}>
+                      <Heart className={`w-6 h-6 ${userProfile?.health_profile?.age_range ? 'text-blue-500' : 'text-muted-foreground'}`} />
+                    </div>
+                    <p className="text-sm font-medium">Health Conscious</p>
+                    <p className="text-xs text-muted-foreground">Setup health profile</p>
+                  </div>
+                  <div className={`p-4 bg-muted/20 rounded-lg text-center ${exposures.length >= 7 ? 'border border-purple-500/30' : 'opacity-50'}`}>
+                    <div className={`w-12 h-12 ${exposures.length >= 7 ? 'bg-purple-500/20' : 'bg-muted'} rounded-full flex items-center justify-center mx-auto mb-2`}>
+                      <Calendar className={`w-6 h-6 ${exposures.length >= 7 ? 'text-purple-500' : 'text-muted-foreground'}`} />
+                    </div>
+                    <p className="text-sm font-medium">Consistent</p>
+                    <p className="text-xs text-muted-foreground">7 days tracked</p>
+                  </div>
+                </div>
+              </Card>
+
               <Card className="glass p-6">
                 <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
                   <Bell className="w-5 h-5" />
-                  Alert Settings
+                  Notification Settings
                 </h3>
                 
                 <div className="space-y-4">
@@ -652,7 +756,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
               <Card className="glass p-6">
                 <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
                   <Settings className="w-5 h-5" />
-                  Account Settings
+                  Account
                 </h3>
                 
                 <div className="space-y-4">
@@ -666,14 +770,12 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
 
                   <div className="flex items-center justify-between p-4 bg-muted/20 rounded-lg">
                     <div>
-                      <p className="font-medium">Health Profile</p>
+                      <p className="font-medium">Member Since</p>
                       <p className="text-sm text-muted-foreground">
-                        {userProfile?.health_profile ? 'Configured' : 'Not configured'}
+                        {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
                       </p>
                     </div>
-                    <Badge variant={userProfile?.health_profile ? 'default' : 'secondary'}>
-                      {userProfile?.health_profile ? 'Active' : 'Setup Required'}
-                    </Badge>
+                    <Badge variant="secondary">Member</Badge>
                   </div>
                 </div>
 
@@ -685,6 +787,14 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
               </Card>
             </TabsContent>
           </Tabs>
+
+          {/* Health Profile Setup Modal */}
+          {showHealthProfileSetup && (
+            <HealthProfileSetup
+              onComplete={() => setShowHealthProfileSetup(false)}
+              onSkip={() => setShowHealthProfileSetup(false)}
+            />
+          )}
         </Card>
       </div>
     </div>

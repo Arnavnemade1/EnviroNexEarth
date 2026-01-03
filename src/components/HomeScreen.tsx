@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { Globe, ArrowRight, ChevronDown, Zap, Shield, Activity } from 'lucide-react';
+import { Globe, ArrowRight, ChevronDown, Zap, Shield, Activity, User } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface HomeScreenProps {
   onStartExploring: () => void;
   onQuickStart: (type: 'search' | 'globe' | 'disasters') => void;
+  onOpenDashboard?: () => void;
 }
 
 // Custom hook for scroll-triggered animations
@@ -32,6 +34,7 @@ const useScrollAnimation = () => {
 };
 
 export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
+  const { user } = useAuth();
   const [isLoaded, setIsLoaded] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -90,7 +93,17 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           </div>
 
           <div className="flex items-center gap-4">
-            <a href="/auth" className="text-sm text-white/60 hover:text-white transition-colors">Sign In</a>
+            {user ? (
+              <button
+                onClick={onStartExploring}
+                className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors"
+              >
+                <User className="w-4 h-4" />
+                Dashboard
+              </button>
+            ) : (
+              <a href="/auth" className="text-sm text-white/60 hover:text-white transition-colors">Sign In</a>
+            )}
             <button
               onClick={onStartExploring}
               className="group px-5 py-2.5 text-sm font-medium bg-white text-black rounded-lg hover:bg-white/90 transition-all flex items-center gap-2"
