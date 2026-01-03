@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/hooks/useAuth';
 import { useHealthTracking } from '@/hooks/useHealthTracking';
+import { useActivityTracking } from '@/hooks/useActivityTracking';
 import { useToast } from '@/hooks/use-toast';
 import { HealthProfileSetup } from '@/components/HealthProfileSetup';
 import {
@@ -33,7 +34,15 @@ import {
   Award,
   Zap,
   Target,
-  Edit
+  Edit,
+  Brain,
+  Play,
+  Pause,
+  MapPinned,
+  Clock,
+  Sun,
+  Moon,
+  Sunrise
 } from 'lucide-react';
 import {
   LineChart,
@@ -60,6 +69,19 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showHealthProfileSetup, setShowHealthProfileSetup] = useState(false);
+
+  const {
+    isTracking,
+    activities,
+    learnedHabits,
+    dailySummaries,
+    optimalTimes,
+    trackingError,
+    permissionStatus,
+    startTracking,
+    stopTracking,
+    fetchOptimalTimes
+  } = useActivityTracking();
   
   const {
     exposures,
@@ -74,6 +96,14 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
     refreshData,
     dismissAlert
   } = useHealthTracking();
+
+  // Fetch optimal activity times when we have a saved location
+  useEffect(() => {
+    if (savedLocations.length > 0) {
+      const primaryLocation = savedLocations.find(l => l.is_favorite) || savedLocations[0];
+      fetchOptimalTimes(primaryLocation.latitude, primaryLocation.longitude);
+    }
+  }, [savedLocations, fetchOptimalTimes]);
 
   const handleLocationClick = (city: string) => {
     if (onSelectCity) {
@@ -218,10 +248,14 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
 
           {/* Content */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="p-6">
-            <TabsList className="grid w-full grid-cols-5 mb-6">
+            <TabsList className="grid w-full grid-cols-6 mb-6">
               <TabsTrigger value="overview" className="gap-2">
                 <Activity className="w-4 h-4" />
                 <span className="hidden sm:inline">Overview</span>
+              </TabsTrigger>
+              <TabsTrigger value="activity" className="gap-2">
+                <Brain className="w-4 h-4" />
+                <span className="hidden sm:inline">Activity</span>
               </TabsTrigger>
               <TabsTrigger value="health" className="gap-2">
                 <Heart className="w-4 h-4" />
@@ -229,7 +263,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
               </TabsTrigger>
               <TabsTrigger value="report" className="gap-2">
                 <FileText className="w-4 h-4" />
-                <span className="hidden sm:inline">Weekly Report</span>
+                <span className="hidden sm:inline">Report</span>
               </TabsTrigger>
               <TabsTrigger value="locations" className="gap-2">
                 <MapPin className="w-4 h-4" />
@@ -369,6 +403,255 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                     Save a location to start tracking your air quality exposure and health metrics.
                   </p>
                   <Button onClick={onClose}>Explore Globe & Save Location</Button>
+                </Card>
+              )}
+            </TabsContent>
+
+            {/* Activity Tab - Habit Learning */}
+            <TabsContent value="activity" className="space-y-6">
+              {/* Passive Tracking Control */}
+              <Card className="glass p-6 bg-gradient-to-r from-primary/10 to-secondary/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className={`p-3 rounded-full ${isTracking ? 'bg-green-500/20' : 'bg-muted'}`}>
+                      <Brain className={`w-6 h-6 ${isTracking ? 'text-green-500' : 'text-muted-foreground'}`} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">Passive Activity Tracking</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {isTracking 
+                          ? 'Tracking your location & learning your habits' 
+                          : 'Enable to learn your outdoor activity patterns'}
+                      </p>
+                      {trackingError && (
+                        <p className="text-sm text-red-500 mt-1">{trackingError}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {permissionStatus === 'denied' && (
+                      <Badge variant="destructive">Location Denied</Badge>
+                    )}
+                    <Button 
+                      onClick={isTracking ? stopTracking : startTracking}
+                      variant={isTracking ? 'outline' : 'default'}
+                      disabled={permissionStatus === 'denied'}
+                    >
+                      {isTracking ? (
+                        <>
+                          <Pause className="w-4 h-4 mr-2" />
+                          Stop Tracking
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-4 h-4 mr-2" />
+                          Start Tracking
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {isTracking && (
+                  <div className="mt-4 pt-4 border-t border-border/50 grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <p className="text-2xl font-bold text-primary">{activities.length}</p>
+                      <p className="text-xs text-muted-foreground">Data Points</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-green-500">{learnedHabits.length}</p>
+                      <p className="text-xs text-muted-foreground">Habits Learned</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-yellow-500">
+                        {activities.length > 0 
+                          ? Math.round(activities.reduce((sum, a) => sum + a.aqi, 0) / activities.length)
+                          : 0}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Avg AQI Exposure</p>
+                    </div>
+                  </div>
+                )}
+              </Card>
+
+              {/* Learned Habits */}
+              {learnedHabits.length > 0 && (
+                <Card className="glass p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-purple-500/20 rounded-lg">
+                      <Sparkles className="w-5 h-5 text-purple-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">AI-Learned Habits</h3>
+                      <p className="text-sm text-muted-foreground">Patterns detected from your activity</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {learnedHabits.map((habit) => (
+                      <div 
+                        key={habit.id}
+                        className="p-4 bg-muted/20 rounded-lg border border-border/50"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            {habit.timeOfDay === 'morning' && <Sunrise className="w-5 h-5 text-orange-400" />}
+                            {habit.timeOfDay === 'afternoon' && <Sun className="w-5 h-5 text-yellow-500" />}
+                            {habit.timeOfDay === 'evening' && <Moon className="w-5 h-5 text-indigo-400" />}
+                            <div>
+                              <p className="font-medium">{habit.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                <MapPinned className="w-3 h-3 inline mr-1" />
+                                {habit.location.name}
+                              </p>
+                            </div>
+                          </div>
+                          <Badge 
+                            variant="outline" 
+                            className={habit.confidence > 80 ? 'border-green-500/50 text-green-500' : 'border-yellow-500/50 text-yellow-500'}
+                          >
+                            {habit.confidence}% confidence
+                          </Badge>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                          <div className="flex items-center gap-2">
+                            <Wind className="w-4 h-4 text-muted-foreground" />
+                            <span>Avg AQI: <strong className={habit.averageAqi > 75 ? 'text-orange-500' : 'text-green-500'}>{habit.averageAqi}</strong></span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-muted-foreground" />
+                            <span>Optimal: <strong className="text-primary">{habit.optimalTimeWindow.start} - {habit.optimalTimeWindow.end}</strong></span>
+                          </div>
+                        </div>
+
+                        <div className="p-3 bg-primary/10 rounded-lg flex items-start gap-2">
+                          <Zap className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                          <p className="text-sm">{habit.suggestion}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {/* Daily Activity Summaries */}
+              {dailySummaries.length > 0 && dailySummaries.some(s => s.totalOutdoorMinutes > 0) && (
+                <Card className="glass p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-primary" />
+                    Daily Activity Summary
+                  </h3>
+
+                  <div className="h-48 mb-4">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={dailySummaries.map(s => ({
+                        day: new Date(s.date).toLocaleDateString('en-US', { weekday: 'short' }),
+                        minutes: s.totalOutdoorMinutes,
+                        aqi: s.avgAqi,
+                        score: s.exposureScore
+                      }))}>
+                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                        <XAxis dataKey="day" />
+                        <YAxis />
+                        <Tooltip
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const data = payload[0].payload;
+                              return (
+                                <div className="glass p-3 rounded-lg border border-border">
+                                  <p className="font-medium">{data.day}</p>
+                                  <p className="text-primary">Outdoor: {data.minutes} min</p>
+                                  <p className="text-muted-foreground">Avg AQI: {data.aqi}</p>
+                                  <p className="text-green-500">Score: {data.score}%</p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <Bar dataKey="minutes" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    {dailySummaries.slice(-4).map((summary, i) => (
+                      <div key={i} className="p-3 bg-muted/20 rounded-lg">
+                        <p className="text-xs text-muted-foreground mb-1">
+                          {new Date(summary.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                        </p>
+                        <p className="text-lg font-bold">{summary.totalOutdoorMinutes}m</p>
+                        <p className="text-xs text-muted-foreground">outdoor</p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {/* Optimal Activity Times */}
+              {optimalTimes.length > 0 && (
+                <Card className="glass p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-primary" />
+                    Today's Optimal Activity Windows
+                  </h3>
+                  
+                  <div className="grid grid-cols-6 md:grid-cols-12 gap-2">
+                    {optimalTimes.slice(6, 22).map((time) => (
+                      <div 
+                        key={time.hour}
+                        className={`p-2 rounded-lg text-center ${
+                          time.recommendation === 'excellent' ? 'bg-green-500/20 border border-green-500/50' :
+                          time.recommendation === 'good' ? 'bg-blue-500/20 border border-blue-500/50' :
+                          time.recommendation === 'moderate' ? 'bg-yellow-500/20 border border-yellow-500/50' :
+                          'bg-red-500/20 border border-red-500/50'
+                        }`}
+                      >
+                        <p className="text-xs font-medium">{time.hour}:00</p>
+                        <p className={`text-lg font-bold ${
+                          time.recommendation === 'excellent' ? 'text-green-500' :
+                          time.recommendation === 'good' ? 'text-blue-500' :
+                          time.recommendation === 'moderate' ? 'text-yellow-500' :
+                          'text-red-500'
+                        }`}>{time.aqi}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-center gap-6 mt-4 text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-green-500 rounded" />
+                      <span>Excellent (&lt;50)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-blue-500 rounded" />
+                      <span>Good (50-75)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-yellow-500 rounded" />
+                      <span>Moderate (75-100)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-red-500 rounded" />
+                      <span>Avoid (&gt;100)</span>
+                    </div>
+                  </div>
+                </Card>
+              )}
+
+              {/* Empty state */}
+              {activities.length === 0 && !isTracking && (
+                <Card className="glass p-8 text-center">
+                  <Brain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h4 className="font-medium mb-2">Start Tracking Your Activities</h4>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Enable passive tracking to learn your outdoor activity patterns and get personalized recommendations for the best times to exercise.
+                  </p>
+                  <Button onClick={startTracking} disabled={permissionStatus === 'denied'}>
+                    <Play className="w-4 h-4 mr-2" />
+                    Enable Activity Tracking
+                  </Button>
                 </Card>
               )}
             </TabsContent>
@@ -685,7 +968,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                   <Award className="w-5 h-5 text-yellow-500" />
                   Achievements
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   <div className="p-4 bg-muted/20 rounded-lg text-center border border-yellow-500/30">
                     <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
                       <Star className="w-6 h-6 text-yellow-500" />
@@ -713,6 +996,13 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                     </div>
                     <p className="text-sm font-medium">Consistent</p>
                     <p className="text-xs text-muted-foreground">7 days tracked</p>
+                  </div>
+                  <div className={`p-4 bg-muted/20 rounded-lg text-center ${learnedHabits.length > 0 ? 'border border-cyan-500/30' : 'opacity-50'}`}>
+                    <div className={`w-12 h-12 ${learnedHabits.length > 0 ? 'bg-cyan-500/20' : 'bg-muted'} rounded-full flex items-center justify-center mx-auto mb-2`}>
+                      <Brain className={`w-6 h-6 ${learnedHabits.length > 0 ? 'text-cyan-500' : 'text-muted-foreground'}`} />
+                    </div>
+                    <p className="text-sm font-medium">Habit Master</p>
+                    <p className="text-xs text-muted-foreground">AI learned a habit</p>
                   </div>
                 </div>
               </Card>
