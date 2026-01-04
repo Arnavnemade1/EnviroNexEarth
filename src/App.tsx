@@ -9,9 +9,10 @@ import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
-// Lazy load auth and health pages
+// Lazy load pages
 const Auth = lazy(() => import("./pages/Auth"));
 const Health = lazy(() => import("./pages/Health"));
+const Explore = lazy(() => import("./pages/Explore"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const App = () => (
@@ -35,6 +36,13 @@ const App = () => (
                 <div className="animate-pulse text-primary">Loading...</div>
               </div>}>
                 <Health />
+              </Suspense>
+            } />
+            <Route path="/explore" element={
+              <Suspense fallback={<div className="min-h-screen bg-gradient-space flex items-center justify-center">
+                <div className="animate-pulse text-primary">Loading...</div>
+              </div>}>
+                <Explore />
               </Suspense>
             } />
             <Route path="/404" element={
