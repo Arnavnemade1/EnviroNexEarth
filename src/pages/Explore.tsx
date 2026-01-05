@@ -30,7 +30,8 @@ import {
   X,
   Check,
   AlertTriangle,
-  Info
+  Info,
+  GraduationCap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -41,6 +42,7 @@ import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ComposedChart, ScatterChart, Scatter, ZAxis } from 'recharts';
+import TrainingSimulator from '@/components/TrainingSimulator';
 
 interface ModelResult {
   id: string;
@@ -533,10 +535,14 @@ export default function Explore() {
 
           <Tabs defaultValue="models" className="space-y-6">
             <div className="flex items-center justify-between">
-              <TabsList className="bg-white/5 border border-white/10 p-1 rounded-xl">
+              <TabsList className="bg-white/5 border border-white/10 p-1 rounded-xl flex-wrap">
                 <TabsTrigger value="models" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-blue-500/20 data-[state=active]:text-white rounded-lg px-4 text-sm">
                   <Cpu className="w-4 h-4 mr-2" />
                   Models
+                </TabsTrigger>
+                <TabsTrigger value="training" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-rose-500/20 data-[state=active]:text-white rounded-lg px-4 text-sm">
+                  <GraduationCap className="w-4 h-4 mr-2" />
+                  Training
                 </TabsTrigger>
                 <TabsTrigger value="analytics" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white rounded-lg px-4 text-sm">
                   <BarChart3 className="w-4 h-4 mr-2" />
@@ -758,6 +764,10 @@ export default function Explore() {
                   )}
                 </div>
               </div>
+            </TabsContent>
+
+            <TabsContent value="training" className="space-y-6">
+              <TrainingSimulator />
             </TabsContent>
 
             <TabsContent value="analytics" className="space-y-6">
