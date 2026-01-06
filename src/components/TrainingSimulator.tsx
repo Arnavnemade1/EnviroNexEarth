@@ -15,7 +15,10 @@ import {
   CheckCircle2,
   AlertCircle,
   Cpu,
-  Flame
+  Flame,
+  Sparkles,
+  BarChart3,
+  Target
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -23,7 +26,10 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import DataAugmentationVisualizer from './DataAugmentationVisualizer';
+import { modelDefinitions } from '@/lib/modelDefinitions';
 
 interface TrainingMetrics {
   epoch: number;
@@ -43,11 +49,14 @@ interface TrainingConfig {
   optimizer: string;
 }
 
-const modelConfigs = [
-  { id: 'quantum-vqe', name: 'Quantum VQE', type: 'quantum', icon: Atom, color: 'text-violet-400', gradient: 'from-violet-500 to-purple-600' },
-  { id: 'neural-transformer', name: 'Neural Transformer', type: 'neural', icon: Brain, color: 'text-cyan-400', gradient: 'from-cyan-500 to-blue-600' },
-  { id: 'hybrid-qnn', name: 'Hybrid QNN', type: 'hybrid', icon: Zap, color: 'text-amber-400', gradient: 'from-amber-500 to-orange-600' },
-];
+const modelConfigs = modelDefinitions.map(m => ({
+  id: m.id,
+  name: m.name,
+  type: m.type,
+  icon: m.icon,
+  color: m.type === 'quantum' ? 'text-violet-400' : m.type === 'neural' ? 'text-cyan-400' : m.type === 'hybrid' ? 'text-amber-400' : 'text-emerald-400',
+  gradient: m.color,
+}));
 
 export default function TrainingSimulator() {
   const [isTraining, setIsTraining] = useState(false);
@@ -601,6 +610,21 @@ export default function TrainingSimulator() {
             ))
           )}
         </div>
+      </Card>
+
+      {/* Data Augmentation Section */}
+      <Card className="p-5 bg-gradient-to-br from-white/[0.03] to-transparent border-white/10">
+        <Tabs defaultValue="augmentation" className="space-y-4">
+          <TabsList className="bg-white/5 border border-white/10 p-1">
+            <TabsTrigger value="augmentation" className="data-[state=active]:bg-pink-500/20 data-[state=active]:text-white text-xs">
+              <Sparkles className="w-3 h-3 mr-1.5" />
+              Data Augmentation
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="augmentation">
+            <DataAugmentationVisualizer />
+          </TabsContent>
+        </Tabs>
       </Card>
     </div>
   );

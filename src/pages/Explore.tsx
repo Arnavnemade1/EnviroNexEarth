@@ -43,6 +43,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ComposedChart, ScatterChart, Scatter, ZAxis } from 'recharts';
 import TrainingSimulator from '@/components/TrainingSimulator';
+import { getModelsForUI } from '@/lib/modelDefinitions';
 
 interface ModelResult {
   id: string;
@@ -55,64 +56,8 @@ interface ModelResult {
   created_at: string;
 }
 
-const models = [
-  {
-    id: 'quantum-aqi',
-    name: 'Quantum AQI Predictor',
-    type: 'quantum',
-    description: 'IBM Quantum circuits for air quality prediction with quantum advantage using VQE optimization',
-    icon: Atom,
-    color: 'from-violet-500 to-purple-600',
-    bgGlow: 'bg-violet-500/20',
-    accuracy: 97.3,
-    latency: 2500,
-    qubits: 8,
-    depth: 12,
-    status: 'optimal'
-  },
-  {
-    id: 'neural-climate',
-    name: 'Neural Climate Model',
-    type: 'neural',
-    description: 'Transformer-based deep learning for climate pattern recognition and multi-horizon forecasting',
-    icon: Brain,
-    color: 'from-cyan-500 to-blue-600',
-    bgGlow: 'bg-cyan-500/20',
-    accuracy: 94.1,
-    latency: 1200,
-    parameters: '125M',
-    layers: 48,
-    status: 'stable'
-  },
-  {
-    id: 'hybrid-disaster',
-    name: 'Hybrid Disaster Detector',
-    type: 'hybrid',
-    description: 'Quantum-classical variational circuit for real-time natural disaster prediction',
-    icon: Zap,
-    color: 'from-amber-500 to-orange-600',
-    bgGlow: 'bg-amber-500/20',
-    accuracy: 96.8,
-    latency: 1800,
-    qubits: 4,
-    classicalLayers: 24,
-    status: 'experimental'
-  },
-  {
-    id: 'classical-forecast',
-    name: 'Ensemble Forecast',
-    type: 'classical',
-    description: 'Gradient boosting ensemble with XGBoost, LightGBM, and CatBoost for short-term forecasts',
-    icon: BarChart3,
-    color: 'from-emerald-500 to-green-600',
-    bgGlow: 'bg-emerald-500/20',
-    accuracy: 91.2,
-    latency: 500,
-    models: 5,
-    features: 128,
-    status: 'stable'
-  }
-];
+// Use real model definitions
+const models = getModelsForUI();
 
 // Quantum circuit visualization data
 const generateQuantumCircuit = () => {
