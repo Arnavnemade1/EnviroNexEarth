@@ -404,179 +404,226 @@ export default function Explore() {
 
   return (
     <div className="h-screen flex flex-col bg-black text-white overflow-hidden">
-      {/* Animated Background */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-violet-500/10 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-emerald-500/5 rounded-full blur-[150px]" />
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-amber-500/5 rounded-full blur-[100px]" />
+      {/* Minimal Background - Anduril inspired */}
+      <div className="fixed inset-0 pointer-events-none">
+        {/* Subtle gradient orb */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-gradient-to-b from-white/[0.02] to-transparent rounded-full blur-3xl" />
         
-        {/* Grid overlay */}
+        {/* Fine grid */}
         <div 
-          className="absolute inset-0 opacity-[0.02]"
+          className="absolute inset-0 opacity-[0.015]"
           style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-            backgroundSize: '40px 40px'
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+            backgroundSize: '80px 80px'
           }}
         />
-        
-        <Particles />
       </div>
 
-      {/* Header - Fixed */}
-      <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-2xl border-b border-white/5 shrink-0">
-        <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/" className="p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-white/10 hover:border-white/20">
-              <ArrowLeft className="w-4 h-4 text-white/70" />
+      {/* Minimal Header */}
+      <header className="sticky top-0 z-50 bg-black/90 backdrop-blur-xl border-b border-white/[0.06] shrink-0">
+        <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <Link to="/" className="group flex items-center gap-2 text-white/40 hover:text-white transition-colors">
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm font-medium">Back</span>
             </Link>
-            <div>
-              <h1 className="text-lg font-bold bg-gradient-to-r from-white via-white/90 to-white/60 bg-clip-text text-transparent">
-                Model Laboratory
-              </h1>
-              <p className="text-[10px] text-white/40 uppercase tracking-widest">Quantum & Neural Network Research Hub</p>
-            </div>
+            <div className="h-4 w-px bg-white/10" />
+            <h1 className="text-sm font-medium tracking-wide text-white/90">MODEL LAB</h1>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs text-emerald-400 font-medium">Live</span>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-xs text-white/40 font-mono">LIVE</span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-white/40">
-              <span>Auto-refresh</span>
-              <Switch checked={autoRefresh} onCheckedChange={setAutoRefresh} />
-            </div>
-            <Badge variant="outline" className="border-violet-500/50 text-violet-300 bg-violet-500/10 hover:bg-violet-500/20">
-              <Sparkles className="w-3 h-3 mr-1" />
-              v3.0 Beta
-            </Badge>
           </div>
         </div>
       </header>
 
-      {/* Main Scrollable Content */}
-      <main className="relative z-10 flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/30">
-        <div className="max-w-[1600px] mx-auto px-6 py-6 space-y-6">
-          {/* Live Stats Bar */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {[
-              { label: 'Active Requests', value: liveMetrics.requests.toLocaleString(), icon: Radio, color: 'text-cyan-400', gradient: 'from-cyan-500/20 to-cyan-500/5' },
-              { label: 'Avg Latency', value: `${liveMetrics.avgLatency}ms`, icon: Clock, color: 'text-amber-400', gradient: 'from-amber-500/20 to-amber-500/5' },
-              { label: 'Model Accuracy', value: `${liveMetrics.accuracy.toFixed(1)}%`, icon: Target, color: 'text-emerald-400', gradient: 'from-emerald-500/20 to-emerald-500/5' },
-              { label: 'Throughput', value: `${liveMetrics.throughput}/s`, icon: Activity, color: 'text-violet-400', gradient: 'from-violet-500/20 to-violet-500/5' },
-              { label: 'Quantum Adv.', value: '3.2x', icon: Atom, color: 'text-pink-400', gradient: 'from-pink-500/20 to-pink-500/5' },
-            ].map((stat) => (
-              <Card key={stat.label} className={`relative overflow-hidden p-3 bg-gradient-to-br ${stat.gradient} border-white/5 backdrop-blur-sm group hover:border-white/10 transition-all duration-300`}>
-                <div className="relative flex items-center gap-2">
-                  <stat.icon className={`w-4 h-4 ${stat.color} shrink-0`} />
-                  <div className="min-w-0">
-                    <p className="text-[10px] text-white/40 uppercase tracking-wide truncate">{stat.label}</p>
-                    <p className={`text-base font-bold ${stat.color} font-mono`}>{stat.value}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+      {/* Main Content */}
+      <main className="relative z-10 flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+        <div className="max-w-7xl mx-auto px-8 py-8 space-y-10">
 
-          <Tabs defaultValue="models" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <TabsList className="bg-white/5 border border-white/10 p-1 rounded-xl flex-wrap">
-                <TabsTrigger value="models" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-blue-500/20 data-[state=active]:text-white rounded-lg px-4 text-sm">
-                  <Cpu className="w-4 h-4 mr-2" />
-                  Models
+          {/* Clean Tab Navigation */}
+          <Tabs defaultValue="models" className="space-y-8">
+            <TabsList className="bg-transparent border-0 p-0 h-auto gap-6">
+              {[
+                { value: 'models', label: 'Models', icon: Cpu },
+                { value: 'training', label: 'Training', icon: GraduationCap },
+                { value: 'analytics', label: 'Analytics', icon: BarChart3 },
+              ].map(tab => (
+                <TabsTrigger 
+                  key={tab.value}
+                  value={tab.value} 
+                  className="data-[state=active]:text-white data-[state=inactive]:text-white/30 data-[state=active]:border-b-2 data-[state=active]:border-white bg-transparent hover:text-white/60 rounded-none px-0 pb-2 text-sm font-medium transition-colors"
+                >
+                  {tab.label}
                 </TabsTrigger>
-                <TabsTrigger value="training" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/20 data-[state=active]:to-rose-500/20 data-[state=active]:text-white rounded-lg px-4 text-sm">
-                  <GraduationCap className="w-4 h-4 mr-2" />
-                  Training
-                </TabsTrigger>
-                <TabsTrigger value="analytics" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:text-white rounded-lg px-4 text-sm">
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Analytics
-                </TabsTrigger>
-                <TabsTrigger value="benchmark" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/20 data-[state=active]:to-orange-500/20 data-[state=active]:text-white rounded-lg px-4 text-sm">
-                  <Trophy className="w-4 h-4 mr-2" />
-                  Benchmark
-                </TabsTrigger>
-                <TabsTrigger value="history" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500/20 data-[state=active]:to-green-500/20 data-[state=active]:text-white rounded-lg px-4 text-sm">
-                  <Activity className="w-4 h-4 mr-2" />
-                  History
-                </TabsTrigger>
-              </TabsList>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setShowComparison(!showComparison)}
-                className={`border-white/20 text-white/60 hover:bg-white/5 transition-all ${showComparison ? 'bg-white/10 border-white/30' : ''}`}
-              >
-                <Shuffle className="w-4 h-4 mr-2" />
-                Compare Models
-              </Button>
-            </div>
+              ))}
+            </TabsList>
 
-            {showComparison && (
-              <ComparisonCard models={models} onClose={() => setShowComparison(false)} />
-            )}
-
-            <TabsContent value="models" className="space-y-6">
-              {/* Model Selection Grid */}
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <TabsContent value="models" className="space-y-8 mt-0">
+              {/* Models Grid - Clean minimal cards */}
+              <div className="grid lg:grid-cols-3 gap-6">
                 {models.map((model) => (
-                  <Card
+                  <div
                     key={model.id}
                     onClick={() => setSelectedModel(model)}
-                    className={`relative p-4 cursor-pointer transition-all duration-500 overflow-hidden group ${
-                      selectedModel.id === model.id 
-                        ? 'border-2 border-cyan-400/60 bg-cyan-500/10 shadow-lg shadow-cyan-500/20 scale-[1.02]' 
-                        : 'border border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04] hover:scale-[1.01]'
+                    className={`group relative cursor-pointer transition-all duration-300 ${
+                      selectedModel.id === model.id ? 'opacity-100' : 'opacity-70 hover:opacity-100'
                     }`}
                   >
-                    {/* Animated glow effect */}
-                    <div className={`absolute inset-0 ${model.bgGlow} opacity-0 group-hover:opacity-60 blur-2xl transition-opacity duration-700`} />
-                    
-                    {/* Circuit pattern */}
-                    <div className="absolute -top-4 -right-4 w-32 h-32 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
-                      <CircuitBoard className="w-full h-full" />
-                    </div>
-                    
-                    <div className="relative">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${model.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
-                          <model.icon className="w-6 h-6 text-white" />
+                    {/* Card */}
+                    <div className={`p-6 rounded-lg border transition-all duration-300 ${
+                      selectedModel.id === model.id 
+                        ? 'bg-white/[0.04] border-white/20' 
+                        : 'bg-white/[0.02] border-white/[0.06] hover:border-white/10'
+                    }`}>
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${model.color} flex items-center justify-center`}>
+                          <model.icon className="w-5 h-5 text-white" />
                         </div>
-                        <Badge className={`text-[9px] ${
-                          model.status === 'optimal' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
-                          model.status === 'experimental' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' :
-                          'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
+                        <span className={`text-[10px] font-mono uppercase tracking-wider ${
+                          model.status === 'production' ? 'text-emerald-400' :
+                          model.status === 'beta' ? 'text-amber-400' :
+                          'text-white/40'
                         }`}>
                           {model.status}
-                        </Badge>
-                      </div>
-                      <h3 className="font-bold text-white text-sm mb-1">{model.name}</h3>
-                      <p className="text-[11px] text-white/40 mb-3 line-clamp-2">{model.description}</p>
-                      
-                      <div className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-1">
-                          <Target className="w-3 h-3 text-emerald-400" />
-                          <span className="text-emerald-400 font-bold">{model.accuracy}%</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Timer className="w-3 h-3 text-white/40" />
-                          <span className="text-white/50 font-mono">{model.latency}ms</span>
-                        </div>
+                        </span>
                       </div>
                       
-                      {/* Progress bar */}
-                      <div className="mt-3 h-1 bg-white/5 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full bg-gradient-to-r ${model.color} transition-all duration-500`}
-                          style={{ width: `${model.accuracy}%` }}
-                        />
+                      {/* Info */}
+                      <h3 className="text-white font-medium mb-1">{model.name}</h3>
+                      <p className="text-xs text-white/40 mb-4 line-clamp-2">{model.description}</p>
+                      
+                      {/* Metrics */}
+                      <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/[0.06]">
+                        <div>
+                          <p className="text-[10px] text-white/30 uppercase mb-1">Accuracy</p>
+                          <p className="text-sm font-mono text-white">{model.accuracy}%</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-white/30 uppercase mb-1">Latency</p>
+                          <p className="text-sm font-mono text-white/70">{model.latency}ms</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-white/30 uppercase mb-1">{model.qubits ? 'Qubits' : 'Layers'}</p>
+                          <p className="text-sm font-mono text-white/70">{model.qubits || model.layers}</p>
+                        </div>
                       </div>
                     </div>
-                  </Card>
+                    
+                    {/* Selection indicator */}
+                    {selectedModel.id === model.id && (
+                      <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-full" />
+                    )}
+                  </div>
                 ))}
               </div>
+
+              {/* Selected Model Detail */}
+              {selectedModel && (
+                <div className="grid lg:grid-cols-2 gap-8">
+                  {/* Model Info & Run */}
+                  <div className="space-y-6">
+                    {/* Architecture Details */}
+                    <div className="p-6 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                      <h3 className="text-xs text-white/40 uppercase tracking-wider mb-4">Architecture</h3>
+                      
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center py-2 border-b border-white/[0.04]">
+                          <span className="text-sm text-white/50">Framework</span>
+                          <span className="text-sm text-white font-mono">{selectedModel.framework || 'PyTorch 2.1'}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-white/[0.04]">
+                          <span className="text-sm text-white/50">Parameters</span>
+                          <span className="text-sm text-white font-mono">{selectedModel.totalParams?.toLocaleString() || '86M'}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-white/[0.04]">
+                          <span className="text-sm text-white/50">Type</span>
+                          <span className={`text-sm font-medium ${
+                            selectedModel.type === 'quantum' ? 'text-violet-400' :
+                            selectedModel.type === 'hybrid' ? 'text-amber-400' :
+                            selectedModel.type === 'neural' ? 'text-cyan-400' : 'text-emerald-400'
+                          }`}>{selectedModel.type.toUpperCase()}</span>
+                        </div>
+                        {selectedModel.backend && (
+                          <div className="flex justify-between items-center py-2 border-b border-white/[0.04]">
+                            <span className="text-sm text-white/50">Backend</span>
+                            <span className="text-sm text-white font-mono">{selectedModel.backend}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between items-center py-2">
+                          <span className="text-sm text-white/50">Version</span>
+                          <span className="text-sm text-white/70 font-mono">{selectedModel.version}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Run Model */}
+                    <Button
+                      onClick={runModel}
+                      disabled={isRunning}
+                      className="w-full h-12 bg-white text-black font-medium hover:bg-white/90 disabled:opacity-50 rounded-lg"
+                    >
+                      {isRunning ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Play className="w-4 h-4 mr-2" />
+                      )}
+                      {isRunning ? 'Executing...' : 'Run Model'}
+                    </Button>
+                  </div>
+
+                  {/* Input Parameters */}
+                  <div className="p-6 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                    <h3 className="text-xs text-white/40 uppercase tracking-wider mb-6">Input Parameters</h3>
+                    
+                    <div className="space-y-6">
+                      {[
+                        { key: 'temperature', label: 'Temperature', unit: '°C', min: -20, max: 50 },
+                        { key: 'humidity', label: 'Humidity', unit: '%', min: 0, max: 100 },
+                        { key: 'pressure', label: 'Pressure', unit: 'hPa', min: 950, max: 1050 },
+                        { key: 'windSpeed', label: 'Wind Speed', unit: 'm/s', min: 0, max: 50 },
+                      ].map((param) => (
+                        <div key={param.key}>
+                          <div className="flex justify-between mb-3">
+                            <label className="text-sm text-white/60">{param.label}</label>
+                            <span className="text-sm font-mono text-white">
+                              {inputParams[param.key as keyof typeof inputParams]}{param.unit}
+                            </span>
+                          </div>
+                          <Slider
+                            value={[inputParams[param.key as keyof typeof inputParams]]}
+                            onValueChange={([v]) => setInputParams(p => ({ ...p, [param.key]: v }))}
+                            min={param.min}
+                            max={param.max}
+                            step={1}
+                            className="w-full"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Quantum Circuit for quantum models */}
+              {(selectedModel?.type === 'quantum' || selectedModel?.type === 'hybrid') && (
+                <div className="p-6 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs text-white/40 uppercase tracking-wider">Quantum Circuit</h3>
+                    {isRunning && (
+                      <span className="flex items-center gap-2 text-xs text-emerald-400">
+                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                        Executing
+                      </span>
+                    )}
+                  </div>
+                  <QuantumCircuitVisualizer circuit={quantumCircuit} isAnimating={isRunning} />
+                </div>
+              )}
 
               {/* Playground Section */}
               <div className="grid lg:grid-cols-12 gap-6">
@@ -685,9 +732,7 @@ export default function Explore() {
                           <span className="text-[10px] text-white/40">{selectedModel.type === 'quantum' ? 'Qubits' : 'Layers'}</span>
                         </div>
                         <p className="text-xl font-bold text-violet-400">
-                          {selectedModel.type === 'quantum' ? selectedModel.qubits : 
-                           selectedModel.type === 'neural' ? selectedModel.layers :
-                           selectedModel.type === 'hybrid' ? selectedModel.qubits : selectedModel.models}
+                          {selectedModel.qubits || selectedModel.layers}
                         </p>
                       </div>
                       <div className="p-3 rounded-lg bg-white/5 border border-white/5">
