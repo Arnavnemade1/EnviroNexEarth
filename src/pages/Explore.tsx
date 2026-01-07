@@ -43,6 +43,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ComposedChart, ScatterChart, Scatter, ZAxis } from 'recharts';
 import TrainingSimulator from '@/components/TrainingSimulator';
+import GlobalUsageMap from '@/components/GlobalUsageMap';
 import { getModelsForUI } from '@/lib/modelDefinitions';
 
 interface ModelResult {
@@ -330,35 +331,57 @@ export default function Explore() {
     const startTime = Date.now();
 
     try {
-      await new Promise(resolve => setTimeout(resolve, selectedModel.latency));
+      // Simulate model execution with realistic timing
+      await new Promise(resolve => setTimeout(resolve, Math.min(selectedModel.latency, 2000)));
 
       const output = generateModelOutput(selectedModel.type, inputParams);
+      const executionTime = Date.now() - startTime;
 
-      const { error } = await supabase
-        .from('quantum_simulations')
-        .insert({
-          algorithm_name: selectedModel.name,
-          simulation_type: selectedModel.type,
-          input_parameters: inputParams,
-          quantum_results: output,
-          execution_time_ms: Date.now() - startTime,
-          qubit_count: selectedModel.type === 'quantum' ? 8 : selectedModel.type === 'hybrid' ? 4 : 0,
-          user_id: (await supabase.auth.getUser()).data.user?.id || '00000000-0000-0000-0000-000000000000'
-        });
+      // Try to save to database if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { error } = await supabase
+          .from('quantum_simulations')
+          .insert({
+            algorithm_name: selectedModel.name,
+            simulation_type: selectedModel.type,
+            input_parameters: inputParams,
+            quantum_results: output,
+            execution_time_ms: executionTime,
+            qubit_count: selectedModel.type === 'quantum' ? 8 : selectedModel.type === 'hybrid' ? 4 : 0,
+            user_id: user.id
+          });
 
-      if (error) throw error;
+        if (error) {
+          console.warn('Could not save to database:', error);
+        } else {
+          fetchResults();
+        }
+      }
 
       toast({
         title: 'Model executed successfully',
-        description: `${selectedModel.name} completed in ${Date.now() - startTime}ms`
+        description: `${selectedModel.name} completed in ${executionTime}ms with ${(output.confidence * 100).toFixed(1)}% confidence`
       });
 
-      fetchResults();
+      // Update results locally even without auth
+      setResults(prev => [{
+        id: crypto.randomUUID(),
+        model_name: selectedModel.name,
+        model_type: selectedModel.type,
+        input_data: inputParams,
+        output_data: output,
+        execution_time_ms: executionTime,
+        quantum_enhanced: selectedModel.type === 'quantum' || selectedModel.type === 'hybrid',
+        created_at: new Date().toISOString()
+      }, ...prev.slice(0, 9)]);
+
     } catch (error) {
       console.error('Error running model:', error);
       toast({
         title: 'Execution failed',
-        description: 'Failed to run model. Please try again.',
+        description: 'An error occurred. Please try again.',
         variant: 'destructive'
       });
     } finally {
@@ -521,6 +544,9 @@ export default function Explore() {
                   </div>
                 ))}
               </div>
+
+              {/* Global Usage Map */}
+              <GlobalUsageMap />
 
               {/* Selected Model Detail */}
               {selectedModel && (
