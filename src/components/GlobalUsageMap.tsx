@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Globe, Users, Zap, MapPin, Activity, Server, Wifi } from 'lucide-react';
+import { Globe, Users, MapPin, Activity, Server, Wifi } from 'lucide-react';
+import worldMapPng from '@/assets/world-map.png';
 
 interface UsagePoint {
   id: string;
@@ -61,31 +62,8 @@ const getPointColor = (type: string) => {
   }
 };
 
-// Accurate world continents SVG path data (mercator projection, viewBox 0 0 800 400)
-const WorldMapSVG = () => (
-  <g className="world-continents" opacity="0.2">
-    {/* North America */}
-    <path d="M55,85 L65,75 L85,72 L110,68 L135,70 L155,78 L168,88 L172,105 L168,125 L160,140 L148,150 L135,155 L118,152 L102,145 L88,135 L75,122 L62,105 L55,95Z M175,130 L185,135 L190,150 L185,165 L175,175 L165,172 L160,160 L162,145 L168,135Z" fill="white" />
-    {/* South America */}
-    <path d="M165,175 L175,170 L188,175 L198,190 L205,215 L202,250 L192,285 L175,315 L158,325 L145,318 L138,295 L135,260 L138,225 L145,195 L155,180Z" fill="white" />
-    {/* Europe */}
-    <path d="M355,52 L378,48 L398,52 L415,58 L425,68 L428,82 L420,95 L405,100 L388,98 L372,95 L358,88 L352,75 L352,62Z M345,72 L352,68 L358,75 L355,85 L345,82Z" fill="white" />
-    {/* Africa */}
-    <path d="M365,105 L395,102 L425,115 L445,138 L455,175 L450,220 L435,265 L405,295 L370,305 L340,295 L322,258 L318,215 L325,168 L342,130 L358,112Z" fill="white" />
-    {/* Asia */}
-    <path d="M420,45 L475,40 L535,48 L585,62 L620,88 L635,125 L628,165 L605,195 L565,215 L520,225 L475,218 L438,198 L418,168 L408,132 L410,95 L415,65Z M640,145 L655,140 L668,150 L665,168 L652,178 L638,172 L635,158Z" fill="white" />
-    {/* Southeast Asia Islands */}
-    <path d="M565,218 L595,215 L625,228 L638,248 L628,268 L598,275 L568,265 L558,245 L562,228Z M635,248 L658,245 L678,258 L675,278 L655,288 L635,282 L628,265Z" fill="white" />
-    {/* Australia */}
-    <path d="M598,298 L645,292 L685,308 L705,338 L698,372 L665,395 L618,398 L578,382 L565,348 L572,318Z" fill="white" />
-    {/* Japan */}
-    <path d="M655,95 L668,88 L678,98 L675,115 L662,122 L652,115 L652,102Z" fill="white" />
-    {/* UK */}
-    <path d="M345,58 L355,52 L362,58 L358,72 L348,75 L342,68Z" fill="white" />
-    {/* Indonesia */}
-    <path d="M575,252 L605,248 L632,262 L618,282 L588,288 L565,275Z" fill="white" />
-  </g>
-);
+// Real map raster (NASA Blue Marble) is rendered below via an <image> element.
+// We keep dots projected over it using the same equirectangular-ish projection.
 
 export default function GlobalUsageMap() {
   const [usageData] = useState<UsagePoint[]>(generateUsageData());
@@ -96,15 +74,20 @@ export default function GlobalUsageMap() {
   const totalDailyUsers = usageData.reduce((sum, p) => sum + p.users, 0);
   const activeLocations = usageData.length;
 
-  // Animate active points
+  // Animate active points (deterministic, no random)
   useEffect(() => {
     const interval = setInterval(() => {
+      const t = Math.floor(Date.now() / 2000);
       const newActive = new Set<string>();
       const newPulsing = new Set<string>();
-      usageData.forEach(point => {
-        if (Math.random() > 0.3) newActive.add(point.id);
-        if (Math.random() > 0.8) newPulsing.add(point.id);
+
+      usageData.forEach((point, i) => {
+        const active = ((t + i * 3) % 10) < 7;
+        const pulse = ((t + i * 5) % 17) === 0;
+        if (active) newActive.add(point.id);
+        if (pulse) newPulsing.add(point.id);
       });
+
       setActivePoints(newActive);
       setPulsingPoints(newPulsing);
     }, 2000);
@@ -165,9 +148,17 @@ export default function GlobalUsageMap() {
           {/* Background */}
           <rect width="100%" height="100%" fill="url(#mapGrid)" />
           <ellipse cx={mapWidth/2} cy={mapHeight/2} rx={mapWidth*0.45} ry={mapHeight*0.45} fill="url(#atmosphere)" />
-          
-          {/* World Map */}
-          <WorldMapSVG />
+
+          {/* REAL MAP (PNG) */}
+          <image
+            href={worldMapPng}
+            x={0}
+            y={0}
+            width={mapWidth}
+            height={mapHeight}
+            preserveAspectRatio="xMidYMid slice"
+            opacity={0.35}
+          />
 
           {/* Usage points */}
           {usageData.map((point) => {
