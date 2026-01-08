@@ -486,63 +486,115 @@ export default function Explore() {
             </TabsList>
 
             <TabsContent value="models" className="space-y-8 mt-0">
-              {/* Models Grid - Clean minimal cards */}
-              <div className="grid lg:grid-cols-3 gap-6">
-                {models.map((model) => (
-                  <div
-                    key={model.id}
-                    onClick={() => setSelectedModel(model)}
-                    className={`group relative cursor-pointer transition-all duration-300 ${
-                      selectedModel.id === model.id ? 'opacity-100' : 'opacity-70 hover:opacity-100'
-                    }`}
-                  >
-                    {/* Card */}
-                    <div className={`p-6 rounded-lg border transition-all duration-300 ${
-                      selectedModel.id === model.id 
-                        ? 'bg-white/[0.04] border-white/20' 
-                        : 'bg-white/[0.02] border-white/[0.06] hover:border-white/10'
-                    }`}>
-                      {/* Header */}
-                      <div className="flex items-start justify-between mb-4">
-                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${model.color} flex items-center justify-center`}>
-                          <model.icon className="w-5 h-5 text-white" />
+              {/* Models Grid - Modern Glass Cards */}
+              <div className="grid lg:grid-cols-3 gap-5">
+                {models.map((model) => {
+                  const isSelected = selectedModel.id === model.id;
+                  const typeColor = model.type === 'quantum' ? 'violet' : 
+                                   model.type === 'neural' ? 'cyan' : 
+                                   model.type === 'hybrid' ? 'amber' : 'emerald';
+                  
+                  return (
+                    <div
+                      key={model.id}
+                      onClick={() => setSelectedModel(model)}
+                      className={`group relative cursor-pointer transition-all duration-500 ${
+                        isSelected ? 'scale-[1.02]' : 'hover:scale-[1.01]'
+                      }`}
+                    >
+                      {/* Glow effect for selected */}
+                      {isSelected && (
+                        <div className={`absolute -inset-[1px] rounded-xl bg-gradient-to-b ${
+                          typeColor === 'violet' ? 'from-violet-500/30 via-violet-500/10 to-transparent' :
+                          typeColor === 'cyan' ? 'from-cyan-500/30 via-cyan-500/10 to-transparent' :
+                          typeColor === 'amber' ? 'from-amber-500/30 via-amber-500/10 to-transparent' :
+                          'from-emerald-500/30 via-emerald-500/10 to-transparent'
+                        } blur-sm`} />
+                      )}
+                      
+                      {/* Card */}
+                      <div className={`relative p-5 rounded-xl border backdrop-blur-sm transition-all duration-300 ${
+                        isSelected 
+                          ? 'bg-white/[0.06] border-white/20' 
+                          : 'bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.04] hover:border-white/10'
+                      }`}>
+                        {/* Top Row: Icon + Status */}
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`relative w-11 h-11 rounded-xl flex items-center justify-center ${
+                              typeColor === 'violet' ? 'bg-violet-500/15' :
+                              typeColor === 'cyan' ? 'bg-cyan-500/15' :
+                              typeColor === 'amber' ? 'bg-amber-500/15' : 'bg-emerald-500/15'
+                            }`}>
+                              {isSelected && (
+                                <div className={`absolute inset-0 rounded-xl ${
+                                  typeColor === 'violet' ? 'bg-violet-500/20' :
+                                  typeColor === 'cyan' ? 'bg-cyan-500/20' :
+                                  typeColor === 'amber' ? 'bg-amber-500/20' : 'bg-emerald-500/20'
+                                } animate-pulse`} />
+                              )}
+                              <model.icon className={`relative w-5 h-5 ${
+                                typeColor === 'violet' ? 'text-violet-400' :
+                                typeColor === 'cyan' ? 'text-cyan-400' :
+                                typeColor === 'amber' ? 'text-amber-400' : 'text-emerald-400'
+                              }`} />
+                            </div>
+                            <div>
+                              <h3 className="text-sm font-semibold text-white leading-tight">{model.name}</h3>
+                              <p className="text-[10px] text-white/40 font-mono">{model.version}</p>
+                            </div>
+                          </div>
+                          
+                          <div className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider ${
+                            model.status === 'production' 
+                              ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' 
+                              : model.status === 'beta' 
+                              ? 'bg-amber-500/15 text-amber-400 border border-amber-500/20'
+                              : 'bg-white/5 text-white/40 border border-white/10'
+                          }`}>
+                            {model.status}
+                          </div>
                         </div>
-                        <span className={`text-[10px] font-mono uppercase tracking-wider ${
-                          model.status === 'production' ? 'text-emerald-400' :
-                          model.status === 'beta' ? 'text-amber-400' :
-                          'text-white/40'
+                        
+                        {/* Type badge */}
+                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium mb-3 ${
+                          typeColor === 'violet' ? 'bg-violet-500/10 text-violet-300' :
+                          typeColor === 'cyan' ? 'bg-cyan-500/10 text-cyan-300' :
+                          typeColor === 'amber' ? 'bg-amber-500/10 text-amber-300' : 'bg-emerald-500/10 text-emerald-300'
                         }`}>
-                          {model.status}
-                        </span>
-                      </div>
-                      
-                      {/* Info */}
-                      <h3 className="text-white font-medium mb-1">{model.name}</h3>
-                      <p className="text-xs text-white/40 mb-4 line-clamp-2">{model.description}</p>
-                      
-                      {/* Metrics */}
-                      <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/[0.06]">
-                        <div>
-                          <p className="text-[10px] text-white/30 uppercase mb-1">Accuracy</p>
-                          <p className="text-sm font-mono text-white">{model.accuracy}%</p>
+                          <span className={`w-1.5 h-1.5 rounded-full ${
+                            typeColor === 'violet' ? 'bg-violet-400' :
+                            typeColor === 'cyan' ? 'bg-cyan-400' :
+                            typeColor === 'amber' ? 'bg-amber-400' : 'bg-emerald-400'
+                          }`} />
+                          {model.type.toUpperCase()}
                         </div>
-                        <div>
-                          <p className="text-[10px] text-white/30 uppercase mb-1">Latency</p>
-                          <p className="text-sm font-mono text-white/70">{model.latency}ms</p>
+                        
+                        {/* Metrics Row */}
+                        <div className="grid grid-cols-3 gap-3 pt-4 border-t border-white/[0.06]">
+                          <div className="text-center">
+                            <p className="text-lg font-mono font-bold text-white">{model.accuracy}<span className="text-xs text-white/40">%</span></p>
+                            <p className="text-[9px] text-white/30 uppercase tracking-wider">Accuracy</p>
+                          </div>
+                          <div className="text-center border-x border-white/[0.06]">
+                            <p className="text-lg font-mono font-bold text-white/80">{model.latency}<span className="text-[10px] text-white/30">ms</span></p>
+                            <p className="text-[9px] text-white/30 uppercase tracking-wider">Latency</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-lg font-mono font-bold text-white/80">{model.qubits || model.layers}</p>
+                            <p className="text-[9px] text-white/30 uppercase tracking-wider">{model.qubits ? 'Qubits' : 'Layers'}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-[10px] text-white/30 uppercase mb-1">{model.qubits ? 'Qubits' : 'Layers'}</p>
-                          <p className="text-sm font-mono text-white/70">{model.qubits || model.layers}</p>
+                        
+                        {/* Framework tag */}
+                        <div className="mt-4 pt-3 border-t border-white/[0.04] flex items-center justify-between">
+                          <span className="text-[10px] text-white/30 font-mono">{model.framework}</span>
+                          <span className="text-[10px] text-white/20">{model.totalParams?.toLocaleString() || '—'} params</span>
                         </div>
                       </div>
                     </div>
-                    
-                    {/* Selection indicator */}
-                    {selectedModel.id === model.id && (
-                      <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-full" />
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Global Usage Map */}
