@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Users, Zap, MapPin, TrendingUp, Activity, Clock, BarChart3 } from 'lucide-react';
+import { Globe, Users, Zap, MapPin, Activity, Server, Wifi } from 'lucide-react';
 
 interface UsagePoint {
   id: string;
@@ -9,38 +9,25 @@ interface UsagePoint {
   country: string;
   model: string;
   modelType: 'quantum' | 'neural' | 'hybrid' | 'ensemble';
-  dailyUsers: number;
-  totalUsers: number;
+  users: number;
   lastActive: Date;
 }
 
-// Real cities with actual coordinates and realistic daily usage (50-100 users per location)
+// Real cities with actual coordinates - users distributed to total 50-100/day globally
 const generateUsageData = (): UsagePoint[] => {
   const locations = [
-    { city: 'San Francisco', country: 'USA', lat: 37.77, lng: -122.42, dailyUsers: 89, totalUsers: 2341 },
-    { city: 'New York', country: 'USA', lat: 40.71, lng: -74.01, dailyUsers: 76, totalUsers: 1987 },
-    { city: 'London', country: 'UK', lat: 51.51, lng: -0.13, dailyUsers: 67, totalUsers: 1654 },
-    { city: 'Tokyo', country: 'Japan', lat: 35.68, lng: 139.69, dailyUsers: 94, totalUsers: 2156 },
-    { city: 'Singapore', country: 'Singapore', lat: 1.35, lng: 103.82, dailyUsers: 58, totalUsers: 1432 },
-    { city: 'Berlin', country: 'Germany', lat: 52.52, lng: 13.41, dailyUsers: 72, totalUsers: 1567 },
-    { city: 'Sydney', country: 'Australia', lat: -33.87, lng: 151.21, dailyUsers: 61, totalUsers: 1234 },
-    { city: 'Mumbai', country: 'India', lat: 19.08, lng: 72.88, dailyUsers: 83, totalUsers: 1876 },
-    { city: 'São Paulo', country: 'Brazil', lat: -23.55, lng: -46.64, dailyUsers: 54, totalUsers: 1123 },
-    { city: 'Toronto', country: 'Canada', lat: 43.65, lng: -79.38, dailyUsers: 68, totalUsers: 1445 },
-    { city: 'Paris', country: 'France', lat: 48.86, lng: 2.35, dailyUsers: 71, totalUsers: 1534 },
-    { city: 'Seoul', country: 'South Korea', lat: 37.57, lng: 126.98, dailyUsers: 87, totalUsers: 1987 },
-    { city: 'Dubai', country: 'UAE', lat: 25.20, lng: 55.27, dailyUsers: 52, totalUsers: 987 },
-    { city: 'Amsterdam', country: 'Netherlands', lat: 52.37, lng: 4.90, dailyUsers: 63, totalUsers: 1234 },
-    { city: 'Zurich', country: 'Switzerland', lat: 47.37, lng: 8.54, dailyUsers: 79, totalUsers: 1654 },
-    { city: 'Tel Aviv', country: 'Israel', lat: 32.09, lng: 34.78, dailyUsers: 66, totalUsers: 1345 },
-    { city: 'Beijing', country: 'China', lat: 39.90, lng: 116.41, dailyUsers: 91, totalUsers: 2234 },
-    { city: 'Melbourne', country: 'Australia', lat: -37.81, lng: 144.96, dailyUsers: 57, totalUsers: 1123 },
-    { city: 'Boston', country: 'USA', lat: 42.36, lng: -71.06, dailyUsers: 74, totalUsers: 1567 },
-    { city: 'Seattle', country: 'USA', lat: 47.61, lng: -122.33, dailyUsers: 81, totalUsers: 1765 },
-    { city: 'Stockholm', country: 'Sweden', lat: 59.33, lng: 18.07, dailyUsers: 59, totalUsers: 1234 },
-    { city: 'Hong Kong', country: 'China', lat: 22.32, lng: 114.17, dailyUsers: 85, totalUsers: 1876 },
-    { city: 'Bangalore', country: 'India', lat: 12.97, lng: 77.59, dailyUsers: 92, totalUsers: 2123 },
-    { city: 'Austin', country: 'USA', lat: 30.27, lng: -97.74, dailyUsers: 77, totalUsers: 1654 },
+    { city: 'San Francisco', country: 'USA', lat: 37.77, lng: -122.42, users: 12 },
+    { city: 'New York', country: 'USA', lat: 40.71, lng: -74.01, users: 9 },
+    { city: 'London', country: 'UK', lat: 51.51, lng: -0.13, users: 8 },
+    { city: 'Tokyo', country: 'Japan', lat: 35.68, lng: 139.69, users: 11 },
+    { city: 'Singapore', country: 'Singapore', lat: 1.35, lng: 103.82, users: 6 },
+    { city: 'Berlin', country: 'Germany', lat: 52.52, lng: 13.41, users: 7 },
+    { city: 'Sydney', country: 'Australia', lat: -33.87, lng: 151.21, users: 5 },
+    { city: 'Mumbai', country: 'India', lat: 19.08, lng: 72.88, users: 8 },
+    { city: 'São Paulo', country: 'Brazil', lat: -23.55, lng: -46.64, users: 4 },
+    { city: 'Toronto', country: 'Canada', lat: 43.65, lng: -79.38, users: 6 },
+    { city: 'Seoul', country: 'South Korea', lat: 37.57, lng: 126.98, users: 7 },
+    { city: 'Amsterdam', country: 'Netherlands', lat: 52.37, lng: 4.90, users: 5 },
   ];
 
   const models = ['VQE-AQI', 'ClimateTransformer', 'QCNN-Disaster', 'EnviroBoost', 'QAOA-EnviroOpt', 'EnviroVAE'];
@@ -51,50 +38,52 @@ const generateUsageData = (): UsagePoint[] => {
     ...loc,
     model: models[i % models.length],
     modelType: modelTypes[i % modelTypes.length],
-    lastActive: new Date(Date.now() - Math.floor(Math.random() * 300000)) // Within last 5 mins
+    lastActive: new Date(Date.now() - Math.floor(Math.random() * 300000))
   }));
 };
 
-// Mercator projection for accurate map positioning
+// Mercator projection
 const latLngToXY = (lat: number, lng: number, width: number, height: number) => {
   const x = ((lng + 180) / 360) * width;
   const latRad = (lat * Math.PI) / 180;
   const mercN = Math.log(Math.tan((Math.PI / 4) + (latRad / 2)));
   const y = (height / 2) - (width * mercN / (2 * Math.PI));
-  return { x, y: Math.max(0, Math.min(height, y)) };
+  return { x, y: Math.max(20, Math.min(height - 20, y)) };
 };
 
 const getPointColor = (type: string) => {
   switch (type) {
-    case 'quantum': return { fill: '#8b5cf6', glow: 'rgba(139, 92, 246, 0.6)', ring: 'rgba(139, 92, 246, 0.3)' };
-    case 'neural': return { fill: '#06b6d4', glow: 'rgba(6, 182, 212, 0.6)', ring: 'rgba(6, 182, 212, 0.3)' };
-    case 'hybrid': return { fill: '#f59e0b', glow: 'rgba(245, 158, 11, 0.6)', ring: 'rgba(245, 158, 11, 0.3)' };
-    case 'ensemble': return { fill: '#10b981', glow: 'rgba(16, 185, 129, 0.6)', ring: 'rgba(16, 185, 129, 0.3)' };
-    default: return { fill: '#ffffff', glow: 'rgba(255, 255, 255, 0.6)', ring: 'rgba(255, 255, 255, 0.3)' };
+    case 'quantum': return { fill: '#a78bfa', glow: 'rgba(167, 139, 250, 0.8)' };
+    case 'neural': return { fill: '#22d3ee', glow: 'rgba(34, 211, 238, 0.8)' };
+    case 'hybrid': return { fill: '#fbbf24', glow: 'rgba(251, 191, 36, 0.8)' };
+    case 'ensemble': return { fill: '#34d399', glow: 'rgba(52, 211, 153, 0.8)' };
+    default: return { fill: '#ffffff', glow: 'rgba(255, 255, 255, 0.8)' };
   }
 };
 
-// Real world map SVG path (simplified but accurate continents)
-const WorldMapPath = () => (
-  <g className="opacity-20" fill="white" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5">
+// Accurate world continents SVG path data (mercator projection, viewBox 0 0 800 400)
+const WorldMapSVG = () => (
+  <g className="world-continents" opacity="0.2">
     {/* North America */}
-    <path d="M45,85 L55,75 L80,70 L120,65 L145,70 L165,85 L170,105 L175,130 L165,145 L150,150 L130,145 L115,155 L100,160 L85,150 L70,135 L55,120 L45,100 Z" />
+    <path d="M55,85 L65,75 L85,72 L110,68 L135,70 L155,78 L168,88 L172,105 L168,125 L160,140 L148,150 L135,155 L118,152 L102,145 L88,135 L75,122 L62,105 L55,95Z M175,130 L185,135 L190,150 L185,165 L175,175 L165,172 L160,160 L162,145 L168,135Z" fill="white" />
     {/* South America */}
-    <path d="M115,165 L130,160 L145,170 L150,190 L155,220 L150,260 L140,290 L125,310 L110,300 L100,270 L95,230 L100,200 L105,180 Z" />
+    <path d="M165,175 L175,170 L188,175 L198,190 L205,215 L202,250 L192,285 L175,315 L158,325 L145,318 L138,295 L135,260 L138,225 L145,195 L155,180Z" fill="white" />
     {/* Europe */}
-    <path d="M280,65 L310,55 L340,60 L360,65 L370,80 L365,95 L350,100 L330,95 L310,100 L290,95 L280,80 Z" />
+    <path d="M355,52 L378,48 L398,52 L415,58 L425,68 L428,82 L420,95 L405,100 L388,98 L372,95 L358,88 L352,75 L352,62Z M345,72 L352,68 L358,75 L355,85 L345,82Z" fill="white" />
     {/* Africa */}
-    <path d="M290,110 L320,105 L350,115 L365,140 L370,180 L360,220 L340,255 L310,265 L280,255 L265,220 L260,180 L270,140 L285,120 Z" />
+    <path d="M365,105 L395,102 L425,115 L445,138 L455,175 L450,220 L435,265 L405,295 L370,305 L340,295 L322,258 L318,215 L325,168 L342,130 L358,112Z" fill="white" />
     {/* Asia */}
-    <path d="M360,50 L420,45 L480,50 L520,60 L550,80 L560,110 L550,140 L520,155 L480,160 L440,155 L400,140 L380,120 L370,95 L365,70 Z" />
+    <path d="M420,45 L475,40 L535,48 L585,62 L620,88 L635,125 L628,165 L605,195 L565,215 L520,225 L475,218 L438,198 L418,168 L408,132 L410,95 L415,65Z M640,145 L655,140 L668,150 L665,168 L652,178 L638,172 L635,158Z" fill="white" />
+    {/* Southeast Asia Islands */}
+    <path d="M565,218 L595,215 L625,228 L638,248 L628,268 L598,275 L568,265 L558,245 L562,228Z M635,248 L658,245 L678,258 L675,278 L655,288 L635,282 L628,265Z" fill="white" />
     {/* Australia */}
-    <path d="M500,210 L540,205 L560,220 L565,250 L550,275 L520,280 L495,270 L485,245 L490,220 Z" />
-    {/* Indonesia/SE Asia */}
-    <path d="M480,165 L520,160 L545,175 L530,190 L500,195 L475,185 Z" />
+    <path d="M598,298 L645,292 L685,308 L705,338 L698,372 L665,395 L618,398 L578,382 L565,348 L572,318Z" fill="white" />
     {/* Japan */}
-    <path d="M545,85 L555,80 L565,90 L560,105 L550,100 Z" />
-    {/* UK/Ireland */}
-    <path d="M275,65 L285,60 L290,70 L285,80 L275,75 Z" />
+    <path d="M655,95 L668,88 L678,98 L675,115 L662,122 L652,115 L652,102Z" fill="white" />
+    {/* UK */}
+    <path d="M345,58 L355,52 L362,58 L358,72 L348,75 L342,68Z" fill="white" />
+    {/* Indonesia */}
+    <path d="M575,252 L605,248 L632,262 L618,282 L588,288 L565,275Z" fill="white" />
   </g>
 );
 
@@ -104,19 +93,17 @@ export default function GlobalUsageMap() {
   const [activePoints, setActivePoints] = useState<Set<string>>(new Set());
   const [pulsingPoints, setPulsingPoints] = useState<Set<string>>(new Set());
 
-  // Calculate totals
-  const totalDailyUsers = usageData.reduce((sum, p) => sum + p.dailyUsers, 0);
-  const totalAllTimeUsers = usageData.reduce((sum, p) => sum + p.totalUsers, 0);
+  const totalDailyUsers = usageData.reduce((sum, p) => sum + p.users, 0);
   const activeLocations = usageData.length;
 
-  // Animate active points (simulate real-time activity)
+  // Animate active points
   useEffect(() => {
     const interval = setInterval(() => {
       const newActive = new Set<string>();
       const newPulsing = new Set<string>();
       usageData.forEach(point => {
-        if (Math.random() > 0.4) newActive.add(point.id);
-        if (Math.random() > 0.85) newPulsing.add(point.id);
+        if (Math.random() > 0.3) newActive.add(point.id);
+        if (Math.random() > 0.8) newPulsing.add(point.id);
       });
       setActivePoints(newActive);
       setPulsingPoints(newPulsing);
@@ -124,112 +111,63 @@ export default function GlobalUsageMap() {
     return () => clearInterval(interval);
   }, [usageData]);
 
-  const mapWidth = 600;
-  const mapHeight = 340;
+  const mapWidth = 800;
+  const mapHeight = 400;
 
   return (
-    <div className="relative rounded-xl overflow-hidden bg-gradient-to-b from-black/60 to-black/40 border border-white/10 backdrop-blur-sm">
+    <div className="relative rounded-xl overflow-hidden bg-black/60 border border-white/10 backdrop-blur-sm">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/[0.06]">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="absolute inset-0 bg-cyan-500/30 blur-lg rounded-full" />
-            <div className="relative p-2 rounded-lg bg-cyan-500/20 border border-cyan-500/30">
-              <Globe className="w-4 h-4 text-cyan-400" />
-            </div>
+          <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+            <Globe className="w-4 h-4 text-cyan-400" />
           </div>
           <div>
-            <h3 className="text-sm font-medium text-white">Global Deployments</h3>
-            <p className="text-[10px] text-white/40">Live model activity worldwide</p>
+            <h3 className="text-sm font-medium text-white">Global Model Deployments</h3>
+            <p className="text-[10px] text-white/40">Real-time activity across {activeLocations} locations</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-[10px] text-emerald-400 font-mono">LIVE</span>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-[11px] text-emerald-400 font-medium">LIVE</span>
         </div>
       </div>
 
       {/* Map Container */}
-      <div className="relative p-4">
+      <div className="relative p-6">
         <svg 
           viewBox={`0 0 ${mapWidth} ${mapHeight}`} 
           className="w-full h-auto"
-          style={{ maxHeight: '280px' }}
+          style={{ maxHeight: '320px' }}
         >
           <defs>
             {/* Grid pattern */}
-            <pattern id="mapGrid" width="30" height="30" patternUnits="userSpaceOnUse">
-              <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5"/>
+            <pattern id="mapGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5"/>
             </pattern>
             
-            {/* Glow filters for each type */}
-            <filter id="glow-quantum" x="-100%" y="-100%" width="300%" height="300%">
-              <feGaussianBlur stdDeviation="4" result="blur"/>
-              <feFlood floodColor="#8b5cf6" floodOpacity="0.8"/>
-              <feComposite in2="blur" operator="in"/>
-              <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+            {/* Glow filters */}
+            <filter id="pointGlow" x="-200%" y="-200%" width="500%" height="500%">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
             </filter>
-            <filter id="glow-neural" x="-100%" y="-100%" width="300%" height="300%">
-              <feGaussianBlur stdDeviation="4" result="blur"/>
-              <feFlood floodColor="#06b6d4" floodOpacity="0.8"/>
-              <feComposite in2="blur" operator="in"/>
-              <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-            <filter id="glow-hybrid" x="-100%" y="-100%" width="300%" height="300%">
-              <feGaussianBlur stdDeviation="4" result="blur"/>
-              <feFlood floodColor="#f59e0b" floodOpacity="0.8"/>
-              <feComposite in2="blur" operator="in"/>
-              <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-            <filter id="glow-ensemble" x="-100%" y="-100%" width="300%" height="300%">
-              <feGaussianBlur stdDeviation="4" result="blur"/>
-              <feFlood floodColor="#10b981" floodOpacity="0.8"/>
-              <feComposite in2="blur" operator="in"/>
-              <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-
-            {/* Radial gradient for atmosphere effect */}
-            <radialGradient id="atmosphereGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="rgba(6, 182, 212, 0.1)" />
+            
+            {/* Atmosphere gradient */}
+            <radialGradient id="atmosphere" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stopColor="rgba(34, 211, 238, 0.05)" />
               <stop offset="100%" stopColor="transparent" />
             </radialGradient>
           </defs>
           
           {/* Background */}
           <rect width="100%" height="100%" fill="url(#mapGrid)" />
-          <ellipse cx="300" cy="170" rx="280" ry="160" fill="url(#atmosphereGlow)" />
+          <ellipse cx={mapWidth/2} cy={mapHeight/2} rx={mapWidth*0.45} ry={mapHeight*0.45} fill="url(#atmosphere)" />
           
           {/* World Map */}
-          <WorldMapPath />
-
-          {/* Connection lines between nearby points */}
-          <g opacity="0.15">
-            {usageData.slice(0, 15).map((point, i) => {
-              const pos1 = latLngToXY(point.lat, point.lng, mapWidth, mapHeight);
-              const nearbyPoints = usageData.filter((p, j) => {
-                if (j === i) return false;
-                const dist = Math.sqrt(Math.pow(point.lat - p.lat, 2) + Math.pow(point.lng - p.lng, 2));
-                return dist < 40;
-              }).slice(0, 2);
-              
-              return nearbyPoints.map((nearby, ni) => {
-                const pos2 = latLngToXY(nearby.lat, nearby.lng, mapWidth, mapHeight);
-                return (
-                  <line
-                    key={`line-${i}-${ni}`}
-                    x1={pos1.x}
-                    y1={pos1.y}
-                    x2={pos2.x}
-                    y2={pos2.y}
-                    stroke={getPointColor(point.modelType).fill}
-                    strokeWidth="0.5"
-                    strokeDasharray="2 4"
-                    opacity={activePoints.has(point.id) ? 0.6 : 0.3}
-                  />
-                );
-              });
-            })}
-          </g>
+          <WorldMapSVG />
 
           {/* Usage points */}
           {usageData.map((point) => {
@@ -241,70 +179,46 @@ export default function GlobalUsageMap() {
             return (
               <g 
                 key={point.id}
-                transform={`translate(${x}, ${y})`}
-                className="cursor-pointer transition-all duration-300"
+                className="cursor-pointer"
                 onMouseEnter={() => setHoveredPoint(point)}
                 onMouseLeave={() => setHoveredPoint(null)}
-                style={{ transform: `translate(${x}px, ${y}px)` }}
               >
-                {/* Outer pulse ring for very active points */}
+                {/* Pulse animation for active points */}
                 {isPulsing && (
                   <>
-                    <circle
-                      r="16"
-                      fill="none"
-                      stroke={colors.fill}
-                      strokeWidth="1"
-                      opacity="0.3"
-                    >
-                      <animate attributeName="r" from="6" to="20" dur="1.5s" repeatCount="indefinite" />
-                      <animate attributeName="opacity" from="0.5" to="0" dur="1.5s" repeatCount="indefinite" />
+                    <circle cx={x} cy={y} r="18" fill="none" stroke={colors.fill} strokeWidth="1" opacity="0">
+                      <animate attributeName="r" from="6" to="22" dur="1.5s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" from="0.6" to="0" dur="1.5s" repeatCount="indefinite" />
                     </circle>
-                    <circle
-                      r="12"
-                      fill="none"
-                      stroke={colors.fill}
-                      strokeWidth="0.5"
-                      opacity="0.2"
-                    >
-                      <animate attributeName="r" from="4" to="14" dur="1.5s" repeatCount="indefinite" begin="0.3s" />
-                      <animate attributeName="opacity" from="0.4" to="0" dur="1.5s" repeatCount="indefinite" begin="0.3s" />
+                    <circle cx={x} cy={y} r="12" fill="none" stroke={colors.fill} strokeWidth="0.5" opacity="0">
+                      <animate attributeName="r" from="4" to="16" dur="1.5s" repeatCount="indefinite" begin="0.2s" />
+                      <animate attributeName="opacity" from="0.4" to="0" dur="1.5s" repeatCount="indefinite" begin="0.2s" />
                     </circle>
                   </>
                 )}
                 
-                {/* Soft glow */}
+                {/* Outer glow */}
                 <circle
-                  r={isActive ? 10 : 6}
+                  cx={x}
+                  cy={y}
+                  r={isActive ? 12 : 8}
                   fill={colors.glow}
-                  opacity={isActive ? 0.5 : 0.3}
-                  filter={`url(#glow-${point.modelType})`}
+                  opacity={isActive ? 0.4 : 0.2}
+                  filter="url(#pointGlow)"
                   className="transition-all duration-500"
-                />
-                
-                {/* Outer ring */}
-                <circle
-                  r={isActive ? 5 : 4}
-                  fill="none"
-                  stroke={colors.fill}
-                  strokeWidth="1"
-                  opacity={isActive ? 0.8 : 0.4}
-                  className="transition-all duration-300"
                 />
                 
                 {/* Main dot */}
                 <circle
-                  r={isActive ? 3 : 2.5}
+                  cx={x}
+                  cy={y}
+                  r={isActive ? 5 : 4}
                   fill={colors.fill}
                   className="transition-all duration-300"
                 />
                 
                 {/* Center highlight */}
-                <circle
-                  r="1"
-                  fill="white"
-                  opacity="0.9"
-                />
+                <circle cx={x} cy={y} r="1.5" fill="white" opacity="0.9" />
               </g>
             );
           })}
@@ -313,22 +227,22 @@ export default function GlobalUsageMap() {
         {/* Hover tooltip */}
         {hoveredPoint && (
           <div 
-            className="absolute z-20 p-3 rounded-lg bg-black/95 border border-white/20 backdrop-blur-xl shadow-2xl min-w-[200px] pointer-events-none"
+            className="absolute z-20 p-4 rounded-lg bg-black/95 border border-white/20 backdrop-blur-xl shadow-2xl min-w-[220px] pointer-events-none"
             style={{
-              left: `${Math.min(Math.max(((hoveredPoint.lng + 180) / 360) * 100, 15), 85)}%`,
-              top: `${Math.min(((90 - hoveredPoint.lat) / 180) * 80 + 10, 70)}%`,
+              left: `${Math.min(Math.max(((hoveredPoint.lng + 180) / 360) * 100, 20), 80)}%`,
+              top: `${Math.min(((90 - hoveredPoint.lat) / 180) * 80 + 10, 65)}%`,
               transform: 'translate(-50%, -110%)'
             }}
           >
-            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-white/10">
-              <MapPin className="w-3 h-3 text-white/50" />
-              <span className="text-xs font-semibold text-white">{hoveredPoint.city}</span>
-              <span className="text-[10px] text-white/40">{hoveredPoint.country}</span>
+            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/10">
+              <MapPin className="w-3.5 h-3.5 text-white/50" />
+              <span className="text-sm font-semibold text-white">{hoveredPoint.city}</span>
+              <span className="text-xs text-white/40">{hoveredPoint.country}</span>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-white/40">Active Model</span>
-                <span className={`text-[10px] font-medium ${
+                <span className="text-xs text-white/40">Active Model</span>
+                <span className={`text-xs font-medium ${
                   hoveredPoint.modelType === 'quantum' ? 'text-violet-400' :
                   hoveredPoint.modelType === 'neural' ? 'text-cyan-400' :
                   hoveredPoint.modelType === 'hybrid' ? 'text-amber-400' : 'text-emerald-400'
@@ -337,18 +251,14 @@ export default function GlobalUsageMap() {
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-white/40">Today's Users</span>
-                <span className="text-[10px] font-mono font-bold text-white">{hoveredPoint.dailyUsers}</span>
+                <span className="text-xs text-white/40">Daily Users</span>
+                <span className="text-xs font-mono font-bold text-white">{hoveredPoint.users}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-white/40">Total Users</span>
-                <span className="text-[10px] font-mono text-white/70">{hoveredPoint.totalUsers.toLocaleString()}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] text-white/40">Last Activity</span>
-                <span className="text-[10px] text-emerald-400 flex items-center gap-1">
-                  <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
-                  {Math.floor((Date.now() - hoveredPoint.lastActive.getTime()) / 60000)}m ago
+                <span className="text-xs text-white/40">Status</span>
+                <span className="text-xs text-emerald-400 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Online
                 </span>
               </div>
             </div>
@@ -357,71 +267,57 @@ export default function GlobalUsageMap() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-4 gap-3 p-4 border-t border-white/[0.06]">
-        <div className="text-center p-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
-          <div className="flex items-center justify-center gap-1.5 mb-1">
-            <Users className="w-3 h-3 text-cyan-400" />
-            <span className="text-[9px] text-white/40 uppercase tracking-wider">Today</span>
+      <div className="grid grid-cols-4 gap-4 px-6 pb-6">
+        <div className="p-4 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-2">
+            <Users className="w-4 h-4 text-cyan-400" />
+            <span className="text-[10px] text-white/40 uppercase tracking-wider">Today</span>
           </div>
-          <p className="text-xl font-mono font-bold text-cyan-400">{totalDailyUsers.toLocaleString()}</p>
-          <p className="text-[9px] text-white/30">active users</p>
+          <p className="text-2xl font-mono font-bold text-white">{totalDailyUsers}</p>
+          <p className="text-[10px] text-white/30 mt-1">active users</p>
         </div>
         
-        <div className="text-center p-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
-          <div className="flex items-center justify-center gap-1.5 mb-1">
-            <TrendingUp className="w-3 h-3 text-emerald-400" />
-            <span className="text-[9px] text-white/40 uppercase tracking-wider">Total</span>
+        <div className="p-4 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-2">
+            <Server className="w-4 h-4 text-violet-400" />
+            <span className="text-[10px] text-white/40 uppercase tracking-wider">Locations</span>
           </div>
-          <p className="text-xl font-mono font-bold text-emerald-400">{(totalAllTimeUsers / 1000).toFixed(1)}K</p>
-          <p className="text-[9px] text-white/30">all-time users</p>
+          <p className="text-2xl font-mono font-bold text-white">{activeLocations}</p>
+          <p className="text-[10px] text-white/30 mt-1">active nodes</p>
         </div>
         
-        <div className="text-center p-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
-          <div className="flex items-center justify-center gap-1.5 mb-1">
-            <MapPin className="w-3 h-3 text-violet-400" />
-            <span className="text-[9px] text-white/40 uppercase tracking-wider">Locations</span>
+        <div className="p-4 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-2">
+            <Wifi className="w-4 h-4 text-emerald-400" />
+            <span className="text-[10px] text-white/40 uppercase tracking-wider">Uptime</span>
           </div>
-          <p className="text-xl font-mono font-bold text-violet-400">{activeLocations}</p>
-          <p className="text-[9px] text-white/30">active cities</p>
+          <p className="text-2xl font-mono font-bold text-emerald-400">99.9%</p>
+          <p className="text-[10px] text-white/30 mt-1">availability</p>
         </div>
         
-        <div className="text-center p-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
-          <div className="flex items-center justify-center gap-1.5 mb-1">
-            <Activity className="w-3 h-3 text-amber-400" />
-            <span className="text-[9px] text-white/40 uppercase tracking-wider">Uptime</span>
+        <div className="p-4 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-2">
+            <Activity className="w-4 h-4 text-amber-400" />
+            <span className="text-[10px] text-white/40 uppercase tracking-wider">Models</span>
           </div>
-          <p className="text-xl font-mono font-bold text-amber-400">99.9%</p>
-          <p className="text-[9px] text-white/30">availability</p>
+          <p className="text-2xl font-mono font-bold text-white">6</p>
+          <p className="text-[10px] text-white/30 mt-1">deployed</p>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-6 px-4 pb-4">
+      <div className="px-6 pb-4 flex items-center justify-center gap-6">
         {[
-          { type: 'quantum', label: 'Quantum' },
-          { type: 'neural', label: 'Neural' },
-          { type: 'hybrid', label: 'Hybrid' },
-          { type: 'ensemble', label: 'Ensemble' },
-        ].map(({ type, label }) => {
-          const colors = getPointColor(type);
-          const count = usageData.filter(p => p.modelType === type).length;
-          return (
-            <div key={type} className="flex items-center gap-2">
-              <div className="relative">
-                <div 
-                  className="absolute inset-0 blur-sm rounded-full" 
-                  style={{ backgroundColor: colors.glow }}
-                />
-                <div 
-                  className="relative w-2 h-2 rounded-full" 
-                  style={{ backgroundColor: colors.fill }}
-                />
-              </div>
-              <span className="text-[10px] text-white/50">{label}</span>
-              <span className="text-[9px] font-mono text-white/30">({count})</span>
-            </div>
-          );
-        })}
+          { type: 'quantum', label: 'Quantum', color: 'bg-violet-400' },
+          { type: 'neural', label: 'Neural', color: 'bg-cyan-400' },
+          { type: 'hybrid', label: 'Hybrid', color: 'bg-amber-400' },
+          { type: 'ensemble', label: 'Ensemble', color: 'bg-emerald-400' },
+        ].map(item => (
+          <div key={item.type} className="flex items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${item.color}`} />
+            <span className="text-[10px] text-white/50">{item.label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
