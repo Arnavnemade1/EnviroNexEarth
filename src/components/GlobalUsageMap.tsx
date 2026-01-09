@@ -34,12 +34,15 @@ const generateUsageData = (): UsagePoint[] => {
   const models = ['VQE-AQI', 'ClimateTransformer', 'QCNN-Disaster', 'EnviroBoost', 'QAOA-EnviroOpt', 'EnviroVAE'];
   const modelTypes: ('quantum' | 'neural' | 'hybrid' | 'ensemble')[] = ['quantum', 'neural', 'hybrid', 'ensemble', 'quantum', 'neural'];
 
+  // Deterministic lastActive offset per location (no random)
+  const offsets = [0, 60000, 120000, 30000, 180000, 90000, 240000, 45000, 150000, 75000, 210000, 135000];
+
   return locations.map((loc, i) => ({
     id: `usage-${i}`,
     ...loc,
     model: models[i % models.length],
     modelType: modelTypes[i % modelTypes.length],
-    lastActive: new Date(Date.now() - Math.floor(Math.random() * 300000))
+    lastActive: new Date(Date.now() - offsets[i % offsets.length])
   }));
 };
 
