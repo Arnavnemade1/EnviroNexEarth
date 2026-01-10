@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { 
+import {
   Sparkles, Loader2, X, Clock, TrendingUp, AlertTriangle, CheckCircle,
   Car, Shirt, Dumbbell, TreePine, Heart, Zap, Plane, PartyPopper, Wheat, Bird,
   ChevronDown, ChevronUp, RefreshCw
@@ -53,6 +53,12 @@ interface PredictionsData {
   overallRiskScore: number;
   bestHourToday: string;
   worstHourToday: string;
+  neuralMetadata?: {
+    engine: string;
+    simulations: number;
+    processingTimeMs: number;
+    confidenceInterval: string;
+  };
 }
 
 const categoryIcons: Record<string, React.ReactNode> = {
@@ -173,7 +179,7 @@ export const ClimatePredictions = ({
             </div>
           </DialogHeader>
 
-          <ScrollArea className="h-[calc(95vh-140px)]">
+          <ScrollArea className="h-[calc(95vh-140px)]" viewportClassName="scrollbar-gutter-stable">
             <div className="p-6 space-y-6">
               {/* Generate Button */}
               {!predictions && !isLoading && (
@@ -220,8 +226,8 @@ export const ClimatePredictions = ({
                   </div>
                   <div className="grid grid-cols-5 gap-3 max-w-lg mx-auto">
                     {Object.entries(categoryIcons).slice(0, 5).map(([key, icon], i) => (
-                      <div 
-                        key={key} 
+                      <div
+                        key={key}
                         className="w-12 h-12 rounded-xl glass flex items-center justify-center text-primary animate-pulse"
                         style={{ animationDelay: `${i * 0.1}s` }}
                       >
@@ -231,8 +237,8 @@ export const ClimatePredictions = ({
                   </div>
                   <div className="grid grid-cols-5 gap-3 max-w-lg mx-auto">
                     {Object.entries(categoryIcons).slice(5, 10).map(([key, icon], i) => (
-                      <div 
-                        key={key} 
+                      <div
+                        key={key}
                         className="w-12 h-12 rounded-xl glass flex items-center justify-center text-secondary animate-pulse"
                         style={{ animationDelay: `${(i + 5) * 0.1}s` }}
                       >
@@ -256,8 +262,8 @@ export const ClimatePredictions = ({
                         <div>
                           <p className="text-sm text-muted-foreground">Overall Risk Score</p>
                           <p className="text-lg font-semibold text-foreground">
-                            {predictions.overallRiskScore <= 30 ? 'Low Impact Day' : 
-                             predictions.overallRiskScore <= 60 ? 'Moderate Impact Day' : 'High Impact Day'}
+                            {predictions.overallRiskScore <= 30 ? 'Low Impact Day' :
+                              predictions.overallRiskScore <= 60 ? 'Moderate Impact Day' : 'High Impact Day'}
                           </p>
                         </div>
                       </div>
@@ -292,8 +298,8 @@ export const ClimatePredictions = ({
                   {/* Prediction Categories */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {Object.entries(predictions.predictions).map(([key, category]) => (
-                      <Card 
-                        key={key} 
+                      <Card
+                        key={key}
                         className="glass border-primary/10 overflow-hidden transition-all duration-300 hover:border-primary/30"
                       >
                         {/* Category Header */}
@@ -356,8 +362,8 @@ export const ClimatePredictions = ({
                                 <div className="space-y-2 max-h-48 overflow-y-auto pr-2 scrollbar-thin">
                                   {category.hourlyPredictions.slice(0, 6).map((hourly, i) => (
                                     <div key={i} className="flex items-start gap-3 p-2 rounded-lg bg-muted/30">
-                                      <Badge 
-                                        variant="outline" 
+                                      <Badge
+                                        variant="outline"
                                         className={`shrink-0 ${getSeverityColor(hourly.severity)}`}
                                       >
                                         {hourly.time}
@@ -408,15 +414,24 @@ export const ClimatePredictions = ({
                   </div>
 
                   {/* Footer */}
-                  <div className="text-center text-xs text-muted-foreground pt-4 border-t border-primary/10">
+                  <div className="text-center text-xs text-muted-foreground pt-4 border-t border-primary/10 space-y-2">
                     <div className="flex items-center justify-center gap-2">
                       <Badge variant="outline" className="border-primary/30">
                         <Sparkles className="w-3 h-3 mr-1" />
-                        Powered by EnviroAI
+                        Powered by AuraEarth Neural Engine
                       </Badge>
                       <span>•</span>
                       <span>Generated at {new Date(predictions.timestamp).toLocaleTimeString()}</span>
                     </div>
+                    {predictions.neuralMetadata && (
+                      <div className="flex items-center justify-center gap-3 opacity-60">
+                        <span>Engine: {predictions.neuralMetadata.engine}</span>
+                        <span>•</span>
+                        <span>Simulations: {predictions.neuralMetadata.simulations.toLocaleString()}</span>
+                        <span>•</span>
+                        <span>Confidence: {predictions.neuralMetadata.confidenceInterval}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

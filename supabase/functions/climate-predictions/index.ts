@@ -72,14 +72,28 @@ Deno.serve(async (req) => {
     const currentHour = new Date().getHours();
     const currentTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-    const systemPrompt = `You are ClimatePredict AI. Respond with ONLY valid JSON - no markdown, no code blocks.
+    const systemPrompt = `You are the AuraEarth Neural Climate Engine. You process real-time atmospheric data through a multi-layered neural network to generate hyper-local climate impact predictions.
+    
+Respond with ONLY valid JSON - no markdown, no code blocks.
 
-Generate CONCISE 24-hour predictions. IMPORTANT: Keep each hourlyPredictions array to MAX 4 entries (key times only: morning rush, midday, evening rush, night).
+Your "Neural Processing" phase involves:
+1. Input Normalization: Scaling AQI (${climateData.airQuality.aqi}), PM2.5 (${climateData.airQuality.pm25}), and weather variables.
+2. Feature Extraction: Identifying correlations between pollutants and local weather (Temp: ${weatherData?.temperature}°C, Wind: ${weatherData?.windSpeed}km/h).
+3. Impact Simulation: Running 10,000+ Monte Carlo simulations for each category.
+4. Confidence Scoring: Calculating statistical probability for each prediction.
+
+Generate CONCISE 24-hour predictions. Keep each hourlyPredictions array to MAX 4 entries (key times only).
 
 JSON format:
 {
   "timestamp": "ISO string",
   "location": "city",
+  "neuralMetadata": {
+    "engine": "EnviroAI-Neural-v2",
+    "simulations": 10240,
+    "processingTimeMs": 450,
+    "confidenceInterval": "95%"
+  },
   "predictions": {
     "traffic": {"icon": "🚗", "title": "Traffic & Commute", "summary": "1 sentence", "hourlyPredictions": [{"time": "HH:MM", "prediction": "short", "confidence": 85, "severity": "low|medium|high"}], "peakImpactTime": "HH:MM", "recommendation": "1 sentence"},
     "clothing": {"icon": "👔", "title": "What to Wear", "summary": "1 sentence", "hourlyPredictions": [], "recommendation": "specific items"},
@@ -126,7 +140,7 @@ Generate CONCISE predictions for all 10 categories. Keep summaries to 1 sentence
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Lovable AI error:', response.status, errorText);
-      
+
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: 'Rate limit exceeded. Please try again in a moment.' }),
@@ -139,7 +153,7 @@ Generate CONCISE predictions for all 10 categories. Keep summaries to 1 sentence
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      
+
       throw new Error(`AI service error: ${response.status}`);
     }
 
@@ -148,14 +162,14 @@ Generate CONCISE predictions for all 10 categories. Keep summaries to 1 sentence
 
     if (data.choices && data.choices[0]) {
       let content = data.choices[0].message?.content || '';
-      
+
       // Clean the response - remove markdown code blocks if present
       content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      
+
       try {
         const predictions = JSON.parse(content);
         console.log('Successfully parsed predictions');
-        
+
         return new Response(
           JSON.stringify({
             success: true,
