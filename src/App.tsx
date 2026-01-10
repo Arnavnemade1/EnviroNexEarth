@@ -13,6 +13,7 @@ const queryClient = new QueryClient();
 const Auth = lazy(() => import("./pages/Auth"));
 const Health = lazy(() => import("./pages/Health"));
 const Explore = lazy(() => import("./pages/Explore"));
+const Predictions = lazy(() => import("./pages/Predictions"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const App = () => (
@@ -43,6 +44,13 @@ const App = () => (
                 <div className="animate-pulse text-primary">Loading...</div>
               </div>}>
                 <Explore />
+              </Suspense>
+            } />
+            <Route path="/predictions" element={
+              <Suspense fallback={<div className="min-h-screen bg-gradient-space flex items-center justify-center">
+                <div className="animate-pulse text-primary">Loading...</div>
+              </div>}>
+                <Predictions />
               </Suspense>
             } />
             <Route path="/404" element={

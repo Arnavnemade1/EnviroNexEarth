@@ -89,7 +89,8 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           <div className="hidden md:flex items-center gap-10">
             <a href="#technology" className="text-sm text-white/60 hover:text-white transition-colors">Technology</a>
             <a href="#capabilities" className="text-sm text-white/60 hover:text-white transition-colors">Capabilities</a>
-            <a href="/explore" className="text-sm text-white/60 hover:text-white transition-colors">Explore Models</a>
+            <a href="/predictions" className="text-sm text-white/60 hover:text-white transition-colors">Predictions</a>
+            <a href="/explore" className="text-sm text-white/60 hover:text-white transition-colors">Model Lab</a>
           </div>
 
           <div className="flex items-center gap-4">
