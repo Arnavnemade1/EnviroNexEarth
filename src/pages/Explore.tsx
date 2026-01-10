@@ -44,7 +44,6 @@ import { useToast } from '@/hooks/use-toast';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ComposedChart, ScatterChart, Scatter, ZAxis } from 'recharts';
 import TrainingSimulator from '@/components/TrainingSimulator';
 import GlobalUsageMap from '@/components/GlobalUsageMap';
-import ModelPredictions from '@/components/ModelPredictions';
 import { getModelsForUI } from '@/lib/modelDefinitions';
 
 interface ModelResult {
@@ -473,7 +472,6 @@ export default function Explore() {
             <TabsList className="bg-transparent border-0 p-0 h-auto gap-6">
               {[
                 { value: 'models', label: 'Models', icon: Cpu },
-                { value: 'predictions', label: 'Predictions', icon: Target },
                 { value: 'training', label: 'Training', icon: GraduationCap },
                 { value: 'analytics', label: 'Analytics', icon: BarChart3 },
               ].map(tab => (
@@ -834,10 +832,6 @@ export default function Explore() {
                   )}
                 </div>
               </div>
-            </TabsContent>
-
-            <TabsContent value="predictions" className="space-y-6 mt-0">
-              <ModelPredictions />
             </TabsContent>
 
             <TabsContent value="training" className="space-y-6">
