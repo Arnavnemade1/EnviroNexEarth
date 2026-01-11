@@ -244,7 +244,22 @@ const generatePredictions = (envData: any, category: typeof PREDICTION_CATEGORIE
 };
 
 export default function Predictions() {
-  const [envData, setEnvData] = useState({
+  const [envData, setEnvData] = useState<{
+    temperature: number;
+    humidity: number;
+    pressure: number;
+    windSpeed: number;
+    aqi: number;
+    pm25: number;
+    uvIndex: number;
+    location: string;
+    hourly?: {
+      temperature: number[];
+      humidity: number[];
+      aqi: number[];
+      pm25: number[];
+    };
+  }>({
     temperature: 22,
     humidity: 55,
     pressure: 1013,
