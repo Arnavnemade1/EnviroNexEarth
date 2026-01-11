@@ -179,7 +179,7 @@ export const ClimatePredictions = ({
             </div>
           </DialogHeader>
 
-          <ScrollArea className="h-[calc(95vh-140px)]" viewportClassName="scrollbar-gutter-stable">
+          <ScrollArea className="h-[calc(95vh-140px)]">
             <div className="p-6 space-y-6">
               {/* Generate Button */}
               {!predictions && !isLoading && (
