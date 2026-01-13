@@ -31,6 +31,8 @@ const generateUsageData = (): UsagePoint[] => {
     { city: 'Amsterdam', country: 'Netherlands', lat: 52.37, lng: 4.90, users: 5 },
     { city: 'Bangalore', country: 'India', lat: 12.97, lng: 77.59, users: 9 },
     { city: 'Austin', country: 'USA', lat: 30.26, lng: -97.74, users: 6 },
+    { city: 'Goa', country: 'India', lat: 15.29, lng: 74.12, users: 5 },
+    { city: 'Houston', country: 'USA', lat: 29.76, lng: -95.36, users: 7 },
   ];
 
   const models = ['VQE-AQI', 'ClimateTransformer', 'QCNN-Disaster', 'EnviroBoost', 'QAOA-EnviroOpt', 'EnviroVAE'];
@@ -239,8 +241,8 @@ export default function GlobalUsageMap() {
               <div className="flex items-center justify-between">
                 <span className="text-xs text-white/40">Active Model</span>
                 <span className={`text-xs font-medium ${hoveredPoint.modelType === 'quantum' ? 'text-violet-400' :
-                    hoveredPoint.modelType === 'neural' ? 'text-cyan-400' :
-                      hoveredPoint.modelType === 'hybrid' ? 'text-amber-400' : 'text-emerald-400'
+                  hoveredPoint.modelType === 'neural' ? 'text-cyan-400' :
+                    hoveredPoint.modelType === 'hybrid' ? 'text-amber-400' : 'text-emerald-400'
                   }`}>
                   {hoveredPoint.model}
                 </span>
