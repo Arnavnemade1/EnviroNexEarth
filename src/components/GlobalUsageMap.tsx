@@ -29,6 +29,8 @@ const generateUsageData = (): UsagePoint[] => {
     { city: 'Toronto', country: 'Canada', lat: 43.65, lng: -79.38, users: 6 },
     { city: 'Seoul', country: 'South Korea', lat: 37.57, lng: 126.98, users: 7 },
     { city: 'Amsterdam', country: 'Netherlands', lat: 52.37, lng: 4.90, users: 5 },
+    { city: 'Bangalore', country: 'India', lat: 12.97, lng: 77.59, users: 9 },
+    { city: 'Austin', country: 'USA', lat: 30.26, lng: -97.74, users: 6 },
   ];
 
   const models = ['VQE-AQI', 'ClimateTransformer', 'QCNN-Disaster', 'EnviroBoost', 'QAOA-EnviroOpt', 'EnviroVAE'];
@@ -121,36 +123,36 @@ export default function GlobalUsageMap() {
 
       {/* Map Container */}
       <div className="relative p-6">
-        <svg 
-          viewBox={`0 0 ${mapWidth} ${mapHeight}`} 
+        <svg
+          viewBox={`0 0 ${mapWidth} ${mapHeight}`}
           className="w-full h-auto"
           style={{ maxHeight: '320px' }}
         >
           <defs>
             {/* Grid pattern */}
             <pattern id="mapGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5"/>
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
             </pattern>
-            
+
             {/* Glow filters */}
             <filter id="pointGlow" x="-200%" y="-200%" width="500%" height="500%">
-              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feGaussianBlur stdDeviation="3" result="blur" />
               <feMerge>
-                <feMergeNode in="blur"/>
-                <feMergeNode in="SourceGraphic"/>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
-            
+
             {/* Atmosphere gradient */}
             <radialGradient id="atmosphere" cx="50%" cy="50%" r="60%">
               <stop offset="0%" stopColor="rgba(34, 211, 238, 0.05)" />
               <stop offset="100%" stopColor="transparent" />
             </radialGradient>
           </defs>
-          
+
           {/* Background */}
           <rect width="100%" height="100%" fill="url(#mapGrid)" />
-          <ellipse cx={mapWidth/2} cy={mapHeight/2} rx={mapWidth*0.45} ry={mapHeight*0.45} fill="url(#atmosphere)" />
+          <ellipse cx={mapWidth / 2} cy={mapHeight / 2} rx={mapWidth * 0.45} ry={mapHeight * 0.45} fill="url(#atmosphere)" />
 
           {/* REAL MAP (PNG) */}
           <image
@@ -169,9 +171,9 @@ export default function GlobalUsageMap() {
             const colors = getPointColor(point.modelType);
             const isActive = activePoints.has(point.id);
             const isPulsing = pulsingPoints.has(point.id);
-            
+
             return (
-              <g 
+              <g
                 key={point.id}
                 className="cursor-pointer"
                 onMouseEnter={() => setHoveredPoint(point)}
@@ -190,7 +192,7 @@ export default function GlobalUsageMap() {
                     </circle>
                   </>
                 )}
-                
+
                 {/* Outer glow */}
                 <circle
                   cx={x}
@@ -201,7 +203,7 @@ export default function GlobalUsageMap() {
                   filter="url(#pointGlow)"
                   className="transition-all duration-500"
                 />
-                
+
                 {/* Main dot */}
                 <circle
                   cx={x}
@@ -210,7 +212,7 @@ export default function GlobalUsageMap() {
                   fill={colors.fill}
                   className="transition-all duration-300"
                 />
-                
+
                 {/* Center highlight */}
                 <circle cx={x} cy={y} r="1.5" fill="white" opacity="0.9" />
               </g>
@@ -220,7 +222,7 @@ export default function GlobalUsageMap() {
 
         {/* Hover tooltip */}
         {hoveredPoint && (
-          <div 
+          <div
             className="absolute z-20 p-4 rounded-lg bg-black/95 border border-white/20 backdrop-blur-xl shadow-2xl min-w-[220px] pointer-events-none"
             style={{
               left: `${Math.min(Math.max(((hoveredPoint.lng + 180) / 360) * 100, 20), 80)}%`,
@@ -236,11 +238,10 @@ export default function GlobalUsageMap() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-white/40">Active Model</span>
-                <span className={`text-xs font-medium ${
-                  hoveredPoint.modelType === 'quantum' ? 'text-violet-400' :
-                  hoveredPoint.modelType === 'neural' ? 'text-cyan-400' :
-                  hoveredPoint.modelType === 'hybrid' ? 'text-amber-400' : 'text-emerald-400'
-                }`}>
+                <span className={`text-xs font-medium ${hoveredPoint.modelType === 'quantum' ? 'text-violet-400' :
+                    hoveredPoint.modelType === 'neural' ? 'text-cyan-400' :
+                      hoveredPoint.modelType === 'hybrid' ? 'text-amber-400' : 'text-emerald-400'
+                  }`}>
                   {hoveredPoint.model}
                 </span>
               </div>
@@ -270,7 +271,7 @@ export default function GlobalUsageMap() {
           <p className="text-2xl font-mono font-bold text-white">{totalDailyUsers}</p>
           <p className="text-[10px] text-white/30 mt-1">active users</p>
         </div>
-        
+
         <div className="p-4 rounded-lg bg-white/[0.03] border border-white/[0.06]">
           <div className="flex items-center gap-2 mb-2">
             <Server className="w-4 h-4 text-violet-400" />
@@ -279,7 +280,7 @@ export default function GlobalUsageMap() {
           <p className="text-2xl font-mono font-bold text-white">{activeLocations}</p>
           <p className="text-[10px] text-white/30 mt-1">active nodes</p>
         </div>
-        
+
         <div className="p-4 rounded-lg bg-white/[0.03] border border-white/[0.06]">
           <div className="flex items-center gap-2 mb-2">
             <Wifi className="w-4 h-4 text-emerald-400" />
@@ -288,7 +289,7 @@ export default function GlobalUsageMap() {
           <p className="text-2xl font-mono font-bold text-emerald-400">99.9%</p>
           <p className="text-[10px] text-white/30 mt-1">availability</p>
         </div>
-        
+
         <div className="p-4 rounded-lg bg-white/[0.03] border border-white/[0.06]">
           <div className="flex items-center gap-2 mb-2">
             <Activity className="w-4 h-4 text-amber-400" />

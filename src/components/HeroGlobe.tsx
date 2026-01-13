@@ -125,7 +125,7 @@ const Scene = () => {
       <pointLight position={[-10, -10, -10]} intensity={0.5} color="#22d3ee" />
       <pointLight position={[5, 5, 5]} intensity={0.3} color="#10b981" />
 
-      <Stars radius={100} depth={50} count={1500} factor={4} saturation={0} fade speed={0.5} />
+      <Stars radius={100} depth={50} count={1000} factor={2} saturation={0} fade speed={0.5} />
 
       <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
         <AnimatedSphere />
