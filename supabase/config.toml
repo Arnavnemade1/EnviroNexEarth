@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.climate-predictions]
 verify_jwt = false
+
+[functions.anomaly-detection]
+verify_jwt = false
