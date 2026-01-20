@@ -164,7 +164,7 @@ export const ClimatePredictions = ({
                     ClimatePredict AI
                   </DialogTitle>
                   <DialogDescription className="text-muted-foreground mt-1">
-                    24-hour predictions powered by EnviroAI • {cityName}
+                    24-hour predictions powered by IBM Quantum • {cityName}
                   </DialogDescription>
                 </div>
               </div>
@@ -418,7 +418,7 @@ export const ClimatePredictions = ({
                     <div className="flex items-center justify-center gap-2">
                       <Badge variant="outline" className="border-primary/30">
                         <Sparkles className="w-3 h-3 mr-1" />
-                        Powered by AuraEarth Neural Engine
+                        Powered by IBM Quantum Neural Engine
                       </Badge>
                       <span>•</span>
                       <span>Generated at {new Date(predictions.timestamp).toLocaleTimeString()}</span>
