@@ -539,6 +539,19 @@ export default function Predictions() {
     quantumAdvantage: r.environmental_context?.quantum_advantage || 12
   }));
 
+  const correlationData = predictions.map(p => ({
+    confidence: p.confidence * 100,
+    value: p.value,
+    stdDev: p.stats.stdDev,
+    name: p.factor
+  }));
+
+  const distributionData = [
+    { name: 'High Confidence', value: predictions.filter(p => p.confidence > 0.9).length, color: '#10b981' },
+    { name: 'Medium Confidence', value: predictions.filter(p => p.confidence > 0.75 && p.confidence <= 0.9).length, color: '#06b6d4' },
+    { name: 'Low Confidence', value: predictions.filter(p => p.confidence <= 0.75).length, color: '#f59e0b' }
+  ];
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Subtle grid background */}
