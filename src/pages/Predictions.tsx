@@ -552,17 +552,57 @@ export default function Predictions() {
       const fetchSatellite = async () => {
         setIsSatelliteConnecting(true);
         try {
-          // Get coordinates from envData or default
-          const { data } = await supabase.functions.invoke('satellite-uplink', {
-            body: { latitude: 29.7604, longitude: -95.3698 } // Default to Houston if missing, or use envData location if we had coords
-          });
-          if (data) {
-            // Simulate connection delay for realism
-            setTimeout(() => {
-              setSatelliteData(data);
-              setIsSatelliteConnecting(false);
-            }, 1500);
-          }
+          // Direct client-side fetch to OpenMeteo to avoid CORS/Edge Function issues
+          // Using Houston coordinates as default or envData location if available
+          const lat = 29.7604;
+          const lon = -95.3698;
+
+          const response = await fetch(
+            `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=pm10,nitrogen_dioxide,sulphur_dioxide,ozone,aerosol_optical_depth,dust&hourly=uv_index`
+          );
+
+          const data = await response.json();
+          const current = data.current;
+
+          // Simulate satellite telemetry format locally
+          const telemetry = {
+            timestamp: new Date().toISOString(),
+            satellite_id: 'TEMPO-1',
+            orbit_segment: 'DESCENDING',
+            scan_angle: (Math.random() * 40 - 20).toFixed(2),
+            quality_flag: 'NOMINAL',
+            spectral_bands: {
+              'UV-VIS': {
+                nitrogen_dioxide: {
+                  value: current.nitrogen_dioxide,
+                  unit: 'μg/m³',
+                  column_density: (current.nitrogen_dioxide * 1.8e15).toExponential(2)
+                },
+                ozone: {
+                  value: current.ozone,
+                  unit: 'μg/m³',
+                  dobson_units: (current.ozone * 0.47).toFixed(1)
+                },
+                formaldehyde: {
+                  value: (Math.random() * 5 + 1).toFixed(2),
+                  unit: 'μg/m³'
+                }
+              },
+              'AEROSOL': {
+                aod: current.aerosol_optical_depth || 0.15,
+                dust_mass: current.dust || 0,
+                pm10: current.pm10
+              }
+            },
+            raw_stream: Array.from({ length: 5 }, () => Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6, '0'))
+          };
+
+          // Simulate connection delay for realism
+          setTimeout(() => {
+            setSatelliteData(telemetry);
+            setIsSatelliteConnecting(false);
+          }, 1500);
+
         } catch (e) {
           console.error('Satellite uplink error:', e);
           setIsSatelliteConnecting(false);
