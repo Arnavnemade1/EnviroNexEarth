@@ -609,6 +609,58 @@ export default function Predictions() {
             </div>
           )}
 
+          {/* Score Guide & Quantum Status */}
+          <div className="flex items-center justify-between px-2">
+            <div className="flex gap-4 text-[10px] font-mono text-white/40">
+              <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-emerald-400" /> 0-40: LOW RISK</span>
+              <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-400" /> 41-70: MODERATE</span>
+              <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-400" /> 71-100: CRITICAL</span>
+            </div>
+            <div className="flex items-center gap-2 text-[10px] font-mono text-white/30">
+              <Atom className="w-3 h-3" />
+              <span>ANU QRNG: {isSimulating ? 'FETCHING...' : 'ACTIVE'}</span>
+              <span className="text-violet-400">[{Math.floor(Math.random() * 255).toString(16).toUpperCase().padStart(2, '0')}]</span>
+            </div>
+          </div>
+
+          {/* Prediction Categories - Top Priority */}
+          <div className="grid grid-cols-6 gap-3">
+            {PREDICTION_CATEGORIES.map(cat => {
+              const catPreds = generatePredictions(envData, cat);
+              const catAvg = catPreds.reduce((a, p) => a + p.value, 0) / catPreds.length;
+              const catModel = getModelById(cat.model);
+              const isSelected = selectedCategory.id === cat.id;
+
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`p-5 rounded-2xl border text-left transition-all ${isSelected
+                    ? 'bg-white/[0.05] border-white/20'
+                    : 'bg-white/[0.02] border-white/[0.04] hover:bg-white/[0.03] hover:border-white/[0.08]'
+                    }`}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`p-2 rounded-lg ${isSelected ? 'bg-white/10' : 'bg-white/[0.04]'}`}>
+                      <cat.icon className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-white/50'}`} />
+                    </div>
+                    {isSelected && <ChevronRight className="w-4 h-4 text-white/40 ml-auto" />}
+                  </div>
+                  <p className={`text-sm font-medium mb-1 ${isSelected ? 'text-white' : 'text-white/70'}`}>{cat.name}</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className={`text-2xl font-semibold ${getScoreColor(catAvg)}`}>{catAvg.toFixed(0)}</p>
+                    <span className="text-[10px] text-white/30">
+                      {catAvg >= 80 ? 'CRITICAL' : catAvg >= 60 ? 'HIGH' : catAvg >= 40 ? 'MODERATE' : 'LOW'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-white/30 mt-1">
+                    {catModel?.type === 'quantum' ? '⚛ Quantum' : catModel?.type === 'hybrid' ? '⚡ Hybrid' : '🧠 Neural'}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+
           {/* Live Environmental Data */}
           <div className="border border-white/10 bg-black/60">
             <div className="border-b border-white/5 px-6 py-3 flex items-center justify-between">
@@ -875,39 +927,6 @@ export default function Predictions() {
               <span>18:00</span>
               <span>23:00</span>
             </div>
-          </div>
-
-          {/* Category Selection */}
-          <div className="grid grid-cols-6 gap-3">
-            {PREDICTION_CATEGORIES.map(cat => {
-              const catPreds = generatePredictions(envData, cat);
-              const catAvg = catPreds.reduce((a, p) => a + p.value, 0) / catPreds.length;
-              const catModel = getModelById(cat.model);
-              const isSelected = selectedCategory.id === cat.id;
-
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`p-5 rounded-2xl border text-left transition-all ${isSelected
-                    ? 'bg-white/[0.05] border-white/20'
-                    : 'bg-white/[0.02] border-white/[0.04] hover:bg-white/[0.03] hover:border-white/[0.08]'
-                    }`}
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className={`p-2 rounded-lg ${isSelected ? 'bg-white/10' : 'bg-white/[0.04]'}`}>
-                      <cat.icon className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-white/50'}`} />
-                    </div>
-                    {isSelected && <ChevronRight className="w-4 h-4 text-white/40 ml-auto" />}
-                  </div>
-                  <p className={`text-sm font-medium mb-1 ${isSelected ? 'text-white' : 'text-white/70'}`}>{cat.name}</p>
-                  <p className={`text-2xl font-semibold ${getScoreColor(catAvg)}`}>{catAvg.toFixed(0)}</p>
-                  <p className="text-[10px] text-white/30 mt-1">
-                    {catModel?.type === 'quantum' ? '⚛ Quantum' : catModel?.type === 'hybrid' ? '⚡ Hybrid' : '🧠 Neural'}
-                  </p>
-                </button>
-              );
-            })}
           </div>
 
           {/* Main Content Area */}
