@@ -393,6 +393,8 @@ export default function Predictions() {
   const [anomalyData, setAnomalyData] = useState<AnomalyResponse | null>(null);
   const [isLoadingAnomalies, setIsLoadingAnomalies] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'forecast' | 'anomalies' | 'analytics'>('overview');
+  const [satelliteData, setSatelliteData] = useState<any>(null);
+  const [isSatelliteConnecting, setIsSatelliteConnecting] = useState(false);
 
   // Fetch real environmental data
   useEffect(() => {
@@ -544,6 +546,32 @@ export default function Predictions() {
   useEffect(() => {
     const preds = generatePredictions(envData, selectedCategory);
     setPredictions(preds);
+
+    // Fetch satellite data if category is satellite
+    if (selectedCategory.id === 'satellite') {
+      const fetchSatellite = async () => {
+        setIsSatelliteConnecting(true);
+        try {
+          // Get coordinates from envData or default
+          const { data } = await supabase.functions.invoke('satellite-uplink', {
+            body: { latitude: 29.7604, longitude: -95.3698 } // Default to Houston if missing, or use envData location if we had coords
+          });
+          if (data) {
+            // Simulate connection delay for realism
+            setTimeout(() => {
+              setSatelliteData(data);
+              setIsSatelliteConnecting(false);
+            }, 1500);
+          }
+        } catch (e) {
+          console.error('Satellite uplink error:', e);
+          setIsSatelliteConnecting(false);
+        }
+      };
+      fetchSatellite();
+    } else {
+      setSatelliteData(null);
+    }
   }, [envData, selectedCategory]);
 
   const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
@@ -966,38 +994,135 @@ export default function Predictions() {
               {/* Factor Cards */}
               <div className="lg:col-span-2 space-y-4">
                 <h3 className="text-sm font-medium text-white/60">{selectedCategory.name} Factors</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {predictions.map((pred) => (
-                    <div key={pred.factor} className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.04]">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <p className="text-sm font-medium text-white">{pred.factor}</p>
-                          <p className="text-[10px] text-white/30 mt-0.5">Confidence: {(pred.confidence * 100).toFixed(0)}%</p>
+
+                {selectedCategory.id === 'satellite' ? (
+                  <div className="space-y-4">
+                    {/* Satellite Uplink View */}
+                    <div className="p-6 rounded-2xl bg-black/40 border border-indigo-500/30 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-indigo-500/5 animate-pulse" />
+                      <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-6">
+                          <div className="flex items-center gap-3">
+                            <Satellite className={`w-6 h-6 ${isSatelliteConnecting ? 'text-indigo-400 animate-bounce' : 'text-indigo-400'}`} />
+                            <div>
+                              <h3 className="text-lg font-bold text-white">TEMPO Satellite Uplink</h3>
+                              <p className="text-xs font-mono text-indigo-300">
+                                {isSatelliteConnecting ? 'ESTABLISHING HANDSHAKE...' : 'DATA STREAM ACTIVE • LOW LATENCY'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[10px] text-white/40 font-mono">ORBIT SEGMENT</p>
+                            <p className="text-sm font-mono text-white">{satelliteData?.orbit_segment || 'SCANNING...'}</p>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          {getTrendIcon(pred.trend)}
-                          <span className={`text-xs ${pred.change > 0 ? 'text-emerald-400' : pred.change < 0 ? 'text-red-400' : 'text-white/40'}`}>
-                            {pred.change > 0 ? '+' : ''}{pred.change.toFixed(1)}
-                          </span>
-                        </div>
-                      </div>
-                      <p className={`text-3xl font-semibold ${getScoreColor(pred.value)} mb-4`}>{pred.value.toFixed(0)}</p>
-                      <div className="h-16">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={pred.history.slice(-12)}>
-                            <defs>
-                              <linearGradient id={`gradient-${pred.factor}`} x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.3} />
-                                <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
-                              </linearGradient>
-                            </defs>
-                            <Area type="monotone" dataKey="value" stroke="#06b6d4" strokeWidth={1.5} fill={`url(#gradient-${pred.factor})`} />
-                          </AreaChart>
-                        </ResponsiveContainer>
+
+                        {isSatelliteConnecting ? (
+                          <div className="h-48 flex items-center justify-center border border-dashed border-white/10 rounded-xl">
+                            <div className="text-center space-y-2">
+                              <div className="w-2 h-2 bg-indigo-500 rounded-full animate-ping mx-auto" />
+                              <p className="text-xs font-mono text-indigo-400">ACQUIRING SIGNAL LOCK...</p>
+                            </div>
+                          </div>
+                        ) : satelliteData ? (
+                          <div className="space-y-6">
+                            <div className="grid grid-cols-3 gap-4">
+                              <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                                <p className="text-[10px] text-white/40 mb-1">SCAN ANGLE</p>
+                                <p className="text-xl font-mono text-white">{satelliteData.scan_angle}°</p>
+                              </div>
+                              <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                                <p className="text-[10px] text-white/40 mb-1">QUALITY FLAG</p>
+                                <p className="text-xl font-mono text-emerald-400">{satelliteData.quality_flag}</p>
+                              </div>
+                              <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                                <p className="text-[10px] text-white/40 mb-1">SPECTRAL BANDS</p>
+                                <p className="text-xl font-mono text-white">{Object.keys(satelliteData.spectral_bands).length} ACTIVE</p>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <p className="text-[10px] font-mono text-white/40 uppercase">Telemetry Stream</p>
+                              <div className="font-mono text-[10px] text-indigo-300/80 bg-black/50 p-3 rounded-lg border border-white/5 overflow-hidden">
+                                {satelliteData.raw_stream.map((hex: string, i: number) => (
+                                  <span key={i} className="mr-3">{hex}</span>
+                                ))}
+                                <span className="animate-pulse">_</span>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              {Object.entries(satelliteData.spectral_bands['UV-VIS']).map(([key, data]: [string, any]) => (
+                                <div key={key} className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+                                  <p className="text-xs font-medium text-indigo-200 uppercase mb-2">{key.replace('_', ' ')}</p>
+                                  <div className="flex items-baseline gap-2">
+                                    <span className="text-2xl font-bold text-white">{data.value}</span>
+                                    <span className="text-[10px] text-white/50">{data.unit}</span>
+                                  </div>
+                                  {data.column_density && (
+                                    <p className="text-[9px] font-mono text-white/30 mt-1">COL: {data.column_density}</p>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="h-48 flex items-center justify-center text-white/30 text-xs">
+                            Waiting for satellite pass...
+                          </div>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    {predictions.map((pred) => (
+                      <div key={pred.factor} className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.04]">
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <p className="text-sm font-medium text-white">{pred.factor}</p>
+                            <p className="text-[10px] text-white/30 mt-0.5">Confidence: {(pred.confidence * 100).toFixed(0)}%</p>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            {getTrendIcon(pred.trend)}
+                            <span className={`text-xs ${pred.change > 0 ? 'text-emerald-400' : pred.change < 0 ? 'text-red-400' : 'text-white/40'}`}>
+                              {pred.change > 0 ? '+' : ''}{pred.change.toFixed(1)}
+                            </span>
+                          </div>
+                        </div>
+                        <p className={`text-3xl font-semibold ${getScoreColor(pred.value)} mb-4`}>{pred.value.toFixed(0)}</p>
+                        <div className="h-16 mb-4">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={pred.history.slice(-12)}>
+                              <defs>
+                                <linearGradient id={`gradient-${pred.factor}`} x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.3} />
+                                  <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
+                                </linearGradient>
+                              </defs>
+                              <Area type="monotone" dataKey="value" stroke="#06b6d4" strokeWidth={1.5} fill={`url(#gradient-${pred.factor})`} />
+                            </AreaChart>
+                          </ResponsiveContainer>
+                        </div>
+
+                        {/* Universal Impact Analysis */}
+                        <div className="pt-4 border-t border-white/5">
+                          <div className="flex items-center gap-2 mb-2">
+                            <FileText className="w-3 h-3 text-white/40" />
+                            <span className="text-[10px] font-mono uppercase text-white/40">Impact Analysis</span>
+                          </div>
+                          <p className="text-xs text-white/70 leading-relaxed">
+                            {pred.value > 70
+                              ? `Critical levels of ${pred.factor.toLowerCase()} detected. Immediate mitigation strategies recommended to prevent system strain.`
+                              : pred.value > 40
+                                ? `Moderate ${pred.factor.toLowerCase()} levels. Monitor closely for potential escalation in the next 4-6 hours.`
+                                : `Optimal ${pred.factor.toLowerCase()} conditions. No significant impact on operations expected.`}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Sidebar */}
