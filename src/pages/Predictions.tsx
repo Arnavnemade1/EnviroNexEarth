@@ -32,7 +32,9 @@ import {
   Waves,
   GitBranch,
   ChevronRight,
-  BarChart3
+  BarChart3,
+  Satellite,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -170,7 +172,9 @@ const PREDICTION_CATEGORIES = [
   { id: 'outdoor', name: 'Outdoor', icon: Dumbbell, color: 'emerald', factors: ['Running Conditions', 'Cycling Safety', 'Hiking Weather', 'Water Sports', 'Golf/Tennis'], model: 'climatetransformer' },
   { id: 'agriculture', name: 'Agriculture', icon: Wheat, color: 'amber', factors: ['Crop Growth', 'Irrigation Need', 'Pest Risk', 'Harvest Window', 'Soil Moisture'], model: 'qcnn-disaster' },
   { id: 'energy', name: 'Energy', icon: Energy, color: 'violet', factors: ['Solar Output', 'Wind Generation', 'Grid Demand', 'Heating/Cooling', 'Battery Efficiency'], model: 'qaoa-optimizer' },
-  { id: 'environment', name: 'Environment', icon: TreePine, color: 'green', factors: ['Air Quality Trend', 'Pollen Count', 'Wildfire Risk', 'Flooding Potential', 'Drought Index'], model: 'anomaly-vae' }
+  { id: 'environment', name: 'Environment', icon: TreePine, color: 'green', factors: ['Air Quality Trend', 'Pollen Count', 'Wildfire Risk', 'Flooding Potential', 'Drought Index'], model: 'anomaly-vae' },
+  { id: 'satellite', name: 'Satellite Comms', icon: Satellite, color: 'indigo', factors: ['Signal Attenuation', 'Ionospheric Scintillation', 'Orbital Debris Risk', 'Uplink Stability', 'Solar Interference'], model: 'q-sat-link' },
+  { id: 'impact', name: 'Impact Analysis', icon: FileText, color: 'slate', factors: ['Economic Impact', 'Healthcare Strain', 'Infrastructure Stress', 'Supply Chain Risk', 'Insurance Risk'], model: 'impact-llm' }
 ];
 
 interface AccuracyRecord {
@@ -285,6 +289,33 @@ const generatePredictions = (envData: any, category: typeof PREDICTION_CATEGORIE
           value = (humidity > 80 ? 55 : 5) + (pressure < 1005 ? 35 : 0);
         } else {
           value = (temperature > 28 ? 55 : 5) + (100 - humidity) * 0.55;
+        }
+        break;
+      case 'satellite':
+        if (factor === 'Signal Attenuation') {
+          value = (humidity * 0.4) + (pm25 * 0.3) + (windSpeed > 20 ? 15 : 0);
+        } else if (factor === 'Ionospheric Scintillation') {
+          value = (uvIndex * 8) + (temperature > 25 ? 20 : 0);
+        } else if (factor === 'Orbital Debris Risk') {
+          value = 15 + (Math.random() * 10); // Base risk
+        } else if (factor === 'Uplink Stability') {
+          value = 100 - (windSpeed * 0.5) - (humidity * 0.2);
+        } else {
+          value = (uvIndex * 5) + (temperature > 30 ? 25 : 0);
+        }
+        break;
+      case 'impact':
+        // Impact analysis logic - returns high values for high risk
+        if (factor === 'Economic Impact') {
+          value = (aqi > 100 ? 60 : 20) + (temperature > 30 ? 30 : 0);
+        } else if (factor === 'Healthcare Strain') {
+          value = (aqi * 0.5) + (pm25 * 0.3) + (temperature > 32 ? 20 : 0);
+        } else if (factor === 'Infrastructure Stress') {
+          value = (windSpeed * 0.8) + (temperature > 35 ? 40 : 10);
+        } else if (factor === 'Supply Chain Risk') {
+          value = (windSpeed > 25 ? 50 : 10) + (humidity > 80 ? 30 : 0);
+        } else {
+          value = (windSpeed * 0.4) + (aqi * 0.3) + 10;
         }
         break;
       default:
@@ -524,11 +555,11 @@ export default function Predictions() {
   };
 
   const getScoreColor = (value: number) => {
-    if (value >= 80) return 'text-emerald-400';
-    if (value >= 60) return 'text-cyan-400';
-    if (value >= 40) return 'text-amber-400';
-    if (value >= 20) return 'text-orange-400';
-    return 'text-red-400';
+    if (value >= 80) return 'text-red-400'; // Critical
+    if (value >= 60) return 'text-orange-400'; // High
+    if (value >= 40) return 'text-amber-400'; // Moderate
+    if (value >= 20) return 'text-emerald-400'; // Low
+    return 'text-emerald-500'; // Very Low
   };
 
   const model = getModelById(selectedCategory.model);
