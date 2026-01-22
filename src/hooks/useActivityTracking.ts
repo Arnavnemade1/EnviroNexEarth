@@ -11,6 +11,20 @@ import {
   type DailyActivitySummary
 } from '@/services/activityTracking';
 
+interface HabitPattern {
+  id: string;
+  user_id: string;
+  location_lat: number;
+  location_lng: number;
+  time_of_day: string;
+  day_of_week: number;
+  duration_minutes: number | null;
+  environmental_aqi: number | null;
+  activity_type: string | null;
+  environmental_temp: number | null;
+  created_at: string;
+}
+
 export interface ActivityTrackingData {
   isTracking: boolean;
   activities: TrackedActivity[];
@@ -53,15 +67,21 @@ export function useActivityTracking() {
     if (!user) return;
 
     try {
-      const { data: habitPatterns } = await supabase
+      const { data: habitPatterns, error } = await (supabase as any)
         .from('habit_patterns')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(100);
 
+      if (error) {
+        console.error('Error loading habit patterns:', error);
+        return;
+      }
+
       if (habitPatterns) {
-        const activities: TrackedActivity[] = habitPatterns.map(hp => ({
+        const typedPatterns = habitPatterns as HabitPattern[];
+        const activities: TrackedActivity[] = typedPatterns.map(hp => ({
           id: hp.id,
           timestamp: new Date(hp.created_at),
           latitude: hp.location_lat,
@@ -104,7 +124,7 @@ export function useActivityTracking() {
 
     // Save to database
     try {
-      await supabase.from('habit_patterns').insert({
+      const { error } = await (supabase as any).from('habit_patterns').insert({
         user_id: user.id,
         location_lat: activity.latitude,
         location_lng: activity.longitude,
@@ -114,6 +134,10 @@ export function useActivityTracking() {
         environmental_aqi: activity.aqi,
         activity_type: activity.activityType
       });
+
+      if (error) {
+        console.error('Error saving activity:', error);
+      }
     } catch (error) {
       console.error('Error saving activity:', error);
     }

@@ -30,6 +30,8 @@ interface SavedLocation {
   longitude: number;
   is_favorite: boolean;
   created_at: string;
+  user_id: string;
+  updated_at: string;
 }
 
 interface UserProfileProps {
@@ -87,14 +89,14 @@ export const UserProfile = ({ onClose }: UserProfileProps) => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('saved_locations')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setSavedLocations(data || []);
+      setSavedLocations((data as SavedLocation[]) || []);
     } catch (error) {
       console.error('Error fetching saved locations:', error);
     }
@@ -105,7 +107,7 @@ export const UserProfile = ({ onClose }: UserProfileProps) => {
     
     setLoading(true);
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('profiles')
         .update({
           username: profileData.username,
@@ -135,7 +137,7 @@ export const UserProfile = ({ onClose }: UserProfileProps) => {
 
   const handleLocationDelete = async (locationId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('saved_locations')
         .delete()
         .eq('id', locationId);
@@ -158,7 +160,7 @@ export const UserProfile = ({ onClose }: UserProfileProps) => {
 
   const handleLocationToggleFavorite = async (locationId: string, isFavorite: boolean) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('saved_locations')
         .update({ is_favorite: !isFavorite })
         .eq('id', locationId);
@@ -472,8 +474,8 @@ export const UserProfile = ({ onClose }: UserProfileProps) => {
                       }))}
                       className="w-full p-2 rounded-md glass bg-background/50"
                     >
-                      <option value="metric">Metric (°C, km/h)</option>
-                      <option value="imperial">Imperial (°F, mph)</option>
+                      <option value="metric">Metric (°C, km)</option>
+                      <option value="imperial">Imperial (°F, mi)</option>
                     </select>
                   </div>
                 </div>
@@ -502,5 +504,3 @@ export const UserProfile = ({ onClose }: UserProfileProps) => {
     </div>
   );
 };
-
-export default UserProfile;
