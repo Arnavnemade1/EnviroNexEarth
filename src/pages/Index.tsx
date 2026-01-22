@@ -8,7 +8,7 @@ import DataPanel from '@/components/DataPanel';
 import NaturalDisasters from '@/components/NaturalDisasters';
 import Chatbot from '@/components/Chatbot';
 import HomeScreen from '@/components/HomeScreen';
-import UserProfile from '@/components/UserProfile';
+import { UserProfile } from '@/components/UserProfile';
 import Dashboard from '@/components/Dashboard';
 import { HealthProfileSetup } from '@/components/HealthProfileSetup';
 import QuantumAnalytics from '@/components/QuantumAnalytics';

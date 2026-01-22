@@ -2,12 +2,26 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
+interface UserProfile {
+  id: string;
+  user_id: string;
+  username: string | null;
+  full_name: string | null;
+  email: string | null;
+  avatar_url: string | null;
+  health_profile: any;
+  preferences: any;
+  favorite_cities: any;
+  created_at: string;
+  updated_at: string;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  userProfile: any | null;
+  userProfile: UserProfile | null;
   refreshProfile: () => Promise<void>;
 }
 
@@ -17,13 +31,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [userProfile, setUserProfile] = useState<any | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   const refreshProfile = async () => {
     if (!session?.user) return;
     
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('profiles')
         .select('*')
         .eq('user_id', session.user.id)
@@ -32,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching profile:', error);
       } else {
-        setUserProfile(data);
+        setUserProfile(data as UserProfile | null);
       }
     } catch (error) {
       console.error('Error refreshing profile:', error);

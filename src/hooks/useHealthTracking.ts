@@ -52,14 +52,14 @@ export function useHealthTracking() {
     if (!user) return [];
     
     try {
-      const { data: locations, error } = await supabase
+      const { data: locations, error } = await (supabase as any)
         .from('saved_locations')
         .select('*')
         .eq('user_id', user.id)
         .order('is_favorite', { ascending: false });
 
       if (error) throw error;
-      return locations || [];
+      return (locations as SavedLocation[]) || [];
     } catch (error) {
       console.error('Error loading saved locations:', error);
       return [];
@@ -153,7 +153,7 @@ export function useHealthTracking() {
     if (!user) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('air_quality_alerts')
         .upsert({
           user_id: user.id,
