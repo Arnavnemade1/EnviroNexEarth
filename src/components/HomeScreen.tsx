@@ -199,116 +199,68 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
         </div>
       </section>
 
-      {/* Technology Section - Premium Redesign */}
+      {/* Technology Section - Clean Premium Design */}
       <section
         id="technology"
         ref={techAnim.ref}
         className={`relative min-h-screen flex items-center py-32 px-8 bg-black transition-all duration-1000 ${techAnim.isVisible ? 'opacity-100' : 'opacity-0'}`}
       >
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/2 left-1/4 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[120px] animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-emerald-500/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
-        </div>
-        
-        <div className="max-w-7xl mx-auto w-full relative z-10">
-          <div className="grid lg:grid-cols-2 gap-20 items-center">
-            <div className={`transition-all duration-1000 delay-200 ${techAnim.isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`}>
-              <span className="inline-flex items-center gap-2 text-sm font-semibold text-cyan-400 uppercase tracking-[0.2em] mb-6">
-                <span className="w-8 h-px bg-gradient-to-r from-cyan-400 to-transparent" />
+        <div className="max-w-6xl mx-auto w-full">
+          <div className={`transition-all duration-1000 delay-200 ${techAnim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            {/* Header */}
+            <div className="mb-20">
+              <span className="text-cyan-400 text-sm font-medium uppercase tracking-[0.25em] mb-6 block">
                 Technology
               </span>
-              <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-[1.05]">
+              <h2 className="text-5xl md:text-6xl lg:text-[80px] font-bold text-white leading-[1.1] mb-8">
                 Built on<br />
-                <span className="relative">
-                  <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-emerald-400 bg-clip-text text-transparent">Next-Gen</span>
-                  <span className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 via-blue-400 to-emerald-400 rounded-full opacity-50" />
-                </span> Architecture
+                <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Next-Gen</span> Architecture
               </h2>
-              <p className="text-xl text-white/50 mb-12 leading-relaxed max-w-lg">
+              <p className="text-xl text-white/50 max-w-2xl leading-relaxed">
                 EnviroNex leverages the most advanced computing paradigms to deliver environmental predictions
                 with unprecedented accuracy and speed.
               </p>
-
-              <div className="space-y-4">
-                {[
-                  { icon: Zap, title: 'IBM Quantum Runtime', desc: 'Real quantum circuit execution for complex climate modeling', color: 'cyan', glow: 'shadow-cyan-500/20' },
-                  { icon: Shield, title: 'Agentic AI Systems', desc: 'Autonomous agents that navigate, analyze, and act on environmental data', color: 'emerald', glow: 'shadow-emerald-500/20' },
-                  { icon: Activity, title: 'Real-Time Processing', desc: 'Sub-second data ingestion from 500+ global monitoring stations', color: 'violet', glow: 'shadow-violet-500/20' }
-                ].map((item, i) => (
-                  <div
-                    key={item.title}
-                    className={`group relative flex gap-5 p-5 rounded-2xl transition-all cursor-pointer duration-500 hover:scale-[1.02]
-                      bg-gradient-to-r from-white/[0.03] to-transparent
-                      border border-white/[0.06] hover:border-${item.color}-500/30
-                      backdrop-blur-xl hover:shadow-2xl ${item.glow}`}
-                    style={{ transitionDelay: `${400 + i * 150}ms`, opacity: techAnim.isVisible ? 1 : 0, transform: techAnim.isVisible ? 'translateY(0)' : 'translateY(20px)' }}
-                  >
-                    {/* Hover glow effect */}
-                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r from-${item.color}-500/0 via-${item.color}-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                    
-                    <div className={`relative w-14 h-14 rounded-xl bg-${item.color}-500/10 flex items-center justify-center 
-                      group-hover:bg-${item.color}-500/20 transition-all duration-300
-                      ring-1 ring-${item.color}-500/20 group-hover:ring-${item.color}-500/40
-                      group-hover:shadow-lg group-hover:shadow-${item.color}-500/20`}>
-                      <item.icon className={`w-6 h-6 text-${item.color}-400`} />
-                    </div>
-                    <div className="relative">
-                      <h3 className="font-bold text-white text-lg mb-1.5 group-hover:text-cyan-50 transition-colors">{item.title}</h3>
-                      <p className="text-sm text-white/40 group-hover:text-white/60 transition-colors leading-relaxed">{item.desc}</p>
-                    </div>
-                    <ArrowRight className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/0 group-hover:text-white/40 transition-all duration-300 group-hover:translate-x-1" />
-                  </div>
-                ))}
-              </div>
-
-              {/* API Callout */}
-              <div className="mt-10 p-4 rounded-xl bg-gradient-to-r from-white/[0.02] to-transparent border border-white/[0.06] flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-cyan-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-white/60">Integrate our API into your applications</p>
-                  <p className="text-sm font-mono text-cyan-400">api.envirocast.org</p>
-                </div>
-              </div>
             </div>
 
-            {/* Visual Element - Enhanced */}
-            <div className={`relative aspect-square hidden lg:flex items-center justify-center transition-all duration-1000 delay-500 ${techAnim.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
-              {/* Outer glow */}
-              <div className="absolute w-[500px] h-[500px] bg-gradient-to-r from-cyan-500/10 via-blue-500/5 to-emerald-500/10 rounded-full blur-3xl animate-pulse" />
-              
-              {/* Concentric rings with glow */}
-              <div className="absolute w-96 h-96 rounded-full border border-white/10 animate-[spin_40s_linear_infinite]">
-                <div className="absolute top-0 left-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400 shadow-lg shadow-cyan-400/50" />
-              </div>
-              <div className="absolute w-80 h-80 rounded-full border border-cyan-500/20 animate-[spin_30s_linear_infinite_reverse]">
-                <div className="absolute bottom-0 left-1/2 w-2 h-2 -translate-x-1/2 translate-y-1/2 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50" />
-              </div>
-              <div className="absolute w-64 h-64 rounded-full border border-emerald-500/20 animate-[spin_25s_linear_infinite]">
-                <div className="absolute right-0 top-1/2 w-2 h-2 translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-400 shadow-lg shadow-violet-400/50" />
-              </div>
-              <div className="absolute w-48 h-48 rounded-full border border-violet-500/20 animate-[spin_20s_linear_infinite_reverse]" />
-              
-              {/* Center core */}
-              <div className="absolute w-32 h-32 rounded-full bg-gradient-to-br from-cyan-500/20 via-blue-500/10 to-emerald-500/20 blur-2xl animate-pulse" />
-              <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-400 shadow-2xl shadow-cyan-400/50 flex items-center justify-center">
-                <div className="w-2 h-2 rounded-full bg-white" />
-              </div>
-              
-              {/* Floating particles */}
-              {[...Array(12)].map((_, i) => (
+            {/* Feature List - Clean Minimal Style */}
+            <div className="space-y-8">
+              {[
+                { 
+                  icon: Zap, 
+                  title: 'IBM Quantum Runtime', 
+                  desc: 'Real quantum circuit execution for complex climate modeling',
+                  color: 'cyan'
+                },
+                { 
+                  icon: Shield, 
+                  title: 'Agentic AI Systems', 
+                  desc: 'Autonomous agents that navigate, analyze, and act on environmental data',
+                  color: 'cyan'
+                },
+                { 
+                  icon: Activity, 
+                  title: 'Real-Time Processing', 
+                  desc: 'Sub-second data ingestion from 500+ global monitoring stations',
+                  color: 'cyan'
+                }
+              ].map((item, i) => (
                 <div
-                  key={i}
-                  className="absolute w-1 h-1 rounded-full bg-cyan-400/60"
-                  style={{
-                    top: `${20 + Math.random() * 60}%`,
-                    left: `${20 + Math.random() * 60}%`,
-                    animation: `float ${3 + Math.random() * 2}s ease-in-out infinite`,
-                    animationDelay: `${i * 0.2}s`
+                  key={item.title}
+                  className="group flex items-start gap-6 py-6 border-b border-white/[0.06] last:border-0 cursor-pointer transition-all duration-500 hover:pl-2"
+                  style={{ 
+                    transitionDelay: `${300 + i * 100}ms`, 
+                    opacity: techAnim.isVisible ? 1 : 0, 
+                    transform: techAnim.isVisible ? 'translateY(0)' : 'translateY(20px)' 
                   }}
-                />
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center group-hover:bg-cyan-500/10 group-hover:border-cyan-500/20 transition-all duration-300">
+                    <item.icon className="w-6 h-6 text-cyan-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-cyan-50 transition-colors">{item.title}</h3>
+                    <p className="text-white/40 leading-relaxed group-hover:text-white/60 transition-colors">{item.desc}</p>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -339,107 +291,62 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
         </div>
       </section>
 
-      {/* Capabilities Section - Premium Redesign */}
+      {/* Capabilities Section - Clean Premium Design */}
       <section
         id="capabilities"
         ref={capAnim.ref}
         className={`relative py-32 px-8 bg-black transition-all duration-1000 ${capAnim.isVisible ? 'opacity-100' : 'opacity-0'}`}
       >
-        {/* Background effects */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/3 right-0 w-[500px] h-[500px] bg-violet-500/5 rounded-full blur-[150px]" />
-          <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-cyan-500/5 rounded-full blur-[120px]" />
-        </div>
-
-        <div className="max-w-7xl mx-auto relative z-10">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
           <div className={`text-center mb-20 transition-all duration-1000 ${capAnim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <span className="inline-flex items-center gap-3 text-sm font-semibold text-cyan-400 uppercase tracking-[0.2em] mb-6">
-              <span className="w-8 h-px bg-gradient-to-r from-transparent to-cyan-400" />
-              Capabilities
-              <span className="w-8 h-px bg-gradient-to-l from-transparent to-cyan-400" />
-            </span>
-            <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
+            <h2 className="text-5xl md:text-6xl lg:text-[80px] font-bold text-white mb-4">
               Environmental Defense<br />
-              <span className="relative inline-block">
-                <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-emerald-400 bg-clip-text text-transparent">Reimagined</span>
-                <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-blue-400 to-emerald-400 rounded-full opacity-40" />
-              </span>
+              <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Reimagined</span>
             </h2>
-            <p className="text-lg text-white/40 max-w-2xl mx-auto mt-6">
-              Enterprise-grade environmental intelligence powered by quantum computing and agentic AI systems.
-            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* Stats Grid - Clean 2x3 */}
+          <div className="grid md:grid-cols-2 gap-4">
             {[
-              { title: 'Quantum Climate Modeling', value: '97.3%', desc: 'Prediction accuracy with quantum advantage', gradient: 'from-violet-500 to-purple-600', textColor: 'text-violet-400', bgGlow: 'bg-violet-500/10' },
-              { title: 'Disaster Detection', value: '< 1s', desc: 'Real-time event identification and alerting', gradient: 'from-rose-500 to-red-600', textColor: 'text-rose-400', bgGlow: 'bg-rose-500/10' },
-              { title: 'Air Quality Index', value: '500+', desc: 'Cities monitored in real-time globally', gradient: 'from-cyan-500 to-blue-600', textColor: 'text-cyan-400', bgGlow: 'bg-cyan-500/10' },
-              { title: 'Agentic Response', value: '24/7', desc: 'Autonomous monitoring and intervention', gradient: 'from-emerald-500 to-green-600', textColor: 'text-emerald-400', bgGlow: 'bg-emerald-500/10' },
-              { title: 'Data Processing', value: '10TB+', desc: 'Environmental data analyzed daily', gradient: 'from-amber-500 to-orange-600', textColor: 'text-amber-400', bgGlow: 'bg-amber-500/10' },
-              { title: 'API Uptime', value: '99.99%', desc: 'Enterprise-grade reliability at api.envirocast.org', gradient: 'from-pink-500 to-rose-600', textColor: 'text-pink-400', bgGlow: 'bg-pink-500/10' },
-            ].map((cap, i) => (
+              { value: '97.3%', title: 'Quantum Climate Modeling', desc: 'Prediction accuracy with quantum advantage', color: 'violet' },
+              { value: '< 1s', title: 'Disaster Detection', desc: 'Real-time event identification and alerting', color: 'rose' },
+              { value: '500+', title: 'Air Quality Index', desc: 'Cities monitored in real-time globally', color: 'cyan' },
+              { value: '24/7', title: 'Agentic Response', desc: 'Autonomous monitoring and intervention', color: 'emerald' },
+              { value: '10TB+', title: 'Data Processing', desc: 'Environmental data analyzed daily', color: 'amber' },
+              { value: '99.99%', title: 'API Uptime', desc: 'Enterprise-grade reliability', color: 'pink' },
+            ].map((stat, i) => (
               <div
-                key={cap.title}
-                className="group relative p-8 rounded-3xl transition-all duration-500 overflow-hidden cursor-pointer hover:scale-[1.02]"
+                key={stat.title}
+                className="group p-8 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-500 cursor-pointer"
                 style={{
-                  transitionDelay: `${200 + i * 100}ms`,
+                  transitionDelay: `${200 + i * 80}ms`,
                   opacity: capAnim.isVisible ? 1 : 0,
-                  transform: capAnim.isVisible ? 'translateY(0)' : 'translateY(30px)'
+                  transform: capAnim.isVisible ? 'translateY(0)' : 'translateY(20px)'
                 }}
               >
-                {/* Card background with gradient border */}
-                <div className="absolute inset-0 rounded-3xl bg-white/[0.02] border border-white/[0.08] group-hover:border-white/20 transition-colors duration-500" />
-                
-                {/* Glow effect on hover */}
-                <div className={`absolute inset-0 rounded-3xl ${cap.bgGlow} opacity-0 group-hover:opacity-100 transition-all duration-500 blur-xl`} />
-                
-                {/* Inner glow line */}
-                <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r ${cap.gradient} opacity-0 group-hover:opacity-60 transition-opacity duration-500`} />
-
-                {/* Content */}
-                <div className="relative z-10">
-                  {/* Value with gradient */}
-                  <div className={`text-5xl md:text-6xl font-bold bg-gradient-to-r ${cap.gradient} bg-clip-text text-transparent mb-4 tracking-tight`}>
-                    {cap.value}
-                  </div>
-                  
-                  {/* Title with icon indicator */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${cap.gradient} shadow-lg`} />
-                    <h3 className="text-lg font-bold text-white">{cap.title}</h3>
-                  </div>
-                  
-                  {/* Description */}
-                  <p className="text-sm text-white/40 leading-relaxed">{cap.desc}</p>
+                <div className={`text-5xl md:text-6xl font-bold mb-4 ${
+                  stat.color === 'violet' ? 'text-violet-400' :
+                  stat.color === 'rose' ? 'text-rose-400' :
+                  stat.color === 'cyan' ? 'text-cyan-400' :
+                  stat.color === 'emerald' ? 'text-emerald-400' :
+                  stat.color === 'amber' ? 'text-amber-400' :
+                  'text-pink-400'
+                }`}>
+                  {stat.value}
                 </div>
-
-                {/* Corner accent */}
-                <div className={`absolute bottom-0 right-0 w-24 h-24 bg-gradient-to-tl ${cap.gradient} opacity-[0.03] rounded-tl-full`} />
+                <h3 className="text-lg font-semibold text-white mb-2">{stat.title}</h3>
+                <p className="text-white/40 text-sm">{stat.desc}</p>
               </div>
             ))}
           </div>
 
-          {/* API CTA Banner */}
-          <div className={`mt-16 p-8 rounded-3xl bg-gradient-to-r from-white/[0.03] via-cyan-500/[0.05] to-white/[0.03] border border-white/[0.08] flex flex-col md:flex-row items-center justify-between gap-6 transition-all duration-1000 delay-700 ${capAnim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <div className="flex items-center gap-5">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 flex items-center justify-center ring-1 ring-cyan-500/30">
-                <Zap className="w-7 h-7 text-cyan-400" />
-              </div>
-              <div>
-                <h4 className="text-xl font-bold text-white mb-1">Developer API</h4>
-                <p className="text-white/50">Integrate environmental intelligence into your applications</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <code className="px-5 py-3 rounded-xl bg-black/50 border border-white/10 font-mono text-cyan-400 text-sm">
-                api.envirocast.org
-              </code>
-              <button className="px-6 py-3 rounded-xl bg-white text-black font-semibold hover:bg-white/90 transition-colors flex items-center gap-2">
-                Documentation
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
+          {/* API Banner - Minimal */}
+          <div className={`mt-16 flex items-center justify-center gap-6 transition-all duration-1000 delay-700 ${capAnim.isVisible ? 'opacity-100' : 'opacity-0'}`}>
+            <span className="text-white/40">Developer API available at</span>
+            <code className="px-4 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] font-mono text-cyan-400 text-sm">
+              api.envirocast.org
+            </code>
           </div>
         </div>
       </section>
