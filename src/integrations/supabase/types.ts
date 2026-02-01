@@ -620,6 +620,48 @@ export type Database = {
           },
         ]
       }
+      family_connections: {
+        Row: {
+          created_at: string | null
+          family_email: string
+          family_member_id: string | null
+          id: string
+          last_location_update: string | null
+          latitude: number | null
+          longitude: number | null
+          sender_email: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          family_email: string
+          family_member_id?: string | null
+          id?: string
+          last_location_update?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          sender_email?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          family_email?: string
+          family_member_id?: string | null
+          id?: string
+          last_location_update?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          sender_email?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       followers: {
         Row: {
           created_at: string | null
@@ -1060,11 +1102,17 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           email: string | null
+          family_safety_enabled: boolean | null
           favorite_cities: Json | null
           full_name: string | null
           health_profile: Json | null
           id: string
+          last_check_in: string | null
+          location_sharing_active: boolean | null
+          notifications_enabled: boolean | null
           preferences: Json | null
+          temp_unit: string | null
+          theme_mode: string | null
           updated_at: string
           user_id: string
           username: string | null
@@ -1073,11 +1121,17 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           email?: string | null
+          family_safety_enabled?: boolean | null
           favorite_cities?: Json | null
           full_name?: string | null
           health_profile?: Json | null
           id?: string
+          last_check_in?: string | null
+          location_sharing_active?: boolean | null
+          notifications_enabled?: boolean | null
           preferences?: Json | null
+          temp_unit?: string | null
+          theme_mode?: string | null
           updated_at?: string
           user_id: string
           username?: string | null
@@ -1086,11 +1140,17 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           email?: string | null
+          family_safety_enabled?: boolean | null
           favorite_cities?: Json | null
           full_name?: string | null
           health_profile?: Json | null
           id?: string
+          last_check_in?: string | null
+          location_sharing_active?: boolean | null
+          notifications_enabled?: boolean | null
           preferences?: Json | null
+          temp_unit?: string | null
+          theme_mode?: string | null
           updated_at?: string
           user_id?: string
           username?: string | null
@@ -1274,6 +1334,39 @@ export type Database = {
           insight_data?: Json
           insight_type?: string
           source?: string
+        }
+        Relationships: []
+      }
+      safety_alerts: {
+        Row: {
+          created_at: string | null
+          hazard_level: string
+          hazard_type: string
+          id: string
+          location_name: string | null
+          message: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          hazard_level: string
+          hazard_type: string
+          id?: string
+          location_name?: string | null
+          message?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          hazard_level?: string
+          hazard_type?: string
+          id?: string
+          location_name?: string | null
+          message?: string | null
+          status?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
