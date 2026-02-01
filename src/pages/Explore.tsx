@@ -306,14 +306,14 @@ export default function Explore() {
   }, [isRunning]);
 
   const fetchResults = async () => {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('quantum_simulations')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(10);
 
     if (!error && data) {
-      setResults(data.map(d => ({
+      setResults(data.map((d: any) => ({
         id: d.id,
         model_name: d.algorithm_name,
         model_type: d.simulation_type,
@@ -341,7 +341,7 @@ export default function Explore() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('quantum_simulations')
           .insert({
             algorithm_name: selectedModel.name,
