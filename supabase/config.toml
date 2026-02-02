@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.anomaly-detection]
 verify_jwt = false
+
+[functions.earth2-forecast]
+verify_jwt = false

@@ -10,6 +10,7 @@ import { useHealthTracking } from '@/hooks/useHealthTracking';
 import { useActivityTracking } from '@/hooks/useActivityTracking';
 import { useToast } from '@/hooks/use-toast';
 import { HealthProfileSetup } from '@/components/HealthProfileSetup';
+import { Earth2ForecastCard } from '@/components/Earth2ForecastCard';
 import {
   Activity,
   Heart,
@@ -392,6 +393,15 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                     </ResponsiveContainer>
                   </div>
                 </Card>
+              )}
+
+              {/* Earth-2 Ensemble Forecast */}
+              {savedLocations.length > 0 && (
+                <Earth2ForecastCard
+                  lat={savedLocations.find(l => l.is_favorite)?.latitude || savedLocations[0].latitude}
+                  lon={savedLocations.find(l => l.is_favorite)?.longitude || savedLocations[0].longitude}
+                  cityName={savedLocations.find(l => l.is_favorite)?.city || savedLocations[0].city}
+                />
               )}
 
               {/* No data message */}
