@@ -31,7 +31,10 @@ import {
   Check,
   AlertTriangle,
   Info,
-  GraduationCap
+  GraduationCap,
+  Swords,
+  Store,
+  Boxes
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -44,6 +47,9 @@ import { useToast } from '@/hooks/use-toast';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ComposedChart, ScatterChart, Scatter, ZAxis } from 'recharts';
 import TrainingSimulator from '@/components/TrainingSimulator';
 import GlobalUsageMap from '@/components/GlobalUsageMap';
+import BenchmarkArena from '@/components/BenchmarkArena';
+import ModelMarketplace from '@/components/ModelMarketplace';
+import NeuralArchitect from '@/components/NeuralArchitect';
 import { getModelsForUI } from '@/lib/modelDefinitions';
 
 interface ModelResult {
@@ -469,9 +475,12 @@ export default function Explore() {
 
           {/* Clean Tab Navigation */}
           <Tabs defaultValue="models" className="space-y-8">
-            <TabsList className="bg-transparent border-0 p-0 h-auto gap-6">
+            <TabsList className="bg-transparent border-0 p-0 h-auto gap-4 flex-wrap">
               {[
                 { value: 'models', label: 'Models', icon: Cpu },
+                { value: 'arena', label: 'Arena', icon: Swords },
+                { value: 'marketplace', label: 'Marketplace', icon: Store },
+                { value: 'architect', label: 'Architect', icon: Boxes },
                 { value: 'training', label: 'Training', icon: GraduationCap },
                 { value: 'analytics', label: 'Analytics', icon: BarChart3 },
               ].map(tab => (
@@ -832,6 +841,18 @@ export default function Explore() {
                   )}
                 </div>
               </div>
+            </TabsContent>
+
+            <TabsContent value="arena" className="space-y-6">
+              <BenchmarkArena />
+            </TabsContent>
+
+            <TabsContent value="marketplace" className="space-y-6">
+              <ModelMarketplace />
+            </TabsContent>
+
+            <TabsContent value="architect" className="space-y-6">
+              <NeuralArchitect />
             </TabsContent>
 
             <TabsContent value="training" className="space-y-6">
