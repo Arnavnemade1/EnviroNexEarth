@@ -12,7 +12,6 @@ import {
   TrendingUp,
   Clock,
   User,
-  Filter,
   Grid3X3,
   List,
   Verified,
@@ -20,154 +19,121 @@ import {
   Sparkles,
   ExternalLink,
   Eye,
-  GitFork
+  GitFork,
+  Loader2,
+  Plus
 } from 'lucide-react';
-
-interface MarketplaceModel {
-  id: string;
-  name: string;
-  author: string;
-  authorVerified: boolean;
-  description: string;
-  category: string;
-  accuracy: number;
-  downloads: number;
-  stars: number;
-  forks: number;
-  lastUpdated: string;
-  tags: string[];
-  featured: boolean;
-  trending: boolean;
-  price: 'free' | 'premium';
-}
-
-const marketplaceModels: MarketplaceModel[] = [
-  {
-    id: '1',
-    name: 'QuantumAir Pro',
-    author: 'NVIDIA Research',
-    authorVerified: true,
-    description: 'State-of-the-art quantum-enhanced air quality prediction with 99.2% accuracy on global datasets.',
-    category: 'Air Quality',
-    accuracy: 99.2,
-    downloads: 15420,
-    stars: 892,
-    forks: 234,
-    lastUpdated: '2 days ago',
-    tags: ['quantum', 'production-ready', 'gpu-optimized'],
-    featured: true,
-    trending: true,
-    price: 'free'
-  },
-  {
-    id: '2',
-    name: 'ClimateForecaster v3',
-    author: 'DeepMind',
-    authorVerified: true,
-    description: 'Advanced neural climate prediction using transformer architecture with multi-horizon forecasting.',
-    category: 'Climate',
-    accuracy: 97.8,
-    downloads: 28910,
-    stars: 1456,
-    forks: 567,
-    lastUpdated: '1 week ago',
-    tags: ['neural', 'transformer', 'multi-horizon'],
-    featured: true,
-    trending: false,
-    price: 'free'
-  },
-  {
-    id: '3',
-    name: 'DisasterNet',
-    author: 'MIT CSAIL',
-    authorVerified: true,
-    description: 'Real-time natural disaster detection and impact prediction using hybrid quantum-classical approach.',
-    category: 'Disaster',
-    accuracy: 96.4,
-    downloads: 8932,
-    stars: 673,
-    forks: 189,
-    lastUpdated: '3 days ago',
-    tags: ['hybrid', 'real-time', 'early-warning'],
-    featured: false,
-    trending: true,
-    price: 'premium'
-  },
-  {
-    id: '4',
-    name: 'EcoSense Ensemble',
-    author: 'Google Research',
-    authorVerified: true,
-    description: 'Multi-model ensemble for environmental sensing with automatic model selection.',
-    category: 'Environmental',
-    accuracy: 95.9,
-    downloads: 12340,
-    stars: 521,
-    forks: 145,
-    lastUpdated: '5 days ago',
-    tags: ['ensemble', 'auto-ml', 'multi-sensor'],
-    featured: false,
-    trending: false,
-    price: 'free'
-  },
-  {
-    id: '5',
-    name: 'PollutionTracker Pro',
-    author: 'IBM Quantum',
-    authorVerified: true,
-    description: 'Quantum machine learning for industrial pollution source tracking and attribution.',
-    category: 'Air Quality',
-    accuracy: 98.1,
-    downloads: 6543,
-    stars: 412,
-    forks: 98,
-    lastUpdated: '1 day ago',
-    tags: ['quantum', 'industrial', 'source-tracking'],
-    featured: false,
-    trending: true,
-    price: 'premium'
-  },
-  {
-    id: '6',
-    name: 'WeatherNow v2',
-    author: 'OpenAI',
-    authorVerified: true,
-    description: 'GPT-powered weather prediction with natural language explanations and uncertainty quantification.',
-    category: 'Weather',
-    accuracy: 94.7,
-    downloads: 45670,
-    stars: 2341,
-    forks: 789,
-    lastUpdated: '1 week ago',
-    tags: ['llm', 'explainable', 'uncertainty'],
-    featured: true,
-    trending: false,
-    price: 'free'
-  },
-];
+import { useMarketplace, MarketplaceModel } from '@/hooks/useMarketplace';
+import { useAuth } from '@/hooks/useAuth';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
+import { formatDistanceToNow } from 'date-fns';
 
 const categories = ['All', 'Air Quality', 'Climate', 'Weather', 'Disaster', 'Environmental'];
 
 export default function ModelMarketplace() {
+  const { user } = useAuth();
+  const { 
+    models, 
+    loading, 
+    likedModels, 
+    hasMore,
+    fetchModels, 
+    likeModel, 
+    unlikeModel, 
+    deployModel,
+    submitModel,
+    searchModels 
+  } = useMarketplace();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [likedModels, setLikedModels] = useState<string[]>([]);
-
-  const filteredModels = marketplaceModels.filter(model => {
-    const matchesSearch = model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         model.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         model.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesCategory = selectedCategory === 'All' || model.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+  const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+  const [viewingModel, setViewingModel] = useState<MarketplaceModel | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  
+  // Form state for submitting a model
+  const [newModel, setNewModel] = useState({
+    name: '',
+    author_name: '',
+    description: '',
+    category: 'Air Quality',
+    accuracy: 90,
+    tags: '',
+    price: 'free' as 'free' | 'premium',
+    is_public: true,
+    is_featured: false,
+    is_trending: false,
+    model_path: null as string | null,
   });
 
-  const toggleLike = (modelId: string) => {
-    setLikedModels(prev => 
-      prev.includes(modelId) 
-        ? prev.filter(id => id !== modelId)
-        : [...prev, modelId]
-    );
+  const filteredModels = searchModels(searchQuery, selectedCategory);
+  const featuredModel = models.find(m => m.is_featured);
+
+  const handleToggleLike = async (modelId: string) => {
+    if (likedModels.includes(modelId)) {
+      await unlikeModel(modelId);
+    } else {
+      await likeModel(modelId);
+    }
+  };
+
+  const handleDeploy = async (modelId: string) => {
+    await deployModel(modelId);
+  };
+
+  const handleSubmitModel = async () => {
+    if (!newModel.name || !newModel.description || !newModel.author_name) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await submitModel({
+        name: newModel.name,
+        author_name: newModel.author_name,
+        description: newModel.description,
+        category: newModel.category,
+        accuracy: newModel.accuracy,
+        tags: newModel.tags.split(',').map(t => t.trim()).filter(Boolean),
+        price: newModel.price,
+        is_public: newModel.is_public,
+        is_featured: false,
+        is_trending: false,
+        model_path: newModel.model_path,
+      });
+      setSubmitDialogOpen(false);
+      setNewModel({
+        name: '',
+        author_name: '',
+        description: '',
+        category: 'Air Quality',
+        accuracy: 90,
+        tags: '',
+        price: 'free',
+        is_public: true,
+        is_featured: false,
+        is_trending: false,
+        model_path: null,
+      });
+    } catch (err) {
+      // Error already handled in hook
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const getTimeAgo = (dateString: string) => {
+    try {
+      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+    } catch {
+      return 'recently';
+    }
   };
 
   return (
@@ -186,12 +152,143 @@ export default function ModelMarketplace() {
         
         <div className="flex items-center gap-3">
           <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
-            {marketplaceModels.length} Models Available
+            {models.length} Models Available
           </Badge>
-          <Button variant="outline" className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10">
-            <Sparkles className="w-4 h-4 mr-2" />
-            Submit Model
-          </Button>
+          
+          <Dialog open={submitDialogOpen} onOpenChange={setSubmitDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+                onClick={() => {
+                  if (!user) {
+                    toast.error('Please sign in to submit models');
+                    return;
+                  }
+                }}
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Submit Model
+              </Button>
+            </DialogTrigger>
+            {user && (
+              <DialogContent className="bg-black/95 border-white/10 text-white max-w-lg">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Plus className="w-5 h-5 text-emerald-400" />
+                    Submit Your Model
+                  </DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-4 mt-4">
+                  <div className="space-y-2">
+                    <Label>Model Name *</Label>
+                    <Input 
+                      value={newModel.name}
+                      onChange={(e) => setNewModel(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="e.g., QuantumAir Pro"
+                      className="bg-white/5 border-white/10"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Author Name *</Label>
+                    <Input 
+                      value={newModel.author_name}
+                      onChange={(e) => setNewModel(prev => ({ ...prev, author_name: e.target.value }))}
+                      placeholder="e.g., Your Name or Organization"
+                      className="bg-white/5 border-white/10"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Description *</Label>
+                    <Textarea 
+                      value={newModel.description}
+                      onChange={(e) => setNewModel(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder="Describe what your model does..."
+                      className="bg-white/5 border-white/10 min-h-[80px]"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Category</Label>
+                      <Select 
+                        value={newModel.category} 
+                        onValueChange={(val) => setNewModel(prev => ({ ...prev, category: val }))}
+                      >
+                        <SelectTrigger className="bg-white/5 border-white/10">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black border-white/10">
+                          {categories.filter(c => c !== 'All').map(cat => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Accuracy (%)</Label>
+                      <Input 
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={newModel.accuracy}
+                        onChange={(e) => setNewModel(prev => ({ ...prev, accuracy: Number(e.target.value) }))}
+                        className="bg-white/5 border-white/10"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Tags (comma-separated)</Label>
+                    <Input 
+                      value={newModel.tags}
+                      onChange={(e) => setNewModel(prev => ({ ...prev, tags: e.target.value }))}
+                      placeholder="e.g., quantum, neural, real-time"
+                      className="bg-white/5 border-white/10"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Pricing</Label>
+                    <Select 
+                      value={newModel.price} 
+                      onValueChange={(val: 'free' | 'premium') => setNewModel(prev => ({ ...prev, price: val }))}
+                    >
+                      <SelectTrigger className="bg-white/5 border-white/10">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-black border-white/10">
+                        <SelectItem value="free">Free</SelectItem>
+                        <SelectItem value="premium">Premium</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <Button 
+                    onClick={handleSubmitModel} 
+                    className="w-full bg-emerald-500 hover:bg-emerald-600"
+                    disabled={submitting}
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Submit Model
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </DialogContent>
+            )}
+          </Dialog>
         </div>
       </div>
 
@@ -242,24 +339,36 @@ export default function ModelMarketplace() {
       </div>
 
       {/* Featured Banner */}
-      <Card className="p-6 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 border-emerald-500/20">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/30 to-orange-500/30">
-              <Flame className="w-8 h-8 text-amber-400" />
+      {featuredModel && (
+        <Card className="p-6 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 border-emerald-500/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/30 to-orange-500/30">
+                <Flame className="w-8 h-8 text-amber-400" />
+              </div>
+              <div>
+                <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 mb-1">Featured</Badge>
+                <h3 className="text-lg font-bold text-white">{featuredModel.name} by {featuredModel.author_name}</h3>
+                <p className="text-sm text-white/50">{featuredModel.description.slice(0, 80)}... • {featuredModel.accuracy}% accuracy</p>
+              </div>
             </div>
-            <div>
-              <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 mb-1">Featured</Badge>
-              <h3 className="text-lg font-bold text-white">QuantumAir Pro by NVIDIA Research</h3>
-              <p className="text-sm text-white/50">State-of-the-art quantum-enhanced air quality prediction • 99.2% accuracy</p>
-            </div>
+            <Button 
+              className="bg-white text-black hover:bg-white/90"
+              onClick={() => handleDeploy(featuredModel.id)}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Deploy Now
+            </Button>
           </div>
-          <Button className="bg-white text-black hover:bg-white/90">
-            <Download className="w-4 h-4 mr-2" />
-            Deploy Now
-          </Button>
+        </Card>
+      )}
+
+      {/* Loading State */}
+      {loading && models.length === 0 && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
         </div>
-      </Card>
+      )}
 
       {/* Models Grid */}
       <div className={`grid gap-4 ${viewMode === 'grid' ? 'lg:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
@@ -274,12 +383,12 @@ export default function ModelMarketplace() {
               {/* Header */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  {model.featured && (
+                  {model.is_featured && (
                     <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px]">
                       Featured
                     </Badge>
                   )}
-                  {model.trending && (
+                  {model.is_trending && (
                     <Badge className="bg-rose-500/20 text-rose-400 border-rose-500/30 text-[10px]">
                       <TrendingUp className="w-3 h-3 mr-1" /> Trending
                     </Badge>
@@ -291,7 +400,7 @@ export default function ModelMarketplace() {
                   )}
                 </div>
                 <button 
-                  onClick={() => toggleLike(model.id)}
+                  onClick={() => handleToggleLike(model.id)}
                   className="opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <Heart className={`w-5 h-5 transition-colors ${
@@ -304,8 +413,8 @@ export default function ModelMarketplace() {
               <h3 className="font-bold text-white text-lg mb-1">{model.name}</h3>
               <div className="flex items-center gap-2 mb-3">
                 <User className="w-3 h-3 text-white/40" />
-                <span className="text-sm text-white/60">{model.author}</span>
-                {model.authorVerified && <Verified className="w-4 h-4 text-blue-400" />}
+                <span className="text-sm text-white/60">{model.author_name}</span>
+                <Verified className="w-4 h-4 text-blue-400" />
               </div>
 
               {/* Description */}
@@ -336,7 +445,7 @@ export default function ModelMarketplace() {
                 </div>
                 <div className="flex items-center gap-1 ml-auto">
                   <Clock className="w-3 h-3" />
-                  <span>{model.lastUpdated}</span>
+                  <span>{getTimeAgo(model.updated_at)}</span>
                 </div>
               </div>
 
@@ -356,14 +465,28 @@ export default function ModelMarketplace() {
 
               {/* Actions */}
               <div className="flex gap-2">
-                <Button className="flex-1 bg-white text-black hover:bg-white/90 h-9">
+                <Button 
+                  className="flex-1 bg-white text-black hover:bg-white/90 h-9"
+                  onClick={() => handleDeploy(model.id)}
+                >
                   <Download className="w-4 h-4 mr-2" />
                   Deploy
                 </Button>
-                <Button variant="outline" className="border-white/20 text-white/60 hover:bg-white/5 h-9">
+                <Button 
+                  variant="outline" 
+                  className="border-white/20 text-white/60 hover:bg-white/5 h-9"
+                  onClick={() => setViewingModel(model)}
+                >
                   <Eye className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" className="border-white/20 text-white/60 hover:bg-white/5 h-9">
+                <Button 
+                  variant="outline" 
+                  className="border-white/20 text-white/60 hover:bg-white/5 h-9"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/explore?model=${model.id}`);
+                    toast.success('Link copied to clipboard!');
+                  }}
+                >
                   <ExternalLink className="w-4 h-4" />
                 </Button>
               </div>
@@ -372,12 +495,108 @@ export default function ModelMarketplace() {
         ))}
       </div>
 
+      {/* Empty State */}
+      {!loading && filteredModels.length === 0 && (
+        <div className="text-center py-12">
+          <Store className="w-12 h-12 text-white/20 mx-auto mb-4" />
+          <p className="text-white/40">No models found matching your criteria</p>
+        </div>
+      )}
+
       {/* Load More */}
-      <div className="flex justify-center pt-4">
-        <Button variant="outline" className="border-white/20 text-white/60 hover:bg-white/5">
-          Load More Models
-        </Button>
-      </div>
+      {hasMore && models.length > 0 && (
+        <div className="flex justify-center pt-4">
+          <Button 
+            variant="outline" 
+            className="border-white/20 text-white/60 hover:bg-white/5"
+            onClick={() => fetchModels(false)}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              'Load More Models'
+            )}
+          </Button>
+        </div>
+      )}
+
+      {/* Model Details Dialog */}
+      <Dialog open={!!viewingModel} onOpenChange={(open) => !open && setViewingModel(null)}>
+        {viewingModel && (
+          <DialogContent className="bg-black/95 border-white/10 text-white max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <span className="text-xl">{viewingModel.name}</span>
+                {viewingModel.is_featured && (
+                  <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">Featured</Badge>
+                )}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4 mt-4">
+              <div className="flex items-center gap-2 text-white/60">
+                <User className="w-4 h-4" />
+                <span>{viewingModel.author_name}</span>
+                <Verified className="w-4 h-4 text-blue-400" />
+              </div>
+              
+              <p className="text-white/70">{viewingModel.description}</p>
+              
+              <div className="flex flex-wrap gap-2">
+                {viewingModel.tags.map(tag => (
+                  <Badge key={tag} variant="outline" className="border-white/20 text-white/60">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+              
+              <div className="grid grid-cols-4 gap-4 py-4 border-y border-white/10">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-emerald-400">{viewingModel.accuracy}%</div>
+                  <div className="text-xs text-white/40">Accuracy</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">{viewingModel.downloads.toLocaleString()}</div>
+                  <div className="text-xs text-white/40">Downloads</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-amber-400">{viewingModel.stars.toLocaleString()}</div>
+                  <div className="text-xs text-white/40">Stars</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">{viewingModel.forks}</div>
+                  <div className="text-xs text-white/40">Forks</div>
+                </div>
+              </div>
+              
+              <div className="flex gap-3">
+                <Button 
+                  className="flex-1 bg-emerald-500 hover:bg-emerald-600"
+                  onClick={() => {
+                    handleDeploy(viewingModel.id);
+                    setViewingModel(null);
+                  }}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Deploy Model
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-white/20"
+                  onClick={() => handleToggleLike(viewingModel.id)}
+                >
+                  <Heart className={`w-4 h-4 mr-2 ${likedModels.includes(viewingModel.id) ? 'fill-rose-500 text-rose-500' : ''}`} />
+                  {likedModels.includes(viewingModel.id) ? 'Liked' : 'Like'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        )}
+      </Dialog>
     </div>
   );
 }

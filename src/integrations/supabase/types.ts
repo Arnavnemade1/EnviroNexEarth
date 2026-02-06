@@ -833,6 +833,98 @@ export type Database = {
         }
         Relationships: []
       }
+      marketplace_likes: {
+        Row: {
+          created_at: string
+          id: string
+          model_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          model_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          model_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_likes_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_models: {
+        Row: {
+          accuracy: number | null
+          author_name: string
+          category: string
+          created_at: string
+          description: string
+          downloads: number | null
+          forks: number | null
+          id: string
+          is_featured: boolean | null
+          is_public: boolean | null
+          is_trending: boolean | null
+          model_path: string | null
+          name: string
+          price: string | null
+          stars: number | null
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accuracy?: number | null
+          author_name: string
+          category: string
+          created_at?: string
+          description: string
+          downloads?: number | null
+          forks?: number | null
+          id?: string
+          is_featured?: boolean | null
+          is_public?: boolean | null
+          is_trending?: boolean | null
+          model_path?: string | null
+          name: string
+          price?: string | null
+          stars?: number | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accuracy?: number | null
+          author_name?: string
+          category?: string
+          created_at?: string
+          description?: string
+          downloads?: number | null
+          forks?: number | null
+          id?: string
+          is_featured?: boolean | null
+          is_public?: boolean | null
+          is_trending?: boolean | null
+          model_path?: string | null
+          name?: string
+          price?: string | null
+          stars?: number | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           chatroom_id: string | null
