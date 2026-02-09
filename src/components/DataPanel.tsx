@@ -8,9 +8,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Wind, Thermometer, Eye, Heart, Activity, TrendingUp, TrendingDown, Play, Pause, RotateCcw, Chrome as Home, ChartBar as BarChart3, Atom, Sparkles, Loader as Loader2 } from 'lucide-react';
+import { Wind, Thermometer, Eye, Heart, Activity, TrendingUp, TrendingDown, Play, Pause, RotateCcw, Chrome as Home, ChartBar as BarChart3, Atom, Sparkles, Loader as Loader2, AlertTriangle, Shield } from 'lucide-react';
 import { AirQualityData, PredictionData } from '@/types';
 import { ForecastTimeline } from './ForecastTimeline';
+import { PollutantBadge, PollutantDetailCard, getPollutantSeverity, getWHOExceedance, WHO_GUIDELINES, type PollutantType } from './PollutantSeverity';
 
 type QuantumForecast = {
   model: { name: string; backend: string; horizonHours: number };
@@ -364,22 +365,50 @@ export const DataPanel = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <Wind className="w-4 h-4 text-primary" />
-                  <span>PM2.5: {airQuality.pm25}μg/m³</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Thermometer className="w-4 h-4 text-secondary" />
-                  <span>O₃: {airQuality.o3}μg/m³</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-accent" />
-                  <span>NO₂: {airQuality.no2}μg/m³</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-earth-blue" />
-                  <span>SO₂: {airQuality.so2}μg/m³</span>
+              {/* Enhanced Pollutant Display with Severity */}
+              <div className="space-y-2">
+                {/* Worst Pollutant Alert */}
+                {(() => {
+                  const pollutants: { type: PollutantType; value: number }[] = [
+                    { type: 'pm25', value: airQuality.pm25 },
+                    { type: 'o3', value: airQuality.o3 },
+                    { type: 'no2', value: airQuality.no2 },
+                    { type: 'so2', value: airQuality.so2 }
+                  ];
+                  const worstPollutant = pollutants.reduce((worst, current) => {
+                    const currentExceedance = getWHOExceedance(current.type, current.value);
+                    const worstExceedance = getWHOExceedance(worst.type, worst.value);
+                    return currentExceedance > worstExceedance ? current : worst;
+                  }, pollutants[0]);
+                  const exceedance = getWHOExceedance(worstPollutant.type, worstPollutant.value);
+                  const severity = getPollutantSeverity(worstPollutant.type, worstPollutant.value);
+                  
+                  if (exceedance > 100) {
+                    return (
+                      <div className={`p-2 rounded-lg ${severity.bgColor} border ${severity.borderColor} animate-pulse-slow`}>
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className={`w-4 h-4 ${severity.color}`} />
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-xs font-semibold ${severity.color}`}>
+                              {WHO_GUIDELINES[worstPollutant.type].name} {exceedance - 100}% above WHO limit
+                            </p>
+                            <p className="text-[10px] text-muted-foreground truncate">
+                              {severity.recommendation.split(' ').slice(0, 8).join(' ')}...
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+                
+                {/* Pollutant Badges with Severity */}
+                <div className="grid grid-cols-2 gap-2">
+                  <PollutantBadge type="pm25" value={airQuality.pm25} size="sm" showLabel={true} />
+                  <PollutantBadge type="o3" value={airQuality.o3} size="sm" showLabel={true} />
+                  <PollutantBadge type="no2" value={airQuality.no2} size="sm" showLabel={true} />
+                  <PollutantBadge type="so2" value={airQuality.so2} size="sm" showLabel={true} />
                 </div>
               </div>
 
