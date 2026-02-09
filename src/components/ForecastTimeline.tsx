@@ -17,6 +17,14 @@ import {
   Sparkles, Target, Shield, AlertTriangle, Clock, BarChart3,
   Globe, Users, Building, TreePine, Droplets, Sun
 } from 'lucide-react';
+import { 
+  PollutantDetailCard, 
+  getPollutantSeverity, 
+  getWHOExceedance, 
+  WHO_GUIDELINES, 
+  SEVERITY_LEVELS,
+  type PollutantType 
+} from './PollutantSeverity';
 import { AirQualityData } from '@/types';
 
 interface ForecastTimelineProps {
@@ -493,8 +501,68 @@ export const ForecastTimeline = ({
             </TabsContent>
 
             <TabsContent value="pollutants" className="space-y-3">
+              {/* WHO Threshold Alert Banner */}
+              {(() => {
+                const pollutants: { type: PollutantType; value: number }[] = [
+                  { type: 'pm25', value: currentProjection.pm25 },
+                  { type: 'o3', value: currentProjection.o3 },
+                  { type: 'no2', value: currentProjection.no2 }
+                ];
+                const exceeding = pollutants.filter(p => getWHOExceedance(p.type, p.value) > 100);
+                
+                if (exceeding.length > 0) {
+                  const worstPollutant = exceeding.reduce((worst, current) => {
+                    const currentExceedance = getWHOExceedance(current.type, current.value);
+                    const worstExceedance = getWHOExceedance(worst.type, worst.value);
+                    return currentExceedance > worstExceedance ? current : worst;
+                  }, exceeding[0]);
+                  const severity = getPollutantSeverity(worstPollutant.type, worstPollutant.value);
+                  const exceedance = getWHOExceedance(worstPollutant.type, worstPollutant.value);
+                  
+                  return (
+                    <Card className={`p-3 ${severity.bgColor} border ${severity.borderColor}`}>
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className={`w-5 h-5 ${severity.color} shrink-0`} />
+                        <div>
+                          <p className={`text-sm font-bold ${severity.color}`}>
+                            {exceeding.length} pollutant{exceeding.length > 1 ? 's' : ''} projected to exceed WHO limits by {currentProjection.year}
+                          </p>
+                          <p className="text-xs text-white/60 mt-1">
+                            {WHO_GUIDELINES[worstPollutant.type].fullName} projected at {exceedance - 100}% above WHO guideline
+                          </p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Heart className="w-3 h-3 text-red-400" />
+                            <span className="text-[10px] text-white/50">
+                              {WHO_GUIDELINES[worstPollutant.type].healthEffects[0].effect}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                }
+                
+                return (
+                  <Card className="p-3 bg-emerald-500/10 border border-emerald-500/30">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-emerald-400" />
+                      <p className="text-sm font-medium text-emerald-400">
+                        All pollutants projected within WHO guidelines by {currentProjection.year}
+                      </p>
+                    </div>
+                  </Card>
+                );
+              })()}
+              
+              {/* Pollutant Projections Chart */}
               <Card className="p-3 bg-white/5 border-white/10">
-                <h4 className="text-sm font-medium text-white mb-3">Pollutant Projections</h4>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-medium text-white">Pollutant Trajectory</h4>
+                  <div className="flex items-center gap-1 text-[10px] text-yellow-400">
+                    <AlertTriangle className="w-3 h-3" />
+                    <span>Yellow line = WHO limit</span>
+                  </div>
+                </div>
                 <div className="h-48">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={pollutantData}>
@@ -503,7 +571,7 @@ export const ForecastTimeline = ({
                       <YAxis tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 10 }} />
                       <Tooltip contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }} />
                       <Legend wrapperStyle={{ fontSize: 10 }} />
-                      <Line type="monotone" dataKey="AQI" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} />
+                      <ReferenceLine y={15} stroke="#eab308" strokeDasharray="5 5" label={{ value: 'WHO PM2.5', position: 'right', fill: '#eab308', fontSize: 8 }} />
                       <Line type="monotone" dataKey="PM2.5" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
                       <Line type="monotone" dataKey="O3" stroke="#06b6d4" strokeWidth={2} dot={{ r: 3 }} />
                       <Line type="monotone" dataKey="NO2" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3 }} />
@@ -513,25 +581,47 @@ export const ForecastTimeline = ({
                 </div>
               </Card>
 
-              {/* Pollutant breakdown */}
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { label: 'PM2.5', value: currentProjection.pm25, unit: 'μg/m³', icon: Wind, color: 'text-orange-400' },
-                  { label: 'Ozone', value: currentProjection.o3, unit: 'ppb', icon: Sun, color: 'text-cyan-400' },
-                  { label: 'NO₂', value: currentProjection.no2, unit: 'ppb', icon: Factory, color: 'text-purple-400' },
-                  { label: 'CO₂ Index', value: currentProjection.co2, unit: 'relative', icon: Thermometer, color: 'text-red-400' }
-                ].map((item) => (
-                  <Card key={item.label} className="p-2 bg-white/5 border-white/10">
-                    <div className="flex items-center gap-2">
-                      <item.icon className={`w-4 h-4 ${item.color}`} />
-                      <div>
-                        <p className="text-[10px] text-white/50">{item.label}</p>
-                        <p className={`text-sm font-bold ${item.color}`}>{item.value} <span className="text-[9px] text-white/40">{item.unit}</span></p>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
+              {/* Detailed Pollutant Cards with Health Info */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-medium text-white/60 flex items-center gap-2">
+                  <Heart className="w-3 h-3" />
+                  Projected Health Impact by {currentProjection.year}
+                </h4>
+                <PollutantDetailCard 
+                  type="pm25" 
+                  value={currentProjection.pm25} 
+                  showHealthEffects={true}
+                  compact={false}
+                />
+                <PollutantDetailCard 
+                  type="o3" 
+                  value={currentProjection.o3} 
+                  showHealthEffects={true}
+                  compact={false}
+                />
+                <PollutantDetailCard 
+                  type="no2" 
+                  value={currentProjection.no2} 
+                  showHealthEffects={true}
+                  compact={false}
+                />
               </div>
+              
+              {/* EPA Scale Reference */}
+              <Card className="p-3 bg-white/5 border-white/10">
+                <h4 className="text-xs font-medium text-white/60 mb-2">EPA Air Quality Index Scale</h4>
+                <div className="grid grid-cols-6 gap-1">
+                  {Object.values(SEVERITY_LEVELS).map((level) => {
+                    const Icon = level.icon;
+                    return (
+                      <div key={level.level} className={`p-1.5 rounded ${level.bgColor} border ${level.borderColor} text-center`}>
+                        <Icon className={`w-3 h-3 ${level.color} mx-auto mb-0.5`} />
+                        <p className={`text-[8px] ${level.color} truncate`}>{level.label.split(' ')[0]}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
             </TabsContent>
 
             <TabsContent value="health" className="space-y-3">

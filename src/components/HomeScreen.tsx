@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Globe, ArrowRight, ChevronDown, Zap, Shield, Activity, User } from 'lucide-react';
+import { Globe, ArrowRight, ChevronDown, Zap, Shield, Activity, User, AlertTriangle, Heart, Wind, Eye } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 interface HomeScreenProps {
@@ -371,6 +371,130 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           <div className="text-center">
             <span className="text-sm font-medium text-blue-400 uppercase tracking-widest block mb-4">Atmospheric Analysis</span>
             <h3 className="text-3xl md:text-5xl font-bold text-white">Predicting Climate Patterns</h3>
+          </div>
+        </div>
+      </section>
+
+      {/* Pollutant Awareness Section */}
+      <section className="relative py-32 px-8 bg-gradient-to-b from-black via-red-950/20 to-black">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-medium mb-6">
+              <AlertTriangle className="w-4 h-4" />
+              Critical Health Information
+            </span>
+            <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
+              The Silent<br />
+              <span className="text-red-400">Killers</span> in Our Air
+            </h2>
+            <p className="text-xl text-white/60 max-w-3xl mx-auto">
+              Millions die each year from air pollution. Understanding these pollutants 
+              is the first step to protecting yourself and your family.
+            </p>
+          </div>
+
+          {/* Pollutant Cards */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+            {[
+              {
+                name: 'PM2.5',
+                fullName: 'Fine Particulate Matter',
+                danger: '7 million deaths annually',
+                description: 'Particles 30x smaller than human hair that penetrate deep into lungs and bloodstream',
+                effect: 'Cardiovascular disease, lung cancer, stroke',
+                whoLimit: '15 μg/m³',
+                color: 'orange',
+                icon: Wind
+              },
+              {
+                name: 'O₃',
+                fullName: 'Ground-level Ozone',
+                danger: 'Triggers 1M asthma attacks daily',
+                description: 'Invisible gas formed when pollutants react with sunlight',
+                effect: 'Asthma attacks, reduced lung function, chest pain',
+                whoLimit: '100 μg/m³',
+                color: 'cyan',
+                icon: Activity
+              },
+              {
+                name: 'NO₂',
+                fullName: 'Nitrogen Dioxide',
+                danger: '40% higher asthma risk',
+                description: 'Toxic gas from vehicles and power plants that irritates airways',
+                effect: 'Respiratory infections, reduced lung development in children',
+                whoLimit: '25 μg/m³',
+                color: 'purple',
+                icon: Eye
+              },
+              {
+                name: 'SO₂',
+                fullName: 'Sulfur Dioxide',
+                danger: 'Effects in 10 minutes',
+                description: 'Acidic gas from fossil fuels that causes immediate respiratory distress',
+                effect: 'Bronchoconstriction, eye irritation, worsens heart conditions',
+                whoLimit: '40 μg/m³',
+                color: 'rose',
+                icon: Heart
+              }
+            ].map((pollutant, i) => (
+              <div 
+                key={pollutant.name}
+                className={`group p-6 rounded-2xl bg-gradient-to-b from-${pollutant.color}-500/10 to-transparent border border-${pollutant.color}-500/20 hover:border-${pollutant.color}-500/40 transition-all duration-500`}
+                style={{ animationDelay: `${i * 100}ms` }}
+              >
+                <div className={`w-12 h-12 rounded-xl bg-${pollutant.color}-500/20 flex items-center justify-center mb-4`}>
+                  <pollutant.icon className={`w-6 h-6 text-${pollutant.color}-400`} />
+                </div>
+                
+                <h3 className="text-3xl font-bold text-white mb-1">{pollutant.name}</h3>
+                <p className="text-sm text-white/50 mb-4">{pollutant.fullName}</p>
+                
+                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 mb-4`}>
+                  <AlertTriangle className="w-3 h-3 text-red-400" />
+                  <span className="text-xs font-semibold text-red-400">{pollutant.danger}</span>
+                </div>
+                
+                <p className="text-sm text-white/60 mb-4">{pollutant.description}</p>
+                
+                <div className="space-y-2 pt-4 border-t border-white/10">
+                  <div className="flex items-center gap-2">
+                    <Heart className="w-3 h-3 text-red-400" />
+                    <span className="text-xs text-white/50">{pollutant.effect}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-3 h-3 text-yellow-400" />
+                    <span className="text-xs text-yellow-400">WHO Limit: {pollutant.whoLimit}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* WHO Warning Banner */}
+          <div className="p-6 rounded-2xl bg-gradient-to-r from-red-500/10 via-orange-500/10 to-red-500/10 border border-red-500/20">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-8 h-8 text-red-400" />
+              </div>
+              <div className="text-center md:text-left">
+                <h4 className="text-xl font-bold text-white mb-2">
+                  99% of the world breathes unsafe air
+                </h4>
+                <p className="text-white/60 text-sm max-w-2xl">
+                  According to the World Health Organization, nearly all of humanity is exposed to 
+                  air pollution levels that exceed safe guidelines. EnviroNex helps you understand 
+                  your exposure and take action to protect your health.
+                </p>
+              </div>
+              <button
+                onClick={onStartExploring}
+                className="shrink-0 px-6 py-3 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-400 transition-colors flex items-center gap-2"
+              >
+                Check Your Air
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </section>
