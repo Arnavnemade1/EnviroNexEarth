@@ -34,17 +34,17 @@ const ageRanges = [
 ];
 
 const activityLevels = [
-  { value: 'sedentary', label: 'Sedentary', desc: 'Little to no exercise', icon: '🛋️' },
-  { value: 'light', label: 'Lightly Active', desc: 'Light exercise 1-3 days/week', icon: '🚶' },
-  { value: 'moderate', label: 'Moderately Active', desc: 'Moderate exercise 3-5 days/week', icon: '🏃' },
-  { value: 'active', label: 'Very Active', desc: 'Hard exercise 6-7 days/week', icon: '💪' },
-  { value: 'athlete', label: 'Athlete', desc: 'Very intense exercise daily', icon: '🏋️' },
+  { value: 'sedentary', label: 'Sedentary', desc: 'Little to no exercise' },
+  { value: 'light', label: 'Lightly Active', desc: 'Light exercise 1-3 days/week' },
+  { value: 'moderate', label: 'Moderately Active', desc: 'Moderate exercise 3-5 days/week' },
+  { value: 'active', label: 'Very Active', desc: 'Hard exercise 6-7 days/week' },
+  { value: 'athlete', label: 'Athlete', desc: 'Very intense exercise daily' },
 ];
 
 const smokingStatuses = [
-  { value: 'never', label: 'Never Smoked', icon: '✅' },
-  { value: 'former', label: 'Former Smoker', icon: '🔄' },
-  { value: 'current', label: 'Current Smoker', icon: '🚬' },
+  { value: 'never', label: 'Never Smoked' },
+  { value: 'former', label: 'Former Smoker' },
+  { value: 'current', label: 'Current Smoker' },
 ];
 
 const sensitivities = [
@@ -55,12 +55,12 @@ const sensitivities = [
 ];
 
 const healthConditions = [
-  { value: 'asthma', label: 'Asthma', icon: '🫁' },
-  { value: 'copd', label: 'COPD', icon: '😮‍💨' },
-  { value: 'heart_disease', label: 'Heart Disease', icon: '❤️' },
-  { value: 'allergies', label: 'Allergies', icon: '🤧' },
-  { value: 'diabetes', label: 'Diabetes', icon: '💉' },
-  { value: 'none', label: 'None of the above', icon: '✨' },
+  { value: 'asthma', label: 'Asthma' },
+  { value: 'copd', label: 'COPD' },
+  { value: 'heart_disease', label: 'Heart Disease' },
+  { value: 'allergies', label: 'Allergies' },
+  { value: 'diabetes', label: 'Diabetes' },
+  { value: 'none', label: 'None of the above' },
 ];
 
 export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupProps) => {
@@ -239,8 +239,8 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
             {[1, 2, 3, 4, 5].map((s) => (
               <div key={s} className="flex items-center flex-1">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${s < step ? 'bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30' :
-                    s === step ? 'bg-gradient-to-br from-rose-500 to-indigo-500 text-white shadow-lg shadow-rose-500/30 scale-110' :
-                      'bg-white/5 text-slate-500 border border-white/10'
+                  s === step ? 'bg-gradient-to-br from-rose-500 to-indigo-500 text-white shadow-lg shadow-rose-500/30 scale-110' :
+                    'bg-white/5 text-slate-500 border border-white/10'
                   }`}>
                   {s < step ? <Check className="w-5 h-5" /> : s}
                 </div>
@@ -273,8 +273,8 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
                     key={age.value}
                     variant={profile.age_range === age.value ? 'default' : 'outline'}
                     className={`h-16 text-lg font-semibold transition-all duration-300 ${profile.age_range === age.value
-                        ? 'bg-gradient-to-br from-rose-500 to-indigo-500 border-0 shadow-lg shadow-rose-500/30 scale-105'
-                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 hover:scale-105'
+                      ? 'bg-gradient-to-br from-rose-500 to-indigo-500 border-0 shadow-lg shadow-rose-500/30 scale-105'
+                      : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 hover:scale-105'
                       }`}
                     onClick={() => setProfile(p => ({ ...p, age_range: age.value }))}
                   >
@@ -300,18 +300,15 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
                   <button
                     key={level.value}
                     className={`w-full p-5 rounded-2xl border text-left transition-all duration-300 ${profile.activity_level === level.value
-                        ? 'border-emerald-500/50 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 shadow-lg shadow-emerald-500/20 scale-[1.02]'
-                        : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02]'
+                      ? 'border-emerald-500/50 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 shadow-lg shadow-emerald-500/20 scale-[1.02]'
+                      : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02]'
                       }`}
                     onClick={() => setProfile(p => ({ ...p, activity_level: level.value }))}
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <span className="text-3xl">{level.icon}</span>
-                        <div>
-                          <p className="font-bold text-white text-lg">{level.label}</p>
-                          <p className="text-sm text-slate-400">{level.desc}</p>
-                        </div>
+                      <div>
+                        <p className="font-bold text-white text-lg">{level.label}</p>
+                        <p className="text-sm text-slate-400">{level.desc}</p>
                       </div>
                       {profile.activity_level === level.value && (
                         <Check className="w-6 h-6 text-emerald-400" />
@@ -338,16 +335,13 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
                   <button
                     key={status.value}
                     className={`w-full p-5 rounded-2xl border text-left transition-all duration-300 ${profile.smoking_status === status.value
-                        ? 'border-blue-500/50 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 shadow-lg shadow-blue-500/20 scale-[1.02]'
-                        : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02]'
+                      ? 'border-blue-500/50 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 shadow-lg shadow-blue-500/20 scale-[1.02]'
+                      : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02]'
                       }`}
                     onClick={() => setProfile(p => ({ ...p, smoking_status: status.value }))}
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <span className="text-3xl">{status.icon}</span>
-                        <p className="font-bold text-white text-lg">{status.label}</p>
-                      </div>
+                      <p className="font-bold text-white text-lg">{status.label}</p>
                       {profile.smoking_status === status.value && (
                         <Check className="w-6 h-6 text-blue-400" />
                       )}
@@ -373,8 +367,8 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
                   <button
                     key={sens.value}
                     className={`w-full p-5 rounded-2xl border text-left transition-all duration-300 ${profile.air_sensitivity === sens.value
-                        ? 'border-amber-500/50 bg-gradient-to-r from-amber-500/20 to-orange-500/20 shadow-lg shadow-amber-500/20 scale-[1.02]'
-                        : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02]'
+                      ? 'border-amber-500/50 bg-gradient-to-r from-amber-500/20 to-orange-500/20 shadow-lg shadow-amber-500/20 scale-[1.02]'
+                      : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02]'
                       }`}
                     onClick={() => setProfile(p => ({ ...p, air_sensitivity: sens.value }))}
                   >
@@ -408,16 +402,15 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
                   <button
                     key={condition.value}
                     className={`p-5 rounded-2xl border text-center transition-all duration-300 ${profile.health_conditions.includes(condition.value)
-                        ? 'border-purple-500/50 bg-gradient-to-br from-purple-500/20 to-pink-500/20 shadow-lg shadow-purple-500/20 scale-[1.02]'
-                        : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02]'
+                      ? 'border-purple-500/50 bg-gradient-to-br from-purple-500/20 to-pink-500/20 shadow-lg shadow-purple-500/20 scale-[1.02]'
+                      : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02]'
                       }`}
                     onClick={() => handleConditionToggle(condition.value)}
                   >
                     <div className="flex flex-col items-center gap-2">
-                      <span className="text-3xl">{condition.icon}</span>
                       <span className="font-bold text-white text-sm">{condition.label}</span>
                       {profile.health_conditions.includes(condition.value) && (
-                        <Check className="w-5 h-5 text-purple-400 mt-1" />
+                        <Check className="w-5 h-5 text-purple-400" />
                       )}
                     </div>
                   </button>
