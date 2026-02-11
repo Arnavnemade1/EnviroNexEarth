@@ -382,7 +382,7 @@ export const DataPanel = ({
                   }, pollutants[0]);
                   const exceedance = getWHOExceedance(worstPollutant.type, worstPollutant.value);
                   const severity = getPollutantSeverity(worstPollutant.type, worstPollutant.value);
-                  
+
                   if (exceedance > 100) {
                     return (
                       <div className={`p-2 rounded-lg ${severity.bgColor} border ${severity.borderColor} animate-pulse-slow`}>
@@ -402,7 +402,7 @@ export const DataPanel = ({
                   }
                   return null;
                 })()}
-                
+
                 {/* Pollutant Badges with Severity */}
                 <div className="grid grid-cols-2 gap-2">
                   <PollutantBadge type="pm25" value={airQuality.pm25} size="sm" showLabel={true} />
@@ -434,6 +434,31 @@ export const DataPanel = ({
                   </div>
                   <TrendingUp className="w-5 h-5 mr-2 group-hover:animate-bounce" />
                   <span className="font-semibold">ClimatePredict AI</span>
+                </Button>
+              )}
+
+              {/* Quantum Analytics Button */}
+              {onShowQuantumAnalytics && (
+                <Button
+                  size="sm"
+                  className="w-full mt-2 bg-gradient-to-r from-primary to-secondary"
+                  onClick={onShowQuantumAnalytics}
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  View Quantum Analytics
+                </Button>
+              )}
+
+              {/* Health Analysis Button */}
+              {cityName && airQuality && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full mt-2 glass"
+                  onClick={handleHealthNavigation}
+                >
+                  <Heart className="w-4 h-4 mr-2" />
+                  Health Analysis
                 </Button>
               )}
             </div>
@@ -477,27 +502,7 @@ export const DataPanel = ({
                   </div>
                 </div>
               </div>
-              {onShowQuantumAnalytics && (
-                <Button
-                  size="sm"
-                  className="w-full mt-3 bg-gradient-to-r from-primary to-secondary"
-                  onClick={onShowQuantumAnalytics}
-                >
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  View Quantum Analytics
-                </Button>
-              )}
-              {cityName && airQuality && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full mt-2 glass"
-                  onClick={handleHealthNavigation}
-                >
-                  <Heart className="w-4 h-4 mr-2" />
-                  Health Analysis
-                </Button>
-              )}
+
               <div className="text-xs text-muted-foreground">
                 Horizon: {quantumForecast.model.horizonHours}h • Generated {new Date(quantumForecast.generatedAt).toLocaleTimeString()}
               </div>
