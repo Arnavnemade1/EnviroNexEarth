@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import {
   LineChart,
   Line,
@@ -22,7 +23,8 @@ import {
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
-  Radar
+  Radar,
+  Cell
 } from 'recharts';
 import {
   Heart,
@@ -38,13 +40,20 @@ import {
   User,
   Sparkles,
   Loader2,
-  ArrowLeft
+  ArrowLeft,
+  ChevronRight,
+  Zap,
+  Wind,
+  Brain,
+  Stethoscope,
+  Info
 } from 'lucide-react';
 import {
   calculateQuantumHealthRisk,
   predictHealthTrend,
   HealthProfile,
-  QuantumHealthAnalysis as QuantumHealthAnalysisType
+  QuantumHealthAnalysis as QuantumHealthAnalysisType,
+  Interventions
 } from '@/services/quantumHealth';
 
 interface QuantumHealthProps {
@@ -64,7 +73,7 @@ interface QuantumHealthProps {
 }
 
 export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQuality, forecast, onBack }: QuantumHealthProps) => {
-  const [activeTab, setActiveTab] = useState('analysis');
+  const [activeTab, setActiveTab] = useState('shield');
   const [healthProfile, setHealthProfile] = useState<HealthProfile>({
     age: 30,
     hasAsthma: false,
@@ -73,17 +82,12 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
     activityLevel: 'moderate',
     smokingStatus: 'never'
   });
-  const [tempHealthProfile, setTempHealthProfile] = useState<HealthProfile>({
-    age: 30,
-    hasAsthma: false,
-    hasHeartCondition: false,
-    hasLungCondition: false,
-    activityLevel: 'moderate',
-    smokingStatus: 'never'
+  const [interventions, setInterventions] = useState<Interventions>({
+    usingN95: false,
+    usingAirPurifier: false,
+    isStayingIndoors: false
   });
   const [healthAnalysis, setHealthAnalysis] = useState<QuantumHealthAnalysisType | null>(null);
-  const [healthTrend, setHealthTrend] = useState<Array<{ hour: number; riskScore: number; trend: string }>>([]);
-  const [isOptimizing, setIsOptimizing] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
@@ -94,510 +98,497 @@ export const QuantumHealthAnalysisComponent = ({ cityName, currentAQI, airQualit
       airQuality.pm25,
       airQuality.o3,
       airQuality.no2,
-      healthProfile
+      healthProfile,
+      interventions
     );
-    setHealthAnalysis(analysis);
-    setLastUpdated(new Date());
 
     if (forecast) {
-      const trend = predictHealthTrend(analysis, forecast, airQuality.o3, airQuality.no2);
-      setHealthTrend(trend);
+      analysis.activityWindows = predictHealthTrend(
+        analysis,
+        forecast,
+        airQuality.o3,
+        airQuality.no2,
+        healthProfile
+      );
     }
-  }, [airQuality, healthProfile, forecast]);
 
-  const handleProfileSubmit = async () => {
-    setIsUpdating(true);
-
-    // Add a brief delay to show loading state
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    setHealthProfile(tempHealthProfile);
-    setIsUpdating(false);
-  };
+    setHealthAnalysis(analysis);
+    setLastUpdated(new Date());
+  }, [airQuality, healthProfile, forecast, interventions]);
 
   const getRiskColor = (risk: string) => {
-    const colors = {
-      'very-low': 'hsl(var(--chart-1))', // Green
-      'low': 'hsl(var(--chart-2))', // Light green
-      'moderate': 'hsl(var(--chart-3))', // Yellow
-      'high': 'hsl(var(--chart-4))', // Orange
-      'very-high': 'hsl(var(--chart-5))' // Red
-    };
-    return colors[risk as keyof typeof colors] || colors['moderate'];
-  };
-
-  const getActivityIcon = (activity: string) => {
-    switch (activity) {
-      case 'safe': return <CheckCircle className="w-5 h-5 text-green-500" />;
-      case 'limited': return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
-      case 'avoid': return <Shield className="w-5 h-5 text-red-500" />;
-      default: return <Activity className="w-5 h-5" />;
+    switch (risk) {
+      case 'very-low': return '#10b981'; // Emerald
+      case 'low': return '#34d399'; // Green 400
+      case 'moderate': return '#fbbf24'; // Amber
+      case 'high': return '#f87171'; // Red 400
+      case 'very-high': return '#ef4444'; // Red 500
+      default: return '#fbbf24';
     }
   };
 
-  if (!healthAnalysis) return <div>Loading health analysis...</div>;
+  if (!healthAnalysis) return <div>Loading Neural Health Command...</div>;
 
-  // Radar chart data for comprehensive health risk
-  const radarData = [
-    { factor: 'Air Quality', value: Math.min(100, airQuality.aqi * 0.67) },
-    { factor: 'PM2.5 Risk', value: Math.min(100, airQuality.pm25 * 2.86) },
-    { factor: 'Ozone Impact', value: Math.min(100, airQuality.o3) },
-    { factor: 'Personal Risk', value: healthAnalysis.riskScore },
-    { factor: 'Quantum Coherence', value: healthAnalysis.quantumCoherence },
-    {
-      factor: 'Activity Safety', value: healthAnalysis.activitySafety.outdoor === 'safe' ? 20 :
-        healthAnalysis.activitySafety.outdoor === 'limited' ? 60 : 90
-    }
+  const biologicalMetrics = [
+    { name: 'Respiratory', value: healthAnalysis.biologicalImpact.respiratory, icon: Wind, color: '#60a5fa' },
+    { name: 'Cardiovascular', value: healthAnalysis.biologicalImpact.cardiovascular, icon: Heart, color: '#f87171' },
+    { name: 'Neurological', value: healthAnalysis.biologicalImpact.neurological, icon: Brain, color: '#a78bfa' },
+    { name: 'Oxidative Stress', value: healthAnalysis.biologicalImpact.oxidativeStress, icon: Zap, color: '#fbbf24' }
   ];
 
   return (
-    <div className="h-[calc(100vh-12rem)] overflow-auto">
+    <div className="h-[calc(100vh-12rem)] overflow-auto custom-scrollbar">
       <div className="space-y-6 pr-4 pb-8">
-        {/* Header with Overall Risk */}
-        <Card className="glass p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              {onBack && (
-                <Button variant="ghost" size="icon" onClick={onBack} className="hover:bg-primary/10">
-                  <ArrowLeft className="w-5 h-5" />
-                </Button>
-              )}
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                  <Atom className="w-6 h-6 text-primary-foreground animate-pulse" />
+        {/* Neural-Health Header */}
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/30 to-blue-500/30 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+          <Card className="relative bg-[#020617]/80 backdrop-blur-xl border-white/10 p-6 overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+              <Brain size={160} className="text-emerald-400 group-hover:scale-110 transition-transform duration-1000" />
+            </div>
+
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+              <div className="flex items-center gap-6">
+                {onBack && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onBack}
+                    className="hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                  >
+                    <ArrowLeft className="w-6 h-6" />
+                  </Button>
+                )}
+                <div className="relative flex items-center justify-center">
+                  <div className="w-20 h-20 rounded-full border-4 border-emerald-500/20 flex items-center justify-center">
+                    <Atom className="w-10 h-10 text-emerald-400 animate-spin-slow" />
+                  </div>
+                  <div className="absolute -top-1 -right-1">
+                    <div className="h-4 w-4 bg-emerald-500 rounded-full animate-ping" />
+                  </div>
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">Quantum Health Analysis</h2>
-                  <p className="text-muted-foreground">
-                    {cityName} • Real-time Risk Assessment
-                    <span className="text-xs block mt-1">
-                      Last updated: {lastUpdated.toLocaleTimeString()}
-                    </span>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-2xl font-black text-white tracking-tight italic uppercase">Neural-Health Command</h2>
+                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px] animate-pulse">SYSTEM NOMINAL</Badge>
+                  </div>
+                  <p className="text-slate-400 text-sm font-medium flex items-center gap-2">
+                    <Activity className="w-3 h-3" />
+                    Probabilistic Bio-Modeling: {cityName}
                   </p>
                 </div>
               </div>
-            </div>
-            <Badge
-              variant="outline"
-              className="text-lg px-4 py-2"
-              style={{ borderColor: getRiskColor(healthAnalysis.overallRisk) }}
-            >
-              <Heart className="w-4 h-4 mr-2" />
-              {healthAnalysis.overallRisk.toUpperCase()} RISK
-            </Badge>
-          </div>
 
-          {/* Risk Score Display */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="text-3xl font-bold mb-2" style={{ color: getRiskColor(healthAnalysis.overallRisk) }}>
-                {healthAnalysis.riskScore}/100
+              <div className="flex gap-4">
+                <div className="bg-white/5 border border-white/10 rounded-xl px-6 py-3 text-center min-w-[140px]">
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 text-emerald-400">Personal Shield</p>
+                  <p className="text-3xl font-black text-white italic">{100 - healthAnalysis.riskScore}%</p>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-xl px-6 py-3 text-center min-w-[140px]">
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 text-blue-400">System Fidelity</p>
+                  <p className="text-3xl font-black text-white italic">{healthAnalysis.quantumCoherence}%</p>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground">Overall Risk Score</p>
-              <Progress value={healthAnalysis.riskScore} className="mt-2" />
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold mb-2 text-primary">
-                {healthAnalysis.quantumCoherence}%
-              </div>
-              <p className="text-sm text-muted-foreground">Quantum Coherence</p>
-              <Progress value={healthAnalysis.quantumCoherence} className="mt-2" />
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold mb-2 text-accent">
-                {healthAnalysis.timeToSafety || '—'}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {healthAnalysis.timeToSafety ? 'Hours to Improvement' : 'Currently Improving'}
-              </p>
-              {healthAnalysis.timeToSafety && (
-                <Progress value={Math.max(0, 100 - (healthAnalysis.timeToSafety / 24) * 100)} className="mt-2" />
-              )}
-            </div>
-          </div>
+          </Card>
+        </div>
 
-          {/* Personalized Alerts */}
-          {healthAnalysis.personalizedAlerts.length > 0 && (
-            <div className="mt-4 p-4 bg-muted/20 rounded-lg">
-              <h4 className="font-semibold mb-2 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4" />
-                Personalized Health Alerts
-              </h4>
-              <div className="space-y-1">
-                {healthAnalysis.personalizedAlerts.map((alert, index) => (
-                  <p key={index} className="text-sm">{alert}</p>
-                ))}
-              </div>
-            </div>
-          )}
-        </Card>
-
-        {/* Main Analysis Tabs */}
+        {/* Command Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 glass">
-            <TabsTrigger value="analysis">Risk Analysis</TabsTrigger>
-            <TabsTrigger value="activities">Activity Guide</TabsTrigger>
-            <TabsTrigger value="profile">Health Profile</TabsTrigger>
-            <TabsTrigger value="trends">Health Trends</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 bg-white/5 border-white/10 p-1">
+            <TabsTrigger value="shield" className="flex items-center gap-2 data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 rounded-md transition-all">
+              <Shield className="w-4 h-4" />
+              Shield Status
+            </TabsTrigger>
+            <TabsTrigger value="timeline" className="flex items-center gap-2 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-md transition-all">
+              <Clock className="w-4 h-4" />
+              Action Timeline
+            </TabsTrigger>
+            <TabsTrigger value="lab" className="flex items-center gap-2 data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 rounded-md transition-all">
+              <Stethoscope className="w-4 h-4" />
+              Biological Lab
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="flex items-center gap-2 data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 rounded-md transition-all">
+              <User className="w-4 h-4" />
+              Bio-Profile
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="analysis" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Comprehensive Risk Radar */}
-              <Card className="glass p-6">
-                <h3 className="text-lg font-semibold mb-4">Quantum Risk Assessment</h3>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart data={radarData}>
-                      <PolarGrid />
-                      <PolarAngleAxis dataKey="factor" />
-                      <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                      <Radar
-                        name="Risk Level"
-                        dataKey="value"
-                        stroke="hsl(var(--primary))"
-                        fill="hsl(var(--primary))"
-                        fillOpacity={0.3}
-                      />
-                    </RadarChart>
-                  </ResponsiveContainer>
-                </div>
-              </Card>
-
-              {/* Recommendations */}
-              <Card className="glass p-6">
-                <h3 className="text-lg font-semibold mb-4">Quantum-Enhanced Recommendations</h3>
-                <div className="space-y-3">
-                  {healthAnalysis.recommendations.length > 0 ? (
-                    healthAnalysis.recommendations.map((rec, index) => (
-                      <div key={index} className="flex items-start gap-3 p-3 bg-muted/10 rounded-lg">
-                        <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                        <p className="text-sm">{rec}</p>
+          <TabsContent value="shield" className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Biological Impact Radar */}
+              <div className="lg:col-span-12">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {biologicalMetrics.map((m) => (
+                    <Card key={m.name} className="bg-white/5 border-white/10 p-4 hover:bg-white/10 transition-all group overflow-hidden relative">
+                      <div className="absolute bottom-0 right-0 p-4 opacity-5 pointer-events-none group-hover:scale-125 transition-transform duration-500">
+                        <m.icon size={64} />
                       </div>
-                    ))
-                  ) : (
-                    <div className="text-center text-muted-foreground p-4">
-                      <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm">Analyzing air quality data to generate personalized recommendations...</p>
-                    </div>
-                  )}
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 rounded-lg bg-white/5">
+                          <m.icon className="w-4 h-4" style={{ color: m.color }} />
+                        </div>
+                        <h4 className="text-xs font-bold text-white uppercase tracking-wider">{m.name}</h4>
+                      </div>
+                      <div className="flex items-end justify-between font-black text-2xl italic text-white mb-2">
+                        <span>{m.value.toFixed(1)}</span>
+                        <span className="text-[10px] text-slate-500 non-italic mb-1">PROBABILITY %</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div
+                          className="h-full transition-all duration-1000 rounded-full"
+                          style={{ width: `${m.value}%`, backgroundColor: m.color, boxShadow: `0 0 10px ${m.color}40` }}
+                        />
+                      </div>
+                    </Card>
+                  ))}
                 </div>
-              </Card>
-            </div>
-          </TabsContent>
+              </div>
 
-          <TabsContent value="activities" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { key: 'outdoor', label: 'Outdoor Activities', icon: Activity },
-                { key: 'exercise', label: 'Exercise', icon: Heart },
-                { key: 'children', label: 'Children Activities', icon: Baby },
-                { key: 'elderly', label: 'Elderly Care', icon: User }
-              ].map(({ key, label, icon: Icon }) => (
-                <Card key={key} className="glass p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Icon className="w-5 h-5" />
-                    <h4 className="font-medium">{label}</h4>
+              {/* Intervention Simulator */}
+              <div className="lg:col-span-5">
+                <Card className="bg-white/5 border-white/10 p-6 h-full flex flex-col">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2 text-emerald-400">
+                      <Zap className="w-4 h-4" />
+                      Intervention Simulator
+                    </h3>
+                    <Badge variant="outline" className="text-[10px] border-emerald-500/30 text-emerald-400">ACTIVE REDUCTION: {healthAnalysis.interventionEffectiveness}%</Badge>
                   </div>
-                  <div className="flex items-center justify-between">
-                    {getActivityIcon(healthAnalysis.activitySafety[key as keyof typeof healthAnalysis.activitySafety])}
-                    <span className="text-sm font-medium capitalize">
-                      {healthAnalysis.activitySafety[key as keyof typeof healthAnalysis.activitySafety].replace('-', ' ')}
-                    </span>
+
+                  <div className="space-y-6 flex-1">
+                    <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10 hover:border-emerald-500/30 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                          <Shield className="w-5 h-5 text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-white">N95 Mask Usage</p>
+                          <p className="text-[10px] text-slate-500">Filters 85% of PM2.5 particulates</p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={interventions.usingN95}
+                        onCheckedChange={(checked) => setInterventions(prev => ({ ...prev, usingN95: checked }))}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10 hover:border-blue-500/30 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                          <Wind className="w-5 h-5 text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-white">HEPA Air Purifier</p>
+                          <p className="text-[10px] text-slate-500">Neutralizes 70% of indoor toxins</p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={interventions.usingAirPurifier}
+                        onCheckedChange={(checked) => setInterventions(prev => ({ ...prev, usingAirPurifier: checked }))}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10 hover:border-purple-500/30 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                          <Shield className="w-5 h-5 text-purple-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-white">Indoor Confinement</p>
+                          <p className="text-[10px] text-slate-500">Reduces direct ambient exposure by 50%</p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={interventions.isStayingIndoors}
+                        onCheckedChange={(checked) => setInterventions(prev => ({ ...prev, isStayingIndoors: checked }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-8 p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                    <p className="text-xs text-slate-400 leading-relaxed italic">
+                      "Simulating {healthProfile.age}-year old biology across {healthAnalysis.quantumCoherence}% accurate probabilistic timelines. Recommended actions are mission-critical."
+                    </p>
                   </div>
                 </Card>
-              ))}
-            </div>
+              </div>
 
-            {/* Activity Timeline */}
-            {healthTrend.length > 0 && (
-              <Card className="glass p-6">
-                <h3 className="text-lg font-semibold mb-4">12-Hour Activity Safety Forecast</h3>
-                <div className="h-80 mb-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={healthTrend} margin={{ top: 5, right: 30, left: 20, bottom: 50 }}>
-                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                      <XAxis
-                        dataKey="hour"
-                        label={{ value: 'Hours ahead', position: 'insideBottom', offset: -5 }}
-                      />
-                      <YAxis label={{ value: 'Risk Score', angle: -90, position: 'insideLeft' }} />
-                      <Tooltip
-                        content={({ active, payload, label }) => {
-                          if (active && payload && payload.length) {
-                            const data = payload[0].payload;
-                            return (
-                              <div className="glass p-3 rounded-lg">
-                                <p className="font-medium">+{label} hours</p>
-                                <p className="text-primary">Risk Score: {payload[0].value}</p>
-                                <p className="text-secondary">Trend: {data.trend}</p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="riskScore"
-                        stroke="hsl(var(--primary))"
-                        fill="hsl(var(--primary))"
-                        fillOpacity={0.3}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </Card>
-            )}
+              {/* Recommendations Engine */}
+              <div className="lg:col-span-7">
+                <Card className="bg-white/5 border-white/10 p-6 h-full">
+                  <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-emerald-400" />
+                    Neural Recommendation Engine
+                  </h3>
+                  <div className="space-y-4">
+                    {healthAnalysis.recommendations.map((rec, index) => (
+                      <div key={index} className="group relative">
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl blur opacity-0 group-hover:opacity-10 transition duration-300"></div>
+                        <div className="relative flex items-start gap-4 p-4 bg-[#020617] rounded-xl border border-white/5 group-hover:border-white/10">
+                          <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+                            <CheckCircle className="w-4 h-4 text-emerald-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-white font-medium">{rec}</p>
+                            <div className="mt-2 flex items-center gap-3">
+                              <Badge variant="outline" className="text-[8px] uppercase tracking-tighter border-emerald-500/20 text-emerald-500/50">High Confidence</Badge>
+                              <span className="text-[10px] text-slate-600 font-mono tracking-tighter">REF_Q_BIO_0{index + 1}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {healthAnalysis.recommendations.length === 0 && (
+                      <div className="h-40 flex items-center justify-center border-2 border-dashed border-white/5 rounded-2xl">
+                        <p className="text-slate-500 text-sm italic">Recalibrating Neural Feedback...</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-8 flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Live Pulse Update</span>
+                    </div>
+                    <p className="text-xs font-mono text-emerald-400">99.2% Sync</p>
+                  </div>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
 
-          <TabsContent value="profile" className="space-y-6">
-            <Card className="glass p-6">
-              <h3 className="text-lg font-semibold mb-4">Personalize Your Health Analysis</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Age</label>
-                    <Select
-                      value={tempHealthProfile.age.toString()}
-                      onValueChange={(value) => setTempHealthProfile(prev => ({ ...prev, age: parseInt(value) }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="5">Under 18</SelectItem>
-                        <SelectItem value="25">18-30</SelectItem>
-                        <SelectItem value="35">31-40</SelectItem>
-                        <SelectItem value="45">41-50</SelectItem>
-                        <SelectItem value="55">51-60</SelectItem>
-                        <SelectItem value="70">Over 60</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Activity Level</label>
-                    <Select
-                      value={tempHealthProfile.activityLevel}
-                      onValueChange={(value: 'low' | 'moderate' | 'high') =>
-                        setTempHealthProfile(prev => ({ ...prev, activityLevel: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">Low Activity</SelectItem>
-                        <SelectItem value="moderate">Moderate Activity</SelectItem>
-                        <SelectItem value="high">High Activity</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Smoking Status</label>
-                    <Select
-                      value={tempHealthProfile.smokingStatus}
-                      onValueChange={(value: 'never' | 'former' | 'current') =>
-                        setTempHealthProfile(prev => ({ ...prev, smokingStatus: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="never">Never Smoked</SelectItem>
-                        <SelectItem value="former">Former Smoker</SelectItem>
-                        <SelectItem value="current">Current Smoker</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+          <TabsContent value="timeline" className="animate-in fade-in duration-500">
+            <Card className="bg-white/5 border-white/10 p-8">
+              <div className="flex items-center justify-between mb-12">
+                <div>
+                  <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">Optimal Activity Windows</h3>
+                  <p className="text-slate-500 text-sm">24-hour predictive exertion roadmap</p>
                 </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium mb-3 block">Health Conditions</label>
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="asthma"
-                          checked={tempHealthProfile.hasAsthma}
-                          onCheckedChange={(checked) =>
-                            setTempHealthProfile(prev => ({ ...prev, hasAsthma: !!checked }))}
-                        />
-                        <label htmlFor="asthma" className="text-sm">Asthma</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="heart"
-                          checked={tempHealthProfile.hasHeartCondition}
-                          onCheckedChange={(checked) =>
-                            setTempHealthProfile(prev => ({ ...prev, hasHeartCondition: !!checked }))}
-                        />
-                        <label htmlFor="heart" className="text-sm">Heart Condition</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="lung"
-                          checked={tempHealthProfile.hasLungCondition}
-                          onCheckedChange={(checked) =>
-                            setTempHealthProfile(prev => ({ ...prev, hasLungCondition: !!checked }))}
-                        />
-                        <label htmlFor="lung" className="text-sm">Lung Condition</label>
-                      </div>
-                    </div>
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                    <span className="text-[10px] font-bold text-slate-500 uppercase">Optimal</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-amber-500" />
+                    <span className="text-[10px] font-bold text-slate-500 uppercase">Limited</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500" />
+                    <span className="text-[10px] font-bold text-slate-500 uppercase">Danger</span>
                   </div>
                 </div>
               </div>
 
-              {/* Submit Button */}
-              <div className="pt-4 border-t">
-                <Button
-                  onClick={handleProfileSubmit}
-                  className="w-full"
-                  size="lg"
-                  disabled={isUpdating}
-                >
-                  {isUpdating ? (
-                    <>
-                      <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
-                      Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <Activity className="w-4 h-4 mr-2" />
-                      Update Health Analysis
-                    </>
-                  )}
-                </Button>
-                <p className="text-xs text-muted-foreground text-center mt-2">
-                  {isUpdating ?
-                    "Processing quantum health calculations..." :
-                    "Click to recalculate your personalized health recommendations"
-                  }
-                </p>
+              <div className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={healthAnalysis.activityWindows}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff0a" />
+                    <XAxis dataKey="label" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis hide />
+                    <Tooltip
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-[#0f172a] border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-xl">
+                              <p className="text-xs text-slate-500 font-bold uppercase mb-2">Hour: {label}</p>
+                              <div className="flex items-center justify-between gap-8 mb-2">
+                                <span className="text-slate-300 text-sm">Status:</span>
+                                <span className="font-bold uppercase italic text-xs" style={{ color: data.status === 'optimal' ? '#10b981' : data.status === 'limited' ? '#fbbf24' : '#ef4444' }}>
+                                  {data.status}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between gap-8">
+                                <span className="text-slate-300 text-sm">Risk:</span>
+                                <span className="text-white font-bold">{data.riskScore}%</span>
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar dataKey="riskScore" radius={[4, 4, 0, 0]}>
+                      {healthAnalysis.activityWindows.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.status === 'optimal' ? '#10b981' : entry.status === 'limited' ? '#fbbf24' : '#ef4444'}
+                          fillOpacity={0.6}
+                          className="transition-all duration-300 hover:fill-opacity-100"
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </Card>
           </TabsContent>
 
-          <TabsContent value="trends" className="space-y-6">
-            {healthTrend.length > 0 ? (
-              <Card className="glass p-6 relative overflow-hidden">
-                <div className="flex justify-between items-center mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                      <Atom className="w-5 h-5 text-purple-400 animate-spin-slow" />
-                      Quantum Probability Cloud
-                    </h3>
-                    <p className="text-sm text-muted-foreground">Projecting multiple potential timelines</p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    className="border-purple-500/50 hover:bg-purple-500/20 relative overflow-hidden group"
-                    onClick={() => {
-                      setIsOptimizing(true);
-                      // Simulate quantum processing
-                      setTimeout(() => {
-                        const newTrend = healthTrend.map(t => ({
-                          ...t,
-                          riskScore: Math.max(0, t.riskScore * 0.7) // 30% reduction
-                        }));
-                        setHealthTrend(newTrend);
-                        setIsOptimizing(false);
-                      }, 3000);
-                    }}
-                    disabled={isOptimizing}
-                  >
-                    {isOptimizing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Optimizing...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4 mr-2 text-purple-400 group-hover:animate-pulse" />
-                        Optimize Reality
-                      </>
-                    )}
-                    {/* Button glow effect */}
-                    <div className="absolute inset-0 bg-purple-500/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                  </Button>
+          <TabsContent value="lab" className="space-y-6 animate-in zoom-in-95 duration-500">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="bg-white/5 border-white/10 p-6 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-6 opacity-10">
+                  <Atom className="w-32 h-32 text-blue-400 rotate-12" />
                 </div>
+                <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-blue-400" />
+                  Neural Feedback Loop
+                </h3>
+                <div className="space-y-6">
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    Our system predicts bio-cellular responses to pollutants by simulating your unique health profile
+                    against 120+ atmospheric variables. Unlike standard healthcare, we operate in
+                    <span className="text-white"> predictive probability</span>.
+                  </p>
+                  <div className="bg-blue-500/10 p-6 rounded-2xl border border-blue-500/20 italic text-sm text-blue-400">
+                    "Identifying non-linear pulmonary inflammation thresholds across a multi-nodal Hilbert space."
+                  </div>
+                  <ul className="space-y-4">
+                    {[
+                      "H13 Hepa Filtration Recommended: Level 9",
+                      "Antioxidant Load Injection: High Necessity",
+                      "VO2 Max Scaling: Limited Capacity"
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-center gap-3 text-xs text-white/70">
+                        <ChevronRight className="w-3 h-3 text-blue-500" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </Card>
 
-                <div className="h-96 mb-4 relative">
-                  {/* Quantum background effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-pulse pointer-events-none" />
-
-                  {/* Optimization Overlay */}
-                  {isOptimizing && (
-                    <div className="absolute inset-0 z-10 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-300">
-                      <div className="relative">
-                        <Atom className="w-16 h-16 text-purple-500 animate-spin duration-1000" />
-                        <div className="absolute inset-0 w-16 h-16 animate-ping opacity-30">
-                          <Sparkles className="w-16 h-16 text-purple-400" />
-                        </div>
+              <Card className="bg-white/5 border-white/10 p-6">
+                <h3 className="text-lg font-bold text-white mb-6">Pollutant-Biology Interaction</h3>
+                <div className="space-y-4">
+                  {[
+                    { name: 'PM2.5 Penetration', value: airQuality.pm25, impact: 'Alveoli/Bloodstream' },
+                    { name: 'Ozone Irritation', value: airQuality.o3, impact: 'Deep Lung Tissue' },
+                    { name: 'NO2 Concentration', value: airQuality.no2, impact: 'Airway Inflammation' }
+                  ].map((p) => (
+                    <div key={p.name} className="p-4 bg-white/5 rounded-xl border border-white/5">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-bold text-white">{p.name}</span>
+                        <span className="text-xs text-slate-500 italic">{p.impact}</span>
                       </div>
-                      <h3 className="text-xl font-bold mt-4 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent animate-pulse">
-                        Collapsing Wave Functions...
-                      </h3>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        Simulating 1,024 environmental interventions
-                      </p>
-                      <div className="w-64 mt-4 h-1 bg-muted overflow-hidden rounded-full">
-                        <div className="h-full bg-purple-500 animate-progress-indeterminate" />
+                      <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-blue-500 transition-all duration-1000"
+                          style={{ width: `${Math.min(100, p.value * 2)}%`, boxShadow: '0 0 10px #3b82f640' }}
+                        />
                       </div>
                     </div>
-                  )}
+                  ))}
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
 
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={healthTrend} margin={{ top: 5, right: 30, left: 20, bottom: 50 }}>
-                      <defs>
-                        <linearGradient id="colorRisk" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-                          <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
-                        </linearGradient>
-                        <linearGradient id="colorUncertainty" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" className="opacity-20" />
-                      <XAxis
-                        dataKey="hour"
-                        label={{ value: 'Hours ahead', position: 'insideBottom', offset: -5 }}
-                      />
-                      <YAxis label={{ value: 'Risk Probability', angle: -90, position: 'insideLeft' }} />
-                      <Tooltip
-                        contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid #8884d8' }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="riskScore"
-                        stroke="#8884d8"
-                        fillOpacity={1}
-                        fill="url(#colorRisk)"
-                        name="Most Likely Path"
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey={(data) => data.riskScore + 15}
-                        stroke="transparent"
-                        fill="url(#colorUncertainty)"
-                        name="Uncertainty Range"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
+          <TabsContent value="profile" className="space-y-6 animate-in slide-in-from-right-4 duration-500">
+            <Card className="bg-white/5 border-white/10 p-8">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-lg font-bold text-white">Biological Profile Configuration</h3>
+                  <p className="text-sm text-slate-500">Calibrating neural-health weightings</p>
                 </div>
-              </Card>
-            ) : (
-              <Card className="glass p-6">
-                <div className="text-center text-muted-foreground">
-                  <TrendingUp className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Initializing Quantum Probability Field...</p>
+                <Badge variant="outline" className="border-amber-500/30 text-amber-500">ENCRYPTED PKI</Badge>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Biological Age</label>
+                    <Select
+                      value={healthProfile.age.toString()}
+                      onValueChange={(val) => setHealthProfile(prev => ({ ...prev, age: parseInt(val) }))}
+                    >
+                      <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="10">Children (&lt; 18)</SelectItem>
+                        <SelectItem value="25">Adult (18-65)</SelectItem>
+                        <SelectItem value="70">Seniors (65+)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Exertion Profile</label>
+                    <Select
+                      value={healthProfile.activityLevel}
+                      onValueChange={(val: any) => setHealthProfile(prev => ({ ...prev, activityLevel: val }))}
+                    >
+                      <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Sedentary</SelectItem>
+                        <SelectItem value="moderate">Active</SelectItem>
+                        <SelectItem value="high">Athletic</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-              </Card>
-            )}
+
+                <div className="space-y-6">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-4">Neural Health Overlays</label>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div
+                      className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${healthProfile.hasAsthma ? 'bg-amber-500/20 border-amber-500/50 text-amber-500' : 'bg-white/5 border-white/10 text-slate-400'}`}
+                      onClick={() => setHealthProfile(prev => ({ ...prev, hasAsthma: !prev.hasAsthma }))}
+                    >
+                      <span className="text-sm font-bold">Respiratory Sensitivity (Asthma)</span>
+                      {healthProfile.hasAsthma && <CheckCircle size={16} />}
+                    </div>
+                    <div
+                      className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${healthProfile.hasHeartCondition ? 'bg-amber-500/20 border-amber-500/50 text-amber-500' : 'bg-white/5 border-white/10 text-slate-400'}`}
+                      onClick={() => setHealthProfile(prev => ({ ...prev, hasHeartCondition: !prev.hasHeartCondition }))}
+                    >
+                      <span className="text-sm font-bold">Cardiovascular Thresholds</span>
+                      {healthProfile.hasHeartCondition && <CheckCircle size={16} />}
+                    </div>
+                    <div
+                      className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${healthProfile.hasLungCondition ? 'bg-amber-500/20 border-amber-500/50 text-amber-500' : 'bg-white/5 border-white/10 text-slate-400'}`}
+                      onClick={() => setHealthProfile(prev => ({ ...prev, hasLungCondition: !prev.hasLungCondition }))}
+                    >
+                      <span className="text-sm font-bold">Lung Capacity Impairment</span>
+                      {healthProfile.hasLungCondition && <CheckCircle size={16} />}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-12 flex items-center gap-4 p-6 bg-white/5 rounded-2xl border border-white/10">
+                <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
+                  <Shield className="w-6 h-6 text-blue-400" />
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  By updating your profile, you enable our <span className="text-white">Neural Cluster </span> to refine the probabilistic risk weighting for your specific biology. All data is processed locally with zero persistent storage.
+                </p>
+              </div>
+            </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Neural Footer */}
+        <div className="mt-8">
+          <Card className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border-white/10 p-8 text-center relative overflow-hidden">
+            <div className="relative z-10 flex flex-col items-center gap-4">
+              <Info className="text-emerald-400 w-8 h-8 opacity-50" />
+              <h4 className="text-xl font-black text-white italic uppercase tracking-widest">Predictive Health Dominance.</h4>
+              <p className="max-w-xl text-sm text-slate-400">
+                Traditional medicine reacts to symptoms. Our Neural-Health Command center predicts risk thresholds hours before your biology even responds. We don't just tell you the air is bad—we tell you <span className="text-white">exactly how much it affects YOU</span>.
+              </p>
+              <div className="flex gap-4 mt-4">
+                <Badge variant="outline" className="text-emerald-500/50 border-emerald-500/20 uppercase tracking-widest text-[9px] px-3">Bio-Causality</Badge>
+                <Badge variant="outline" className="text-blue-500/50 border-blue-500/20 uppercase tracking-widest text-[9px] px-3">Quantum Prophylaxis</Badge>
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );
