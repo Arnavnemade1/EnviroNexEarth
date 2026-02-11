@@ -437,6 +437,13 @@ export const DataPanel = ({
                 </Button>
               )}
 
+              {/* Separator */}
+              <div className="flex items-center gap-2 mt-4 mb-1">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">Analysis Tools</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+
               {/* Quantum Analytics Button */}
               {onShowQuantumAnalytics && (
                 <Button
