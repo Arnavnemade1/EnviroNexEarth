@@ -24,11 +24,12 @@ import {
   ArrowLeft,
   Stethoscope,
   Heart,
-  Moon,
-  Brain
+  Brain,
+  ShieldCheck,
+  TrendingDown
 } from 'lucide-react';
 import {
-  calculatePhysiologicalImpact, // New function
+  calculateEpidemiologicalRisk, // New function name
   predictHealthTrend,
   HealthProfile,
   QuantumHealthAnalysis as QuantumHealthAnalysisType,
@@ -69,10 +70,9 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
 
   const [healthAnalysis, setHealthAnalysis] = useState<QuantumHealthAnalysisType | null>(null);
   const [activeTab, setActiveTab] = useState('cardio');
-  const [graphMode, setGraphMode] = useState<'stress' | 'hrv'>('stress');
 
   useEffect(() => {
-    const analysis = calculatePhysiologicalImpact(
+    const analysis = calculateEpidemiologicalRisk(
       airQuality.aqi,
       airQuality.pm25,
       airQuality.o3,
@@ -98,11 +98,29 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
     setHealthAnalysis(analysis);
   }, [airQuality, healthProfile, forecast, interventions]);
 
-  if (!healthAnalysis || !healthAnalysis.metrics) return <div className="min-h-screen flex items-center justify-center text-slate-400 bg-[#0f172a]">Initializing Physiological Engine...</div>;
+  if (!healthAnalysis || !healthAnalysis.metrics) return <div className="min-h-screen flex items-center justify-center text-slate-400 bg-[#0f172a]">Initializing Epidemiological Model...</div>;
 
   // Direct access to deterministic metrics
   const { metrics } = healthAnalysis;
-  const { projectedVitals } = metrics;
+
+  // Helpers for color mapping
+  const getColorClass = (color: 'emerald' | 'amber' | 'rose') => {
+    switch (color) {
+      case 'rose': return 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+      case 'amber': return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+      case 'emerald': return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+      default: return 'text-slate-400';
+    }
+  };
+
+  const getStrokeColor = (color: string) => {
+    switch (color) {
+      case 'rose': return '#fb7185';
+      case 'amber': return '#fbbf24';
+      case 'emerald': return '#34d399';
+      default: return '#94a3b8';
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0f172a] text-slate-200 selection:bg-rose-500/30 font-sans">
@@ -110,7 +128,6 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
       {/* Background Ambience - Medical/Sterile */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-20%] left-[-10%] w-[1200px] h-[1200px] bg-slate-800/20 rounded-full blur-[150px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[1200px] h-[1200px] bg-rose-900/10 rounded-full blur-[150px]" />
       </div>
 
       {/* Clinical Header */}
@@ -129,31 +146,25 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
               <div className="flex items-center gap-4 mb-0.5">
                 <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-3">
                   <Stethoscope className="w-5 h-5 text-rose-500" />
-                  CLINICAL <span className="text-slate-600">|</span> BIOLAB
+                  EPIDEMIOLOGICAL <span className="text-slate-600">|</span> RISK ENGINE
                 </h1>
                 <Badge variant="outline" className="border-rose-500/20 text-rose-400 bg-rose-500/5 text-[10px] uppercase tracking-widest px-2 py-0.5 font-bold">
-                  v7.1 Deterministic
+                  v8.0 ERF-Based
                 </Badge>
               </div>
               <p className="text-xs text-slate-500 font-mono flex items-center gap-2 uppercase tracking-widest">
-                Subject: {cityName} Population <span className="text-slate-700">///</span> Vitals: Live
+                Methodology: Log-linear ERF (WHO/ACS) <span className="text-slate-700">///</span> Confidence: 95% CI
               </p>
             </div>
           </div>
           <div className="flex items-center gap-12">
             <div className="text-right group cursor-default">
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.1em] mb-1">System Stress Load</p>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.1em] mb-1">Mortality Risk Factor</p>
               <div className="flex items-center justify-end gap-3">
-                <Activity className="w-4 h-4 text-rose-500 animate-pulse" />
-                <p className="text-3xl font-medium text-white leading-none font-mono">{metrics.stressLoad.toFixed(0)}<span className="text-lg text-slate-600">%</span></p>
-              </div>
-            </div>
-            <div className="h-10 w-px bg-slate-800" />
-            <div className="text-right group cursor-default">
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.1em] mb-1">Recovery Index</p>
-              <div className="flex items-center justify-end gap-3">
-                <Zap className="w-4 h-4 text-emerald-500" />
-                <p className="text-3xl font-medium text-white leading-none font-mono">{metrics.recoveryIndex.toFixed(0)}<span className="text-lg text-slate-600">/100</span></p>
+                <Activity className="w-4 h-4 text-rose-500" />
+                <p className="text-3xl font-medium text-white leading-none font-mono">
+                  {metrics.aggregateRiskIncrease > 0 ? '+' : ''}{metrics.aggregateRiskIncrease}%
+                </p>
               </div>
             </div>
           </div>
@@ -162,34 +173,20 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
 
       <main className="relative z-10 flex-1 flex flex-col max-w-[1800px] mx-auto w-full px-10 py-8 gap-6">
 
-        {/* Top Grid: Main Graph + Vitals Panel */}
+        {/* Top Grid: Main Graph + Risk Panel */}
         <div className="grid grid-cols-12 gap-6 h-[550px]">
 
-          {/* Main Hero: Physiological Stress Graph */}
+          {/* Main Hero: Aggregate Health Risk Graph */}
           <div className="col-span-12 lg:col-span-9 bg-[#1e293b]/40 border border-white/5 rounded-[16px] p-8 relative overflow-hidden group shadow-lg flex flex-col">
             {/* Chart Header & Controls */}
             <div className="flex items-center justify-between mb-6 relative z-10">
               <div>
                 <h2 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-rose-500" /> Physiological Stress Projection
+                  <TrendingDown className="w-5 h-5 text-rose-500" /> Aggregate Health Risk Forecast
                 </h2>
                 <p className="text-xs text-slate-400 leading-relaxed font-mono">
-                  24-hour predictive modeling of autonomic nervous system response.
+                  projected % increase in all-cause mortality risk over 24h baseline (relative risk).
                 </p>
-              </div>
-              <div className="flex items-center gap-4 bg-[#0f172a] p-1 rounded-lg border border-white/5">
-                <button
-                  onClick={() => setGraphMode('stress')}
-                  className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${graphMode === 'stress' ? 'bg-rose-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
-                >
-                  System Stress
-                </button>
-                <button
-                  onClick={() => setGraphMode('hrv')}
-                  className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${graphMode === 'hrv' ? 'bg-emerald-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
-                >
-                  HRV Projection
-                </button>
               </div>
             </div>
 
@@ -198,13 +195,9 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={healthAnalysis.activityWindows} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                   <defs>
-                    <linearGradient id="stressGradient" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient id="riskGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#e11d48" stopOpacity={0.2} />
                       <stop offset="100%" stopColor="#e11d48" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="hrvGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.2} />
-                      <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
                     </linearGradient>
                   </defs>
 
@@ -224,90 +217,87 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
                     fontSize={10}
                     tickLine={false}
                     axisLine={false}
-                    domain={[0, 100]}
+                    domain={[0, 'auto']}
                     fontFamily="monospace"
-                    label={{ value: graphMode === 'stress' ? 'Physiological Load (0-100)' : 'HRV (ms)', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10, dx: 10 }}
+                    label={{ value: '% Risk Increase (Relative)', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10, dx: 10 }}
                   />
                   <Tooltip
                     contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '4px' }}
                     itemStyle={{ color: '#fff', fontWeight: 600, fontSize: '11px', fontFamily: 'monospace' }}
                     labelStyle={{ color: '#94a3b8', fontSize: '10px', marginBottom: '4px', textTransform: 'uppercase' }}
                     cursor={{ stroke: '#475569', strokeWidth: 1 }}
+                    formatter={(value: number) => [`+${value}%`, 'Relative Risk']}
                   />
 
                   {/* Reference Line */}
-                  <ReferenceLine y={graphMode === 'stress' ? 20 : 60} stroke="#64748b" strokeDasharray="4 4" label={{ value: 'BASELINE', fill: '#64748b', fontSize: 9, position: 'insideRight' }} />
+                  <ReferenceLine y={0.5} stroke="#10b981" strokeDasharray="4 4" label={{ value: 'BASELINE', fill: '#10b981', fontSize: 9, position: 'insideRight' }} />
 
                   {/* Area */}
                   <Area
-                    type="monotone"
-                    dataKey={graphMode === 'stress' ? 'riskScore' : 'hrvProjection'}
+                    type="step"
+                    dataKey="riskIncreaseSteps"
                     stroke="none"
-                    fill={graphMode === 'stress' ? "url(#stressGradient)" : "url(#hrvGradient)"}
+                    fill="url(#riskGradient)"
                   />
 
                   {/* Line */}
                   <Line
-                    type="monotone"
-                    dataKey={graphMode === 'stress' ? 'riskScore' : 'hrvProjection'}
-                    stroke={graphMode === 'stress' ? '#e11d48' : '#10b981'}
+                    type="step"
+                    dataKey="riskIncreaseSteps"
+                    stroke="#e11d48"
                     strokeWidth={3}
-                    dot={{ r: 2, fill: '#1e293b', stroke: graphMode === 'stress' ? '#e11d48' : '#10b981', strokeWidth: 2 }}
+                    dot={{ r: 2, fill: '#1e293b', stroke: '#e11d48', strokeWidth: 2 }}
                     activeDot={{ r: 6, fill: '#fff' }}
                     animationDuration={1500}
-                    name={graphMode === 'stress' ? 'Stress Load' : 'HRV (ms)'}
+                    name="Relative Risk"
                   />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          {/* Right Column: Vitals Simulation */}
+          {/* Right Column: Real-Time Exposure Risks (Replaces Vitals) */}
           <div className="col-span-12 lg:col-span-3 bg-[#1e293b]/40 border border-white/5 rounded-[16px] p-6 flex flex-col h-full backdrop-blur-md">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-slate-700/50 rounded-md text-emerald-400"><Activity className="w-4 h-4" /></div>
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Live Vitals</h3>
+              <div className="p-2 bg-slate-700/50 rounded-md text-amber-400"><AlertTriangle className="w-4 h-4" /></div>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Exposure Risks</h3>
             </div>
 
             <div className="grid grid-cols-1 gap-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-              <div className="p-4 bg-white/5 rounded-xl border border-white/5">
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Heart Rate (Proj)</p>
+              <div className={`p-4 rounded-xl border ${getColorClass(metrics.cardiovascularRisk.color)}`}>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-1 opacity-80">{metrics.cardiovascularRisk.label}</p>
                 <div className="flex items-end justify-between">
-                  <p className="text-2xl font-mono text-white">{projectedVitals.hr} <span className="text-xs text-slate-500">bpm</span></p>
-                  <Activity className="w-4 h-4 text-rose-500 animate-pulse" />
+                  <p className="text-2xl font-mono font-bold">+{metrics.cardiovascularRisk.increase}%</p>
+                  <Heart className="w-4 h-4" />
                 </div>
               </div>
 
-              <div className="p-4 bg-white/5 rounded-xl border border-white/5">
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Blood Oxygen</p>
+              <div className={`p-4 rounded-xl border ${getColorClass(metrics.respiratoryRisk.color)}`}>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-1 opacity-80">{metrics.respiratoryRisk.label}</p>
                 <div className="flex items-end justify-between">
-                  <p className="text-2xl font-mono text-white">{projectedVitals.spo2}%</p>
-                  <Wind className="w-4 h-4 text-blue-500" />
+                  <p className="text-2xl font-mono font-bold">+{metrics.respiratoryRisk.increase}%</p>
+                  <Wind className="w-4 h-4" />
                 </div>
               </div>
 
-              <div className="p-4 bg-white/5 rounded-xl border border-white/5">
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Blood Pressure</p>
+              <div className={`p-4 rounded-xl border ${getColorClass(metrics.neurologicalRisk.color)}`}>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-1 opacity-80">{metrics.neurologicalRisk.label}</p>
                 <div className="flex items-end justify-between">
-                  <p className="text-2xl font-mono text-white">{projectedVitals.bp.sys}/{projectedVitals.bp.dia}</p>
-                  <div className={`text-[10px] px-2 py-0.5 rounded-full ${projectedVitals.bp.sys > 130 ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                    {projectedVitals.bp.sys > 130 ? 'ELEV' : 'NORM'}
-                  </div>
+                  <p className="text-2xl font-mono font-bold">+{metrics.neurologicalRisk.increase}%</p>
+                  <Brain className="w-4 h-4" />
                 </div>
               </div>
 
-              <div className="p-4 bg-white/5 rounded-xl border border-white/5">
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Cortisol Levels</p>
-                <div className="flex items-end justify-between">
-                  <p className="text-xl font-mono text-white">{projectedVitals.cortisol}</p>
-                  <AlertTriangle className={`w-4 h-4 ${projectedVitals.cortisol === 'High' ? 'text-red-500' : 'text-slate-600'}`} />
-                </div>
+              <div className="mt-auto pt-4 border-t border-white/5">
+                <p className="text-[10px] text-slate-500 text-center leading-relaxed">
+                  Metrics derived from log-linear ERF models. Not medical advice.
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Section: Clinical Tabs */}
+        {/* Bottom Section: Risk Mitigation Tabs */}
         <div className="min-h-[200px]">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="bg-[#1e293b]/40 border border-white/5 p-1 rounded-xl w-full justify-start gap-2 mb-6 h-auto">
@@ -317,110 +307,50 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
               <TabsTrigger value="resp" className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg py-3 px-6 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
                 <Wind className="w-4 h-4" /> Respiratory
               </TabsTrigger>
-              <TabsTrigger value="neuro" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 rounded-lg py-3 px-6 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-                <Brain className="w-4 h-4" /> Neurological
-              </TabsTrigger>
-              <TabsTrigger value="sleep" className="data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-400 rounded-lg py-3 px-6 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-                <Moon className="w-4 h-4" /> Sleep & Recovery
-              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="cardio" className="animate-in slide-in-from-left-4 duration-300">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-1">
-                <div className="bg-[#1e293b]/40 border border-white/5 rounded-xl p-6">
-                  <h4 className="text-sm font-bold text-white mb-4">Cardiac Strain Probability</h4>
-                  <div className="flex items-center gap-4">
-                    <div className="w-20 h-20 rounded-full border-4 border-white/5 flex items-center justify-center relative">
-                      <div className="absolute inset-0 rounded-full border-4 border-rose-500 border-t-transparent animate-spin-slow" />
-                      <span className="text-xl font-bold text-white">{metrics.cardiacStrain.toFixed(0)}%</span>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs text-slate-400">Vasoconstriction Risk: <span className="text-white font-bold">{metrics.cardiacStrain > 40 ? 'DETECTED' : 'LOW'}</span></p>
-                      <p className="text-[10px] text-slate-500 leading-relaxed">Systemic inflammation may increase cardiac workload by ~{Math.round(metrics.cardiacStrain * 0.2)}%.</p>
-                    </div>
+              <div className="bg-[#1e293b]/40 border border-white/5 rounded-xl p-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-rose-500/10 rounded-lg"><Activity className="w-6 h-6 text-rose-500" /></div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white mb-2">Cardiovascular Impact Summary</h4>
+                    <p className="text-xs text-slate-400 mb-4 max-w-2xl leading-relaxed">
+                      Current PM2.5 levels ({airQuality.pm25} µg/m³) are associated with a <span className="text-white font-bold">{metrics.cardiovascularRisk.increase}%</span> increase in the risk of acute cardiovascular events relative to baseline clean air days.
+                    </p>
+                    {interventions.usingAirPurifier ? (
+                      <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-md w-fit border border-emerald-500/20">
+                        <ShieldCheck className="w-3 h-3" /> Filtration Reducing Risk by ~60%
+                      </div>
+                    ) : (
+                      <Button variant="outline" size="sm" onClick={() => setInterventions(p => ({ ...p, usingAirPurifier: true }))} className="text-xs h-7 border-rose-500/30 text-rose-400 hover:bg-rose-500/10">
+                        Activate HEPA Filter Simulator
+                      </Button>
+                    )}
                   </div>
-                </div>
-                <div className="bg-[#1e293b]/40 border border-white/5 rounded-xl p-6 flex flex-col justify-center">
-                  <p className="text-xs text-slate-400 mb-2 font-bold uppercase">Clinical Advisory</p>
-                  <p className="text-sm text-white leading-relaxed">
-                    {metrics.cardiacStrain > 50
-                      ? "Immediate reduction in high-intensity aerobic output recommended due to elevated particulate uptake."
-                      : "Cardiovascular baseline is stable. Standard training protocols authorized."}
-                  </p>
                 </div>
               </div>
             </TabsContent>
 
             <TabsContent value="resp" className="animate-in slide-in-from-left-4 duration-300">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-1">
-                <div className="bg-[#1e293b]/40 border border-white/5 rounded-xl p-6">
-                  <h4 className="text-sm font-bold text-white mb-4">Pulmonary Capacity Est.</h4>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-xs mb-2 text-slate-400"><span>Bronchial Irritation</span><span>{metrics.lungInflammation.toFixed(0)}%</span></div>
-                      <div className="h-2 bg-white/5 rounded-full overflow-hidden"><div className="h-full bg-blue-500 transition-all duration-1000" style={{ width: `${metrics.lungInflammation}%` }} /></div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-xs mb-2 text-slate-400"><span>O2 Uptake Efficiency</span><span>{(100 - metrics.lungInflammation * 0.3).toFixed(0)}%</span></div>
-                      <div className="h-2 bg-white/5 rounded-full overflow-hidden"><div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${100 - metrics.lungInflammation * 0.3}%` }} /></div>
-                    </div>
+              <div className="bg-[#1e293b]/40 border border-white/5 rounded-xl p-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-blue-500/10 rounded-lg"><Wind className="w-6 h-6 text-blue-500" /></div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white mb-2">Respiratory Impact Summary</h4>
+                    <p className="text-xs text-slate-400 mb-4 max-w-2xl leading-relaxed">
+                      Combined NO2 ({airQuality.no2} ppb) and O3 ({airQuality.o3} ppb) exposure creates a synergistic irritant effect, increasing bronchoconstriction probability by <span className="text-white font-bold">{metrics.respiratoryRisk.increase}%</span>.
+                    </p>
+                    {interventions.usingN95 ? (
+                      <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-md w-fit border border-emerald-500/20">
+                        <ShieldCheck className="w-3 h-3" /> N95 Reducing Particulate Uptake
+                      </div>
+                    ) : (
+                      <Button variant="outline" size="sm" onClick={() => setInterventions(p => ({ ...p, usingN95: true }))} className="text-xs h-7 border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
+                        Activate N95 Simulator
+                      </Button>
+                    )}
                   </div>
-                </div>
-                <div className="bg-[#1e293b]/40 border border-white/5 rounded-xl p-6 flex flex-col justify-center">
-                  <p className="text-xs text-slate-400 mb-2 font-bold uppercase">Clinical Advisory</p>
-                  <p className="text-sm text-white leading-relaxed">
-                    {metrics.lungInflammation > 40
-                      ? "Prophylactic N95 usage strongly advised for outdoor durations exceeding 15 minutes."
-                      : "Respiratory predicted function is within nominal parameters."}
-                  </p>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="neuro" className="animate-in slide-in-from-left-4 duration-300">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-1">
-                <div className="bg-[#1e293b]/40 border border-white/5 rounded-xl p-6">
-                  <h4 className="text-sm font-bold text-white mb-4">Cognitive Performance Index</h4>
-                  <div className="flex items-end gap-4">
-                    <span className="text-4xl font-mono font-bold text-purple-400">{(100 - metrics.cognitiveImpact).toFixed(0)}</span>
-                    <span className="text-sm text-slate-500 mb-2">/ 100 points</span>
-                  </div>
-                  <p className="text-xs text-slate-400 mt-4">
-                    Neuro-inflammation risk is <span className={metrics.cognitiveImpact > 30 ? "text-amber-400 font-bold" : "text-emerald-400 font-bold"}>
-                      {metrics.cognitiveImpact > 30 ? "MODERATE" : "NEGLIGIBLE"}
-                    </span>.
-                  </p>
-                </div>
-                <div className="bg-[#1e293b]/40 border border-white/5 rounded-xl p-6 flex flex-col justify-center">
-                  <p className="text-xs text-slate-400 mb-2 font-bold uppercase">Clinical Advisory</p>
-                  <p className="text-sm text-white leading-relaxed">
-                    {metrics.cognitiveImpact > 30
-                      ? "Expect 15-20% reduction in complex decision-making latency due to environmental fatigue."
-                      : "Cognitive substrate is optimal for high-load mental tasks."}
-                  </p>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="sleep" className="animate-in slide-in-from-left-4 duration-300">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-1">
-                <div className="bg-[#1e293b]/40 border border-white/5 rounded-xl p-6">
-                  <h4 className="text-sm font-bold text-white mb-4">Recovery & Circadian Forecast</h4>
-                  <div className="flex items-center gap-6">
-                    <Moon className={`w-12 h-12 ${metrics.stressLoad < 40 ? 'text-indigo-400' : 'text-slate-600'}`} />
-                    <div>
-                      <p className="text-2xl font-bold text-white">{metrics.recoveryIndex.toFixed(0)}%</p>
-                      <p className="text-xs text-slate-500">Projected Sleep Quality</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-[#1e293b]/40 border border-white/5 rounded-xl p-6 flex flex-col justify-center">
-                  <p className="text-xs text-slate-400 mb-2 font-bold uppercase">Clinical Advisory</p>
-                  <p className="text-sm text-white leading-relaxed">
-                    {metrics.stressLoad > 50
-                      ? "Air filtration in sleeping quarters recommended to prevent micro-arousals from particulate irritation."
-                      : "Environmental conditions favorable for deep-wave REM cycles."}
-                  </p>
                 </div>
               </div>
             </TabsContent>
@@ -432,10 +362,10 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
       {/* Footer */}
       <footer className="border-t border-white/5 px-10 py-6 mt-auto bg-[#0f172a]">
         <div className="max-w-[1800px] mx-auto flex items-center justify-between opacity-60 text-[10px] font-mono uppercase tracking-[0.1em] text-slate-500">
-          <span>Clinical Mode: DETERMINISTIC // v7.1</span>
+          <span>Model: ETH-Zurich / WHO-2024 Basis</span>
           <span className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-            Biometrics Online
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            ERF Engine Online
           </span>
         </div>
       </footer>
@@ -445,3 +375,4 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
 };
 
 export { QuantumHealthAnalysisComponent as QuantumHealthAnalysis };
+

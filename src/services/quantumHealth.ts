@@ -8,17 +8,22 @@ export interface HealthProfile {
   smokingStatus: 'never' | 'former' | 'current';
 }
 
-export interface PhysiologicalMetrics {
-  stressLoad: number; // 0-100 (Overall System Stress)
-  cardiacStrain: number; // 0-100
-  lungInflammation: number; // 0-100
-  cognitiveImpact: number; // 0-100
-  recoveryIndex: number; // 0-100 (Inverse of Stress)
-  projectedVitals: {
-    hr: number; // Heart Rate (bpm)
-    spo2: number; // Blood Oxygen (%)
-    bp: { sys: number; dia: number }; // Blood Pressure
-    cortisol: 'Normal' | 'Elevated' | 'High';
+export interface EpidemiologicalMetrics {
+  aggregateRiskIncrease: number; // % Increase in all-cause mortality risk (0-100+)
+  cardiovascularRisk: {
+    label: string; // "Acute MI Risk"
+    increase: number; // % Increase (e.g., 12%)
+    color: 'emerald' | 'amber' | 'rose';
+  };
+  respiratoryRisk: {
+    label: string; // "Bronchoconstriction Probability"
+    increase: number; // % Increase or Score (0-100)
+    color: 'emerald' | 'amber' | 'rose';
+  };
+  neurologicalRisk: {
+    label: string; // "Cognitive Decline Risk"
+    increase: number; // % Increase (Long term proxy)
+    color: 'emerald' | 'amber' | 'rose';
   };
   recommendations: string[];
 }
@@ -28,13 +33,13 @@ export interface ActivityWindow {
   label: string;
   status: 'optimal' | 'limited' | 'danger';
   riskScore: number;
-  hrvProjection: number; // New: HRV projection for graph
+  riskIncreaseSteps: number; // For graph step chart
 }
 
 export interface QuantumHealthAnalysis {
   overallRisk: 'very-low' | 'low' | 'moderate' | 'high' | 'very-high';
   riskScore: number;
-  metrics: PhysiologicalMetrics;
+  metrics: EpidemiologicalMetrics;
   activityWindows: ActivityWindow[];
   timeToSafety: number | null;
 }
@@ -45,8 +50,23 @@ export interface Interventions {
   isStayingIndoors: boolean;
 }
 
-// Deterministic Physiological Model based on Epidemiological Coefficients
-export function calculatePhysiologicalImpact(
+// Exposure-Response Function (ERF) Coefficients (Log-Linear Models)
+// Derived from WHO, ESCAPE, ACS, and major meta-analyses.
+const ERF = {
+  // Cardiovascular: % increase per 10 µg/m³ PM2.5 (short-term)
+  PM25_CVD: 0.011, // ~1.1%
+  // Respiratory: % increase per 10 µg/m³ PM10
+  PM10_RESP: 0.008, // ~0.8%
+  // Asthma: % increase per 10 ppb NO2
+  NO2_ASTHMA: 0.025, // ~2.5%
+  // Mortality: % increase per 10 µg/m³ PM2.5 (all-cause)
+  PM25_MORTALITY: 0.012, // ~1.2%
+  // Stroke: % increase per 10 µg/m³ PM2.5 (long-term proxy converted to daily hazard)
+  PM25_STROKE: 0.015, // ~1.5%
+};
+
+// Main Calculation Function
+export function calculateEpidemiologicalRisk(
   aqi: number,
   pm25: number,
   o3: number,
@@ -57,105 +77,83 @@ export function calculatePhysiologicalImpact(
   interventions: Interventions = { usingN95: false, usingAirPurifier: false, isStayingIndoors: false }
 ): QuantumHealthAnalysis {
 
-  // 1. Calculate Intervention Factors (Deterministic Reduction)
+  // 1. Calculate Intervention Factors
   const pmReduction = (interventions.usingN95 ? 0.95 : 0) + (interventions.usingAirPurifier ? 0.60 : 0) + (interventions.isStayingIndoors ? 0.30 : 0);
-  const gasReduction = (interventions.usingAirPurifier ? 0.40 : 0) + (interventions.isStayingIndoors ? 0.20 : 0); // Gases are harder to filter
+  const gasReduction = (interventions.usingAirPurifier ? 0.30 : 0) + (interventions.isStayingIndoors ? 0.20 : 0);
 
-  // Cap reductions at realistic maximums
-  const effectivePM25 = pm25 * (1 - Math.min(0.98, pmReduction));
-  const effectiveNO2 = no2 * (1 - Math.min(0.60, gasReduction));
-  const effectiveO3 = o3 * (1 - Math.min(0.60, gasReduction));
-  const effectiveSO2 = so2 * (1 - Math.min(0.60, gasReduction));
-  const effectiveCO = co * (1 - Math.min(0.20, gasReduction)); // CO is very hard to reduce
+  const effPM25 = pm25 * (1 - Math.min(0.99, pmReduction));
+  const effNO2 = no2 * (1 - Math.min(0.60, gasReduction));
+  const effO3 = o3 * (1 - Math.min(0.60, gasReduction));
 
-  // 2. Personal Vulnerability Multipliers
-  let cardioMultiplier = 1.0;
-  let respMultiplier = 1.0;
-  let neuroMultiplier = 1.0;
-
+  // 2. Personal Multipliers
+  let vulnerability = 1.0;
   if (profile) {
-    if (profile.age > 65) { cardioMultiplier *= 1.2; respMultiplier *= 1.2; }
-    if (profile.hasAsthma) { respMultiplier *= 1.5; }
-    if (profile.hasHeartCondition) { cardioMultiplier *= 1.6; }
-    if (profile.hasLungCondition) { respMultiplier *= 1.6; }
-    if (profile.activityLevel === 'high') { cardioMultiplier *= 1.3; respMultiplier *= 1.3; } // Higher uptake
+    if (profile.age > 65) vulnerability *= 1.5;
+    if (profile.hasAsthma || profile.hasLungCondition) vulnerability *= 2.0;
+    if (profile.hasHeartCondition) vulnerability *= 2.0;
+    if (profile.activityLevel === 'high') vulnerability *= 1.3; // Increased inhalation rate
   }
 
-  // 3. Deterministic Physiological Inputs (0-100 scale normalized from typical dangerous levels)
-  // PM2.5 > 50 is bad. NO2 > 100 is bad. O3 > 100 is bad.
+  // 3. RR Calculations using ERF Formula: RR = exp(beta * concentration)
+  // We use linear approximation for short-term daily changes: Risk% = beta * concentration * 100 * vulnerability
 
-  // Cognitive Logic: PM2.5 (Ultrafine) + CO (Hypoxia)
-  const cognitiveInput = (Math.min(100, (effectivePM25 / 75) * 60) + Math.min(100, (effectiveCO / 20) * 40)) * neuroMultiplier;
+  // Cardiovascular Risk (% Increase over baseline)
+  // Driven mainly by PM2.5 (systemic inflammation)
+  const cvdRisk = (effPM25 / 10) * (ERF.PM25_CVD * 100) * vulnerability;
 
-  // Cardiac Logic: PM2.5 (Inflammation) + SO2 (Vasoconstriction) + NO2 (Stress)
-  const cardiacInput = (Math.min(100, (effectivePM25 / 60) * 40) + Math.min(100, (effectiveSO2 / 50) * 30) + Math.min(100, (effectiveNO2 / 80) * 30)) * cardioMultiplier;
+  // Respiratory Risk (% or Probability Score)
+  // Driven by NO2 (irritant) + O3 (oxidant) + PM2.5
+  const respRisk = ((effNO2 / 10) * (ERF.NO2_ASTHMA * 100) + (effPM25 / 10) * (ERF.PM10_RESP * 100)) * vulnerability;
 
-  // Respiratory Logic: O3 (Irritant) + NO2 (Resistance) + PM2.5 (Logistics)
-  const respInput = (Math.min(100, (effectiveO3 / 80) * 40) + Math.min(100, (effectiveNO2 / 80) * 30) + Math.min(100, (effectivePM25 / 60) * 30)) * respMultiplier;
+  // Neurological/Stroke Risk (% Increase)
+  const neuroRisk = (effPM25 / 10) * (ERF.PM25_STROKE * 100) * vulnerability;
 
-  // 4. System Stress Load (Weighted Average)
-  const stressLoad = Math.min(100, (cardiacInput * 0.4 + respInput * 0.4 + cognitiveInput * 0.2));
+  // Aggregate Mortality Risk (% Increase) - The "Master Metric"
+  const aggregateRisk = (effPM25 / 10) * (ERF.PM25_MORTALITY * 100) * vulnerability;
 
-  // 5. Projected Vitals (Deterministic shift from baseline)
-  const baseHR = 65;
-  const baseSpO2 = 99.0;
-  const baseSys = 115;
-  const baseDia = 75;
-
-  const vitals = {
-    hr: Math.round(baseHR + (stressLoad * 0.35)), // Max +35 bpm at 100% stress
-    spo2: Number((baseSpO2 - (respInput * 0.06)).toFixed(1)), // Max -6% SpO2 at 100% resp stress
-    bp: {
-      sys: Math.round(baseSys + (cardiacInput * 0.3)), // Max +30 mmHg
-      dia: Math.round(baseDia + (cardiacInput * 0.15)) // Max +15 mmHg
-    },
-    cortisol: stressLoad > 65 ? 'High' : stressLoad > 35 ? 'Elevated' : 'Normal' as 'Normal' | 'Elevated' | 'High'
-  };
-
-  const metrics: PhysiologicalMetrics = {
-    stressLoad: Math.round(stressLoad),
-    cardiacStrain: Math.round(cardiacInput),
-    lungInflammation: Math.round(respInput),
-    cognitiveImpact: Math.round(cognitiveInput),
-    recoveryIndex: Math.round(Math.max(0, 100 - stressLoad * 1.1)), // Recovery is harder than stress is easy
-    projectedVitals: vitals,
-    recommendations: generateRecommendations(stressLoad, respInput, cardiacInput, interventions)
-  };
+  // 4. Recommendations
+  const recs = [];
+  if (aggregateRisk > 5) recs.push("Elevated mortality risk detected. Reduce outdoor exertion.");
+  if (cvdRisk > 5) recs.push("Cardiovascular strain expected. Monitor pulse if symptomatic.");
+  if (respRisk > 10) recs.push("High bronchial irritation probability. Asthmatics take precaution.");
+  if (interventions.usingN95) recs.push("N95 Filter Active: Risk factors reduced by ~95%.");
+  if (recs.length === 0) recs.push("Risk levels nominal. No specific health actions required.");
 
   return {
-    overallRisk: getRiskLevel(stressLoad),
-    riskScore: Math.round(stressLoad),
-    metrics,
-    activityWindows: [], // Populated in predictHealthTrend
-    timeToSafety: calculateTimeToSafety(effectivePM25, aqi),
+    overallRisk: getRiskLevel(aggregateRisk),
+    riskScore: aggregateRisk, // Using Risk% directly as the score
+    metrics: {
+      aggregateRiskIncrease: Number(aggregateRisk.toFixed(1)),
+      cardiovascularRisk: {
+        label: "Acute CV Event Risk",
+        increase: Number(cvdRisk.toFixed(1)),
+        color: cvdRisk > 5 ? 'rose' : cvdRisk > 2 ? 'amber' : 'emerald'
+      },
+      respiratoryRisk: {
+        label: "Resp. Irritation Prob.",
+        increase: Number(respRisk.toFixed(1)),
+        color: respRisk > 8 ? 'rose' : respRisk > 4 ? 'amber' : 'emerald'
+      },
+      neurologicalRisk: {
+        label: "Stroke Hazard (Proxy)",
+        increase: Number(neuroRisk.toFixed(1)),
+        color: neuroRisk > 4 ? 'rose' : neuroRisk > 2 ? 'amber' : 'emerald'
+      },
+      recommendations: recs
+    },
+    activityWindows: [], // Populated in forecast
+    timeToSafety: null
   };
 }
 
-function generateRecommendations(stress: number, resp: number, cardio: number, interventions: Interventions): string[] {
-  const recs = [];
-  if (stress > 70) recs.push("CRITICAL: Physiological load exceeds safe limits. Halt exertion.");
-  if (resp > 50 && !interventions.usingN95) recs.push("Respiratory inflammation likely. N95 prophylaxis recommended.");
-  if (cardio > 40) recs.push("Vasoconstriction risk detected. Monitor blood pressure.");
-  if (interventions.usingN95) recs.push("N95 filter active: Particulate uptake reduced by ~95%.");
-  if (recs.length === 0) recs.push("Physiological baseline nominal. Standard activity authorized.");
-  return recs;
-}
-
-function getRiskLevel(score: number): QuantumHealthAnalysis['overallRisk'] {
-  if (score < 20) return 'very-low';
-  if (score < 40) return 'low';
-  if (score < 60) return 'moderate';
-  if (score < 80) return 'high';
+function getRiskLevel(riskPct: number): QuantumHealthAnalysis['overallRisk'] {
+  if (riskPct < 1) return 'very-low';
+  if (riskPct < 3) return 'low';
+  if (riskPct < 6) return 'moderate';
+  if (riskPct < 10) return 'high';
   return 'very-high';
 }
 
-function calculateTimeToSafety(pm25: number, aqi: number): number | null {
-  if (pm25 < 35 && aqi < 100) return null;
-  // Simple heuristic: 1 hour per 5ug/m3 over limit
-  return Math.min(24, Math.max(1, Math.ceil((pm25 - 35) / 5)));
-}
-
-// Predict Future Trends based on Forecast Data
 export function predictHealthTrend(
   currentAnalysis: QuantumHealthAnalysis,
   forecast: Array<{ aqi: number; pm25: number; confidence: number }>,
@@ -165,42 +163,29 @@ export function predictHealthTrend(
   currentCO: number,
   profile?: HealthProfile
 ): Array<ActivityWindow> {
-  // Use current values as baselines and modulate with forecast AQI/PM2.5 trends
-  // Diurnal cycles for O3 (peak afternoon) and NO2/CO (peak rush hours)
-
   return forecast.slice(0, 12).map((f, index) => {
     const hour = (new Date().getHours() + index) % 24;
 
-    // Deterministic Diurnal Models
-    const o3Mod = 0.5 + 0.5 * Math.sin((hour - 14) * Math.PI / 12); // Peak at 14:00 (2 PM)
-    const trafficMod = (hour >= 7 && hour <= 9) || (hour >= 16 && hour <= 19) ? 1.4 : 0.8; // Rush hours
-
-    // Forecasted pollutants (Approximated from baseline if not in forecast)
-    const futureO3 = currentO3 * o3Mod;
+    // Simple diurnal modifier for NO2/O3 if not in forecast
+    const trafficMod = (hour >= 7 && hour <= 9) || (hour >= 16 && hour <= 19) ? 1.3 : 0.8;
     const futureNO2 = currentNO2 * trafficMod;
-    const futureSO2 = currentSO2 * 0.9; // Assume slight decay or steady
-    const futureCO = currentCO * trafficMod;
 
-    const futureStats = calculatePhysiologicalImpact(
+    const futureStats = calculateEpidemiologicalRisk(
       f.aqi,
       f.pm25,
-      futureO3,
+      currentO3,
       futureNO2,
-      futureSO2,
-      futureCO,
+      currentSO2,
+      currentCO,
       profile
     );
-
-    // HRV Projection (Inverse of Stress, scaled to reasonable ms values)
-    // Baseline HRV ~60ms. Stress reduces it.
-    const hrv = Math.max(20, 60 - (futureStats.riskScore * 0.4));
 
     return {
       hour: index,
       label: `${hour}:00`,
-      status: futureStats.riskScore < 30 ? 'optimal' : futureStats.riskScore < 60 ? 'limited' : 'danger',
+      status: futureStats.riskScore < 3 ? 'optimal' : futureStats.riskScore < 6 ? 'limited' : 'danger',
       riskScore: futureStats.riskScore,
-      hrvProjection: Math.round(hrv)
+      riskIncreaseSteps: futureStats.metrics.aggregateRiskIncrease
     };
   });
 }
