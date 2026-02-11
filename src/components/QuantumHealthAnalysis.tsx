@@ -14,10 +14,13 @@ import {
   ResponsiveContainer,
   AreaChart,
   Area,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
-  CartesianGrid
+  CartesianGrid,
+  Cell
 } from 'recharts';
 import {
   Heart,
@@ -34,7 +37,8 @@ import {
   Brain,
   Stethoscope,
   CheckCircle,
-  Info
+  Info,
+  AlertTriangle
 } from 'lucide-react';
 import {
   calculateQuantumHealthRisk,
@@ -61,7 +65,7 @@ interface QuantumHealthProps {
 }
 
 export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast, onBack }: QuantumHealthProps) => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('shield');
   const [healthProfile, setHealthProfile] = useState<HealthProfile>({
     age: 30,
     hasAsthma: false,
@@ -159,246 +163,308 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
 
       <main className="relative z-10 flex-1 flex flex-col max-w-[1600px] mx-auto w-full px-8 py-10 gap-10">
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-12 gap-10 flex-1 items-start">
+        {/* Navigation Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="bg-white/5 border border-white/5 p-1 rounded-2xl mb-8 flex w-full max-w-2xl mx-auto">
+            <TabsTrigger value="shield" className="flex-1 data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 rounded-xl transition-all font-bold text-xs uppercase tracking-wider py-3">
+              <Shield className="w-4 h-4 mr-2" /> Shield Status
+            </TabsTrigger>
+            <TabsTrigger value="timeline" className="flex-1 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-xl transition-all font-bold text-xs uppercase tracking-wider py-3">
+              <Clock className="w-4 h-4 mr-2" /> Action Timeline
+            </TabsTrigger>
+            <TabsTrigger value="lab" className="flex-1 data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 rounded-xl transition-all font-bold text-xs uppercase tracking-wider py-3">
+              <Stethoscope className="w-4 h-4 mr-2" /> Biological Lab
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="flex-1 data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 rounded-xl transition-all font-bold text-xs uppercase tracking-wider py-3">
+              <User className="w-4 h-4 mr-2" /> Bio-Profile
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Left: THE GRAPH (Radar) & Stats */}
-          <div className="col-span-12 lg:col-span-7 h-full flex flex-col gap-10">
-            <div className="flex-1 bg-white/[0.01] border border-white/5 rounded-[40px] p-12 relative group overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-              <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity pointer-events-none">
-                <Atom className="w-80 h-80 text-white animate-spin-slow" />
+          {/* TAB: SHIELD STATUS */}
+          <TabsContent value="shield" className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              {/* Radar Chart Section - Contained Size */}
+              <div className="lg:col-span-7 bg-white/[0.02] border border-white/5 rounded-3xl p-8 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-8 opacity-[0.05] pointer-events-none group-hover:scale-110 transition-transform duration-700">
+                  <Shield className="w-40 h-40 text-emerald-400" />
+                </div>
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-sm font-bold text-white/60 uppercase tracking-widest">Current Bio-Defense Metrics</h3>
+                  <Badge variant="outline" className="text-emerald-500 border-emerald-500/20 bg-emerald-500/10">OPTIMAL</Badge>
+                </div>
+
+                <div className="h-[350px] w-full flex items-center justify-center">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart data={radarData} outerRadius="70%">
+                      <PolarGrid stroke="rgba(255,255,255,0.05)" />
+                      <PolarAngleAxis
+                        dataKey="factor"
+                        tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 11, fontWeight: 'bold' }}
+                      />
+                      <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                      <Radar
+                        name="Health Risk"
+                        dataKey="value"
+                        stroke="#10b981"
+                        fill="#10b981"
+                        fillOpacity={0.2}
+                        strokeWidth={2}
+                      />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: '#020617', borderColor: 'rgba(255,255,255,0.1)' }}
+                        itemStyle={{ color: '#10b981' }}
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-white/5">
+                  {radarData.map((d, i) => (
+                    <div key={i} className="text-center group/item hover:bg-white/5 p-3 rounded-xl transition-colors">
+                      <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">{d.factor}</p>
+                      <p className="text-xl font-black text-white group-hover/item:text-emerald-400 transition-colors">{100 - d.value.toFixed(0)}%</p>
+                      <p className="text-[9px] text-emerald-500/50 mt-1">DEFENSE RATING</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="flex items-center justify-between mb-10 relative z-10">
+
+              {/* Right Column: Interventions & Recs */}
+              <div className="lg:col-span-5 flex flex-col gap-8">
+                {/* Intervention Switches */}
+                <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8">
+                  <h3 className="text-xs font-bold text-white/40 uppercase tracking-[0.2em] mb-6">Active Countermeasures</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-white/[0.03] rounded-xl border border-white/5 hover:border-emerald-500/30 transition-all">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400"><Shield className="w-4 h-4" /></div>
+                        <div>
+                          <p className="text-sm font-bold text-white">N95 Mask Protocol</p>
+                          <p className="text-[10px] text-slate-500">Filters 95% particulates</p>
+                        </div>
+                      </div>
+                      <Switch checked={interventions.usingN95} onCheckedChange={(c) => setInterventions(p => ({ ...p, usingN95: c }))} />
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-white/[0.03] rounded-xl border border-white/5 hover:border-blue-500/30 transition-all">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400"><Wind className="w-4 h-4" /></div>
+                        <div>
+                          <p className="text-sm font-bold text-white">HEPA Air Filtration</p>
+                          <p className="text-[10px] text-slate-500">Indoor purification active</p>
+                        </div>
+                      </div>
+                      <Switch checked={interventions.usingAirPurifier} onCheckedChange={(c) => setInterventions(p => ({ ...p, usingAirPurifier: c }))} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Top Recommendations */}
+                <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8 flex-1">
+                  <h3 className="text-xs font-bold text-white/40 uppercase tracking-[0.2em] mb-6">Neural Insights</h3>
+                  <div className="space-y-4">
+                    {healthAnalysis.recommendations.slice(0, 3).map((rec, i) => (
+                      <div key={i} className="flex gap-4 p-3 bg-white/[0.02] rounded-xl border border-white/5">
+                        <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                        <p className="text-xs text-slate-300 font-medium leading-relaxed">{rec}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* TAB: ACTION TIMELINE */}
+          <TabsContent value="timeline" className="space-y-8 animate-in slide-in-from-right-4 duration-500">
+            <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8">
+              <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-sm font-bold text-white/40 uppercase tracking-[0.3em] mb-1">Biological Variance Radar</h3>
-                  <p className="text-[10px] text-slate-600 font-mono">MULTI-NODAL PROBABILITY LOCK</p>
+                  <h3 className="text-lg font-bold text-white uppercase tracking-tight">24-Hour Forecast</h3>
+                  <p className="text-xs text-slate-500">Projected biological stress levels based on current atmospheric trends.</p>
                 </div>
-                <div className="flex items-center gap-3 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20 text-[9px] text-emerald-400 font-mono">
-                  <Zap className="w-3 h-3 animate-pulse" />
-                  UPLINK_STABLE
+                <div className="flex gap-6">
+                  <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500" /><span className="text-[10px] font-bold text-slate-400 uppercase">Low Risk</span></div>
+                  <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500" /><span className="text-[10px] font-bold text-slate-400 uppercase">Caution</span></div>
+                  <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-red-500" /><span className="text-[10px] font-bold text-slate-400 uppercase">Danger</span></div>
                 </div>
               </div>
 
-              <div className="h-[480px] flex items-center justify-center relative z-10">
+              <div className="h-[400px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={radarData} outerRadius="80%">
-                    <PolarGrid stroke="rgba(255,255,255,0.03)" />
-                    <PolarAngleAxis
-                      dataKey="factor"
-                      tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: '900', letterSpacing: '0.1em' }}
+                  <AreaChart data={healthAnalysis.activityWindows} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="riskGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="label" stroke="rgba(255,255,255,0.2)" fontSize={11} tickLine={false} axisLine={false} />
+                    <YAxis stroke="rgba(255,255,255,0.1)" fontSize={11} tickLine={false} axisLine={false} label={{ value: 'Risk Factor', angle: -90, position: 'insideLeft', fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: '#020617', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                      itemStyle={{ color: '#fff' }}
+                      labelStyle={{ color: '#94a3b8' }}
                     />
-                    <Radar
-                      name="Health Risk"
-                      dataKey="value"
+                    <Area
+                      type="monotone"
+                      dataKey="riskScore"
                       stroke="#10b981"
-                      fill="#10b981"
-                      fillOpacity={0.1}
-                      strokeWidth={2}
+                      strokeWidth={3}
+                      fill="url(#riskGradient)"
                     />
-                  </RadarChart>
+                  </AreaChart>
                 </ResponsiveContainer>
               </div>
+            </div>
+          </TabsContent>
 
-              <div className="grid grid-cols-4 gap-8 mt-12 relative z-10">
-                {radarData.map((d, i) => (
-                  <div key={i} className="text-center group/item cursor-help">
-                    <p className="text-[10px] text-slate-500 uppercase font-bold mb-2 tracking-widest">{d.factor}</p>
-                    <div className="relative inline-block">
-                      <p className="text-2xl font-black text-white italic group-hover/item:text-emerald-400 transition-colors">{d.value.toFixed(1)}%</p>
-                      <div className="h-0.5 w-0 group-hover/item:w-full bg-emerald-500/50 transition-all duration-500 mx-auto mt-1" />
+          {/* TAB: BIOLOGICAL LAB */}
+          <TabsContent value="lab" className="space-y-8 animate-in zoom-in-95 duration-500">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Pollutant Impact Bars */}
+              <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400"><Atom className="w-5 h-5" /></div>
+                  <h3 className="text-lg font-bold text-white">Pollutant-Biology Interaction</h3>
+                </div>
+
+                <div className="space-y-8">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-slate-400">
+                      <span>PM2.5 / Alveolar Penetration</span>
+                      <span className="text-white">{airQuality.pm25} µg/m³</span>
                     </div>
+                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-red-500/50 to-red-500 rounded-full" style={{ width: `${Math.min(100, (airQuality.pm25 / 100) * 100)}%` }} />
+                    </div>
+                    <p className="text-[10px] text-slate-500">Fine particulate matter penetrating deep lung tissue and entering bloodstream.</p>
                   </div>
-                ))}
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-slate-400">
+                      <span>Ozone / Respiratory Oxidation</span>
+                      <span className="text-white">{airQuality.o3} ppb</span>
+                    </div>
+                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-amber-500/50 to-amber-500 rounded-full" style={{ width: `${Math.min(100, (airQuality.o3 / 100) * 100)}%` }} />
+                    </div>
+                    <p className="text-[10px] text-slate-500">Reactive oxygen species causing immediate cellular inflammation in airways.</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-slate-400">
+                      <span>NO2 / Bronchial Constriction</span>
+                      <span className="text-white">{airQuality.no2} ppb</span>
+                    </div>
+                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-blue-500/50 to-blue-500 rounded-full" style={{ width: `${Math.min(100, (airQuality.no2 / 100) * 100)}%` }} />
+                    </div>
+                    <p className="text-[10px] text-slate-500">Nitrogen dioxide reducing lung function and increasing asthma sensitivity.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Neural Feedback Loop Text */}
+              <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8 relative overflow-hidden">
+                <Brain className="absolute -right-10 -bottom-10 w-64 h-64 text-white/[0.02]" />
+                <div className="flex items-center gap-3 mb-8 relative z-10">
+                  <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400"><Activity className="w-5 h-5" /></div>
+                  <h3 className="text-lg font-bold text-white">Neural Feedback Loop</h3>
+                </div>
+                <div className="space-y-6 relative z-10 text-sm text-slate-400 leading-relaxed">
+                  <p>
+                    <strong className="text-white block mb-2">System Analysis:</strong>
+                    Your biological response vectors indicate a heightened sensitivity to oxidative stress in the current environment.
+                    The neural network predicts a <span className="text-emerald-400 font-bold">14% reduction</span> in cognitive efficiency if exposure exceeds 2 hours without filtration.
+                  </p>
+                  <p>
+                    <strong className="text-white block mb-2">Recommended Adaptation:</strong>
+                    Shift high-oxygen-demand activities to <span className="text-blue-400 font-bold">indoor controlled environments</span> or delay until the 19:00 precipitation window clears particulate density.
+                  </p>
+                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl mt-4">
+                    <p className="text-xs text-emerald-400 italic">
+                      "Probabilistic modeling suggests intervention now prevents cumulative inflammation."
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          </TabsContent>
 
-          {/* Right: Simulation & Insights */}
-          <div className="col-span-12 lg:col-span-5 flex flex-col gap-10">
-            {/* Simulation Matrix */}
-            <div className="bg-white/[0.01] border border-white/5 rounded-[40px] p-10 space-y-10">
-              <div className="flex items-center justify-between">
+          {/* TAB: BIO-PROFILE */}
+          <TabsContent value="profile" className="space-y-8 animate-in slide-in-from-left-4 duration-500">
+            <div className="max-w-3xl mx-auto bg-white/[0.02] border border-white/5 rounded-3xl p-10">
+              <div className="flex items-center gap-4 mb-8 pb-8 border-b border-white/5">
+                <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500">
+                  <User className="w-6 h-6" />
+                </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white/40 uppercase tracking-[0.3em] mb-1">Intervention Simulator</h3>
-                  <p className="text-[10px] text-slate-600 font-mono">PROACTIVE RISK REDUCTION</p>
-                </div>
-                <Badge variant="outline" className="text-[9px] border-white/5 text-slate-500 uppercase px-3 py-1">Mode: Manual</Badge>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-6 bg-white/[0.02] border border-white/5 rounded-3xl group hover:border-emerald-500/20 transition-all cursor-pointer" onClick={() => setInterventions(prev => ({ ...prev, usingN95: !prev.usingN95 }))}>
-                  <div className="flex items-center gap-5">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${interventions.usingN95 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-slate-500'}`}>
-                      <Shield className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-white mb-0.5 tracking-tight text-white/90">N95 Particulate Shield</p>
-                      <p className="text-[10px] text-slate-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">-85% PM2.5 Exposure</p>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={interventions.usingN95}
-                    onCheckedChange={(checked) => setInterventions(prev => ({ ...prev, usingN95: checked }))}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-6 bg-white/[0.02] border border-white/5 rounded-3xl group hover:border-blue-500/20 transition-all cursor-pointer" onClick={() => setInterventions(prev => ({ ...prev, usingAirPurifier: !prev.usingAirPurifier }))}>
-                  <div className="flex items-center gap-5">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${interventions.usingAirPurifier ? 'bg-blue-500/20 text-blue-400' : 'bg-white/5 text-slate-500'}`}>
-                      <Wind className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-white mb-0.5 tracking-tight text-white/90">Indoor HEPA Filtering</p>
-                      <p className="text-[10px] text-slate-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">-70% Volatile Toxins</p>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={interventions.usingAirPurifier}
-                    onCheckedChange={(checked) => setInterventions(prev => ({ ...prev, usingAirPurifier: checked }))}
-                  />
+                  <h3 className="text-xl font-bold text-white">Biological Profile Configuration</h3>
+                  <p className="text-sm text-slate-500">Calibrate the neural engine to your specific physiology.</p>
                 </div>
               </div>
 
-              <div className="pt-10 border-t border-white/5 space-y-8">
-                <div className="flex items-center justify-between group cursor-pointer" onClick={() => setActiveTab(activeTab === 'profile' ? 'overview' : 'profile')}>
-                  <div className="flex items-center gap-4">
-                    <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
-                      <User className="w-4 h-4 text-amber-500/80" />
-                    </div>
-                    <span className="text-xs font-black text-white/50 uppercase tracking-[0.2em]">Bio-Profile Configuration</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div className="space-y-6">
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Biological Age</label>
+                    <Select value={healthProfile.age.toString()} onValueChange={(v) => setHealthProfile(p => ({ ...p, age: parseInt(v) }))}>
+                      <SelectTrigger className="bg-white/5 border-white/10 h-11 text-white"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="10">Child (&lt; 18)</SelectItem>
+                        <SelectItem value="25">Adult (18-65)</SelectItem>
+                        <SelectItem value="75">Senior (65+)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <ChevronRight className={`w-4 h-4 text-white/10 transition-transform duration-500 ${activeTab === 'profile' ? 'rotate-90' : ''}`} />
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Activity Level</label>
+                    <Select value={healthProfile.activityLevel} onValueChange={(v: any) => setHealthProfile(p => ({ ...p, activityLevel: v }))}>
+                      <SelectTrigger className="bg-white/5 border-white/10 h-11 text-white"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low (Sedentary)</SelectItem>
+                        <SelectItem value="moderate">Moderate (Active)</SelectItem>
+                        <SelectItem value="high">High (Athletic)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
-                {activeTab === 'profile' && (
-                  <div className="grid grid-cols-2 gap-6 pb-2 animate-in slide-in-from-top-4 duration-500">
-                    <div className="space-y-3">
-                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest pl-1">Target Age</p>
-                      <Select
-                        value={healthProfile.age.toString()}
-                        onValueChange={(v) => setHealthProfile(p => ({ ...p, age: parseInt(v) }))}
-                      >
-                        <SelectTrigger className="bg-white/5 border-white/5 text-[11px] h-10 rounded-xl focus:ring-amber-500/20">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="10">CHILD (&lt; 18)</SelectItem>
-                          <SelectItem value="25">ADULT (18-65)</SelectItem>
-                          <SelectItem value="75">SENIOR (65+)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                <div className="space-y-4">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Medical Conditions</label>
+                  {[
+                    { id: 'hasAsthma', label: 'Asthma / Respiratory Sensitivity' },
+                    { id: 'hasHeartCondition', label: 'Cardiovascular Condition' },
+                    { id: 'hasLungCondition', label: 'Chronic Lung Disease' }
+                  ].map((condition) => (
+                    <div
+                      key={condition.id}
+                      className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${healthProfile[condition.id as keyof HealthProfile] ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-white/5 border-white/5 text-slate-400 hover:bg-white/10'}`}
+                      onClick={() => setHealthProfile(prev => ({ ...prev, [condition.id]: !prev[condition.id as keyof HealthProfile] }))}
+                    >
+                      <span className="text-sm font-medium">{condition.label}</span>
+                      {healthProfile[condition.id as keyof HealthProfile] && <CheckCircle className="w-4 h-4" />}
                     </div>
-                    <div className="space-y-3">
-                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest pl-1">Activity Tier</p>
-                      <Select
-                        value={healthProfile.activityLevel}
-                        onValueChange={(v: any) => setHealthProfile(p => ({ ...p, activityLevel: v }))}
-                      >
-                        <SelectTrigger className="bg-white/5 border-white/5 text-[11px] h-10 rounded-xl focus:ring-amber-500/20">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="low">SEDENTARY</SelectItem>
-                          <SelectItem value="moderate">ACTIVE</SelectItem>
-                          <SelectItem value="high">ATHLETIC</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                )}
+                  ))}
+                </div>
               </div>
             </div>
+          </TabsContent>
+        </Tabs>
 
-            {/* AI Insights - Very Minimal */}
-            <div className="bg-white/[0.01] border border-white/5 rounded-[40px] p-10 flex-1">
-              <div className="flex items-center gap-3 mb-8">
-                <Brain className="w-4 h-4 text-emerald-500/40" />
-                <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Predictive Insights</h3>
-              </div>
-              <div className="space-y-6">
-                {healthAnalysis.recommendations.slice(0, 3).map((rec, i) => (
-                  <div key={i} className="flex items-start gap-4">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50 mt-1.5 shrink-0" />
-                    <p className="text-xs text-white/60 leading-relaxed font-medium tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">{rec}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Trend Analysis */}
-        <div className="bg-white/[0.01] border border-white/5 rounded-[40px] p-12 overflow-hidden relative group">
-          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-emerald-500/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-          <div className="flex items-center justify-between mb-12 relative z-10">
-            <div>
-              <h3 className="text-sm font-bold text-white/40 uppercase tracking-[0.3em] mb-1">24-Hour Adaptive Forecast</h3>
-              <p className="text-[10px] text-slate-600 font-mono">NEURAL RISK PROJECTION MAP</p>
-            </div>
-            <div className="flex gap-8">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b98180]" />
-                <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Optimized</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_#fbbf2480]" />
-                <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Compromised</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="h-64 w-full relative z-10">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={healthAnalysis.activityWindows} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="10 10" vertical={false} stroke="rgba(255,255,255,0.02)" />
-                <XAxis
-                  dataKey="label"
-                  stroke="rgba(255,255,255,0.1)"
-                  fontSize={9}
-                  tickLine={false}
-                  axisLine={false}
-                  interval={2}
-                  tick={{ fill: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}
-                />
-                <YAxis hide domain={[0, 100]} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#020617', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', fontSize: '10px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}
-                  itemStyle={{ color: '#10b981', fontWeight: 'bold' }}
-                  cursor={{ stroke: 'rgba(16,185,129,0.2)', strokeWidth: 2 }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="riskScore"
-                  stroke="#10b981"
-                  strokeWidth={3}
-                  fillOpacity={1}
-                  fill="url(#trendGrad)"
-                  animationDuration={2000}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
       </main>
 
       {/* Extreme Minimal Footer */}
       <footer className="relative z-10 border-t border-white/5 px-8 py-8 backdrop-blur-md">
-        <div className="max-w-[1600px] mx-auto flex items-center justify-between text-[9px] font-black font-mono text-slate-700 tracking-[0.3em] uppercase">
+        <div className="max-w-[1600px] mx-auto flex items-center justify-between text-[10px] font-bold font-mono text-slate-600 tracking-[0.2em] uppercase">
           <div className="flex gap-12">
             <span className="hover:text-slate-400 transition-colors cursor-default">Instance: BIO_CLUSTER_7A</span>
-            <span className="hover:text-slate-400 transition-colors cursor-default select-none group flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500/30 group-hover:bg-blue-500/60 transition-colors" />
+            <span className="hover:text-slate-400 transition-colors cursor-default flex items-center gap-2">
               Spatial Context: {cityName}
             </span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]" />
             <span className="text-emerald-500/50">Probabilistic Reality Lock Active</span>
           </div>
