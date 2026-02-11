@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ResponsiveContainer,
@@ -17,19 +16,16 @@ import {
 } from 'recharts';
 import {
   Activity,
-  Zap,
   Wind,
-  CheckCircle,
-  AlertTriangle,
   ArrowLeft,
-  Stethoscope,
   Heart,
   Brain,
   ShieldCheck,
-  TrendingDown
+  TrendingDown,
+  Info
 } from 'lucide-react';
 import {
-  calculateEpidemiologicalRisk, // New function name
+  calculateEpidemiologicalRisk,
   predictHealthTrend,
   HealthProfile,
   QuantumHealthAnalysis as QuantumHealthAnalysisType,
@@ -98,259 +94,275 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
     setHealthAnalysis(analysis);
   }, [airQuality, healthProfile, forecast, interventions]);
 
-  if (!healthAnalysis || !healthAnalysis.metrics) return <div className="min-h-screen flex items-center justify-center text-slate-400 bg-[#0f172a]">Initializing Epidemiological Model...</div>;
+  if (!healthAnalysis || !healthAnalysis.metrics) return <div className="min-h-screen flex items-center justify-center text-slate-400 bg-slate-950 font-sans">Initializing Health Engine...</div>;
 
-  // Direct access to deterministic metrics
   const { metrics } = healthAnalysis;
 
-  // Helpers for color mapping
-  const getColorClass = (color: 'emerald' | 'amber' | 'rose') => {
+  // New aesthetic color helpers
+  const getRiskColor = (color: 'emerald' | 'amber' | 'rose') => {
     switch (color) {
       case 'rose': return 'text-rose-400 bg-rose-500/10 border-rose-500/20';
       case 'amber': return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
       case 'emerald': return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
-      default: return 'text-slate-400';
-    }
-  };
-
-  const getStrokeColor = (color: string) => {
-    switch (color) {
-      case 'rose': return '#fb7185';
-      case 'amber': return '#fbbf24';
-      case 'emerald': return '#34d399';
-      default: return '#94a3b8';
     }
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0f172a] text-slate-200 selection:bg-rose-500/30 font-sans">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-200 font-sans selection:bg-indigo-500/30">
 
-      {/* Background Ambience - Medical/Sterile */}
+      {/* Background Ambience - Ethereal */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] w-[1200px] h-[1200px] bg-slate-800/20 rounded-full blur-[150px]" />
+        <div className="absolute top-[-20%] left-[-10%] w-[1200px] h-[1200px] bg-indigo-500/10 rounded-full blur-[180px] animate-pulse-slow" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[1200px] h-[1200px] bg-rose-500/5 rounded-full blur-[180px] animate-pulse-slow delay-1000" />
       </div>
 
-      {/* Clinical Header */}
-      <header className="relative z-20 border-b border-white/5 bg-[#0f172a]/95 backdrop-blur-md px-10 py-5">
-        <div className="max-w-[1800px] mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-8">
+      {/* Modern Header */}
+      <header className="relative z-20 border-b border-white/5 bg-slate-950/50 backdrop-blur-xl px-8 py-6">
+        <div className="max-w-[1600px] mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-6">
             <Button
               variant="ghost"
               size="icon"
               onClick={onBack}
-              className="hover:bg-white/5 rounded-lg text-slate-400 w-9 h-9"
+              className="hover:bg-white/5 rounded-full text-slate-400 w-10 h-10 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <div className="flex items-center gap-4 mb-0.5">
-                <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-3">
-                  <Stethoscope className="w-5 h-5 text-rose-500" />
-                  EPIDEMIOLOGICAL <span className="text-slate-600">|</span> RISK ENGINE
+              <div className="flex items-center gap-3 mb-1">
+                <h1 className="text-2xl font-bold tracking-tight text-white">
+                  Health Forecast
                 </h1>
-                <Badge variant="outline" className="border-rose-500/20 text-rose-400 bg-rose-500/5 text-[10px] uppercase tracking-widest px-2 py-0.5 font-bold">
-                  v8.0 ERF-Based
+                <Badge variant="outline" className="border-rose-500/20 text-rose-400 bg-rose-500/5 px-2.5 py-0.5 text-[10px] font-medium rounded-full">
+                  Live Analysis
                 </Badge>
               </div>
-              <p className="text-xs text-slate-500 font-mono flex items-center gap-2 uppercase tracking-widest">
-                Methodology: Log-linear ERF (WHO/ACS) <span className="text-slate-700">///</span> Confidence: 95% CI
+              <p className="text-sm text-slate-400 font-medium tracking-wide">
+                Epidemiological risk assessment for <span className="text-slate-200">{cityName}</span>
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-12">
-            <div className="text-right group cursor-default">
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.1em] mb-1">Mortality Risk Factor</p>
-              <div className="flex items-center justify-end gap-3">
-                <Activity className="w-4 h-4 text-rose-500" />
-                <p className="text-3xl font-medium text-white leading-none font-mono">
+
+          <div className="flex items-center gap-8">
+            <div className="text-right">
+              <p className="text-xs text-slate-500 font-medium mb-1">Mortality Risk Factor</p>
+              <div className="flex items-center justify-end gap-2 text-white">
+                <Activity className="w-5 h-5 text-rose-500" />
+                <span className="text-3xl font-bold tracking-tight">
                   {metrics.aggregateRiskIncrease > 0 ? '+' : ''}{metrics.aggregateRiskIncrease}%
-                </p>
+                </span>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="relative z-10 flex-1 flex flex-col max-w-[1800px] mx-auto w-full px-10 py-8 gap-6">
+      <main className="relative z-10 flex-1 flex flex-col max-w-[1600px] mx-auto w-full px-8 py-8 gap-8">
 
-        {/* Top Grid: Main Graph + Risk Panel */}
-        <div className="grid grid-cols-12 gap-6 h-[550px]">
+        {/* Top Grid: Graph + Risks */}
+        <div className="grid grid-cols-12 gap-6 min-h-[500px]">
 
-          {/* Main Hero: Aggregate Health Risk Graph */}
-          <div className="col-span-12 lg:col-span-9 bg-[#1e293b]/40 border border-white/5 rounded-[16px] p-8 relative overflow-hidden group shadow-lg flex flex-col">
-            {/* Chart Header & Controls */}
-            <div className="flex items-center justify-between mb-6 relative z-10">
+          {/* Main Graph Card */}
+          <div className="col-span-12 lg:col-span-8 bg-white/5 backdrop-blur-md border border-white/10 rounded-[24px] p-8 shadow-2xl relative overflow-hidden group">
+            <div className="flex items-center justify-between mb-8 relative z-10">
               <div>
-                <h2 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                  <TrendingDown className="w-5 h-5 text-rose-500" /> Aggregate Health Risk Forecast
+                <h2 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                  Aggregate Health Risk
                 </h2>
-                <p className="text-xs text-slate-400 leading-relaxed font-mono">
-                  projected % increase in all-cause mortality risk over 24h baseline (relative risk).
+                <p className="text-sm text-slate-400 max-w-md">
+                  Projected 24-hour relative increase in all-cause mortality risk based on forecasted particulate exposure.
                 </p>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/5 text-xs text-slate-400">
+                <Info className="w-3 h-3" />
+                <span>Probabilistic Model (CI 95%)</span>
               </div>
             </div>
 
-            {/* The Graph */}
-            <div className="flex-1 w-full relative z-10 min-h-0">
+            <div className="h-[350px] w-full relative z-10">
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={healthAnalysis.activityWindows} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                <ComposedChart data={healthAnalysis.activityWindows} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
-                    <linearGradient id="riskGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#e11d48" stopOpacity={0.2} />
-                      <stop offset="100%" stopColor="#e11d48" stopOpacity={0} />
+                    <linearGradient id="riskGradientSmooth" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.4} />
+                      <stop offset="100%" stopColor="#f43f5e" stopOpacity={0} />
                     </linearGradient>
                   </defs>
 
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.3} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff" opacity={0.05} />
                   <XAxis
                     dataKey="label"
-                    stroke="#94a3b8"
-                    fontSize={10}
+                    stroke="#64748b"
+                    fontSize={11}
                     tickLine={false}
                     axisLine={false}
                     dy={10}
                     interval={2}
-                    fontFamily="monospace"
+                    fontFamily="Inter, sans-serif"
                   />
                   <YAxis
-                    stroke="#94a3b8"
-                    fontSize={10}
+                    stroke="#64748b"
+                    fontSize={11}
                     tickLine={false}
                     axisLine={false}
+                    fontFamily="Inter, sans-serif"
                     domain={[0, 'auto']}
-                    fontFamily="monospace"
-                    label={{ value: '% Risk Increase (Relative)', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10, dx: 10 }}
+                    label={{ value: '% Risk Increase', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 11, dx: 10 }}
                   />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '4px' }}
-                    itemStyle={{ color: '#fff', fontWeight: 600, fontSize: '11px', fontFamily: 'monospace' }}
-                    labelStyle={{ color: '#94a3b8', fontSize: '10px', marginBottom: '4px', textTransform: 'uppercase' }}
-                    cursor={{ stroke: '#475569', strokeWidth: 1 }}
-                    formatter={(value: number) => [`+${value}%`, 'Relative Risk']}
+                    contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', backdropFilter: 'blur(12px)' }}
+                    itemStyle={{ color: '#fff', fontWeight: 600, fontSize: '12px', fontFamily: 'Inter, sans-serif' }}
+                    labelStyle={{ color: '#94a3b8', fontSize: '11px', marginBottom: '4px' }}
+                    cursor={{ stroke: '#ffffff', strokeWidth: 1, strokeOpacity: 0.2 }}
+                    formatter={(value: number) => [`+${value}%`, 'Risk Increase']}
                   />
 
-                  {/* Reference Line */}
-                  <ReferenceLine y={0.5} stroke="#10b981" strokeDasharray="4 4" label={{ value: 'BASELINE', fill: '#10b981', fontSize: 9, position: 'insideRight' }} />
+                  <ReferenceLine y={0} stroke="#ffffff" strokeOpacity={0.1} />
 
-                  {/* Area */}
                   <Area
-                    type="step"
+                    type="monotone"
                     dataKey="riskIncreaseSteps"
                     stroke="none"
-                    fill="url(#riskGradient)"
+                    fill="url(#riskGradientSmooth)"
                   />
 
-                  {/* Line */}
                   <Line
-                    type="step"
+                    type="monotone"
                     dataKey="riskIncreaseSteps"
-                    stroke="#e11d48"
+                    stroke="#f43f5e"
                     strokeWidth={3}
-                    dot={{ r: 2, fill: '#1e293b', stroke: '#e11d48', strokeWidth: 2 }}
-                    activeDot={{ r: 6, fill: '#fff' }}
+                    dot={false}
+                    activeDot={{ r: 6, fill: '#fff', strokeWidth: 0 }}
                     animationDuration={1500}
-                    name="Relative Risk"
                   />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          {/* Right Column: Real-Time Exposure Risks (Replaces Vitals) */}
-          <div className="col-span-12 lg:col-span-3 bg-[#1e293b]/40 border border-white/5 rounded-[16px] p-6 flex flex-col h-full backdrop-blur-md">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-slate-700/50 rounded-md text-amber-400"><AlertTriangle className="w-4 h-4" /></div>
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Exposure Risks</h3>
+          {/* Right Column: Risk Factors (Bento Style) */}
+          <div className="col-span-12 lg:col-span-4 flex flex-col gap-4">
+            {/* Card 1: Cardio */}
+            <div className={`flex-1 p-6 rounded-[24px] border backdrop-blur-md flex flex-col justify-between transition-all hover:scale-[1.02] duration-300 ${getRiskColor(metrics.cardiovascularRisk.color)}`}>
+              <div className="flex justify-between items-start">
+                <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-sm">
+                  <Heart className="w-6 h-6" />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-wider opacity-70 bg-white/10 px-2 py-1 rounded-full">Acute</span>
+              </div>
+              <div>
+                <p className="text-4xl font-bold mb-1 tracking-tight">+{metrics.cardiovascularRisk.increase}%</p>
+                <p className="text-sm font-medium opacity-80">{metrics.cardiovascularRisk.label}</p>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-              <div className={`p-4 rounded-xl border ${getColorClass(metrics.cardiovascularRisk.color)}`}>
-                <p className="text-[10px] font-bold uppercase tracking-widest mb-1 opacity-80">{metrics.cardiovascularRisk.label}</p>
-                <div className="flex items-end justify-between">
-                  <p className="text-2xl font-mono font-bold">+{metrics.cardiovascularRisk.increase}%</p>
-                  <Heart className="w-4 h-4" />
+            {/* Card 2: Respiratory */}
+            <div className={`flex-1 p-6 rounded-[24px] border backdrop-blur-md flex flex-col justify-between transition-all hover:scale-[1.02] duration-300 ${getRiskColor(metrics.respiratoryRisk.color)}`}>
+              <div className="flex justify-between items-start">
+                <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-sm">
+                  <Wind className="w-6 h-6" />
                 </div>
+                <span className="text-xs font-bold uppercase tracking-wider opacity-70 bg-white/10 px-2 py-1 rounded-full">Irritant</span>
               </div>
+              <div>
+                <p className="text-4xl font-bold mb-1 tracking-tight">+{metrics.respiratoryRisk.increase}%</p>
+                <p className="text-sm font-medium opacity-80">{metrics.respiratoryRisk.label}</p>
+              </div>
+            </div>
 
-              <div className={`p-4 rounded-xl border ${getColorClass(metrics.respiratoryRisk.color)}`}>
-                <p className="text-[10px] font-bold uppercase tracking-widest mb-1 opacity-80">{metrics.respiratoryRisk.label}</p>
-                <div className="flex items-end justify-between">
-                  <p className="text-2xl font-mono font-bold">+{metrics.respiratoryRisk.increase}%</p>
-                  <Wind className="w-4 h-4" />
+            {/* Card 3: Neuro */}
+            <div className={`flex-1 p-6 rounded-[24px] border backdrop-blur-md flex flex-col justify-between transition-all hover:scale-[1.02] duration-300 ${getRiskColor(metrics.neurologicalRisk.color)}`}>
+              <div className="flex justify-between items-start">
+                <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-sm">
+                  <Brain className="w-6 h-6" />
                 </div>
+                <span className="text-xs font-bold uppercase tracking-wider opacity-70 bg-white/10 px-2 py-1 rounded-full">Long-term</span>
               </div>
-
-              <div className={`p-4 rounded-xl border ${getColorClass(metrics.neurologicalRisk.color)}`}>
-                <p className="text-[10px] font-bold uppercase tracking-widest mb-1 opacity-80">{metrics.neurologicalRisk.label}</p>
-                <div className="flex items-end justify-between">
-                  <p className="text-2xl font-mono font-bold">+{metrics.neurologicalRisk.increase}%</p>
-                  <Brain className="w-4 h-4" />
-                </div>
-              </div>
-
-              <div className="mt-auto pt-4 border-t border-white/5">
-                <p className="text-[10px] text-slate-500 text-center leading-relaxed">
-                  Metrics derived from log-linear ERF models. Not medical advice.
-                </p>
+              <div>
+                <p className="text-4xl font-bold mb-1 tracking-tight">+{metrics.neurologicalRisk.increase}%</p>
+                <p className="text-sm font-medium opacity-80">{metrics.neurologicalRisk.label}</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Section: Risk Mitigation Tabs */}
-        <div className="min-h-[200px]">
+        {/* Bottom Section: Insights Tabs */}
+        <div className="min-h-[250px] bg-white/5 backdrop-blur-md border border-white/10 rounded-[24px] p-6 lg:p-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="bg-[#1e293b]/40 border border-white/5 p-1 rounded-xl w-full justify-start gap-2 mb-6 h-auto">
-              <TabsTrigger value="cardio" className="data-[state=active]:bg-rose-500/20 data-[state=active]:text-rose-400 rounded-lg py-3 px-6 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-                <Heart className="w-4 h-4" /> Cardiovascular
-              </TabsTrigger>
-              <TabsTrigger value="resp" className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 rounded-lg py-3 px-6 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-                <Wind className="w-4 h-4" /> Respiratory
-              </TabsTrigger>
-            </TabsList>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-white">Risk Mitigation</h3>
+              <TabsList className="bg-slate-950/50 border border-white/5 p-1 rounded-full h-auto">
+                <TabsTrigger value="cardio" className="rounded-full px-6 py-2 text-xs font-bold transition-all data-[state=active]:bg-white/10 data-[state=active]:text-white data-[state=active]:shadow-none hover:text-white">
+                  Cardiovascular
+                </TabsTrigger>
+                <TabsTrigger value="resp" className="rounded-full px-6 py-2 text-xs font-bold transition-all data-[state=active]:bg-white/10 data-[state=active]:text-white data-[state=active]:shadow-none hover:text-white">
+                  Respiratory
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-            <TabsContent value="cardio" className="animate-in slide-in-from-left-4 duration-300">
-              <div className="bg-[#1e293b]/40 border border-white/5 rounded-xl p-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-rose-500/10 rounded-lg"><Activity className="w-6 h-6 text-rose-500" /></div>
-                  <div>
-                    <h4 className="text-sm font-bold text-white mb-2">Cardiovascular Impact Summary</h4>
-                    <p className="text-xs text-slate-400 mb-4 max-w-2xl leading-relaxed">
-                      Current PM2.5 levels ({airQuality.pm25} µg/m³) are associated with a <span className="text-white font-bold">{metrics.cardiovascularRisk.increase}%</span> increase in the risk of acute cardiovascular events relative to baseline clean air days.
-                    </p>
-                    {interventions.usingAirPurifier ? (
-                      <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-md w-fit border border-emerald-500/20">
-                        <ShieldCheck className="w-3 h-3" /> Filtration Reducing Risk by ~60%
-                      </div>
-                    ) : (
-                      <Button variant="outline" size="sm" onClick={() => setInterventions(p => ({ ...p, usingAirPurifier: true }))} className="text-xs h-7 border-rose-500/30 text-rose-400 hover:bg-rose-500/10">
-                        Activate HEPA Filter Simulator
-                      </Button>
-                    )}
+            <TabsContent value="cardio" className="mt-0 animate-in fade-in duration-500">
+              <div className="flex flex-col lg:flex-row gap-8 items-center">
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-center gap-3 text-rose-400 mb-2">
+                    <TrendingDown className="w-5 h-5" />
+                    <span className="font-bold text-sm tracking-wide">IMPACT ANALYSIS</span>
                   </div>
+                  <p className="text-lg text-slate-200 leading-relaxed font-light">
+                    Current fine particulate matter ({airQuality.pm25} µg/m³) exposure is correlated with a <span className="text-white font-semibold">+{metrics.cardiovascularRisk.increase}% relative increase</span> in acute cardiovascular event probability compared to baseline.
+                  </p>
+                </div>
+                <div className="w-full lg:w-auto min-w-[300px] p-6 bg-slate-950/30 rounded-2xl border border-white/5">
+                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Recommended Action</h4>
+                  {interventions.usingAirPurifier ? (
+                    <div className="flex items-center gap-3 text-emerald-400 bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20">
+                      <ShieldCheck className="w-5 h-5" />
+                      <div>
+                        <p className="font-bold text-sm">HEPA Active</p>
+                        <p className="text-xs opacity-80">Risk Reduced ~60%</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={() => setInterventions(p => ({ ...p, usingAirPurifier: true }))}
+                      className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl h-12 shadow-lg shadow-indigo-500/20"
+                    >
+                      Activate HEPA Simulation
+                    </Button>
+                  )}
                 </div>
               </div>
             </TabsContent>
 
-            <TabsContent value="resp" className="animate-in slide-in-from-left-4 duration-300">
-              <div className="bg-[#1e293b]/40 border border-white/5 rounded-xl p-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-blue-500/10 rounded-lg"><Wind className="w-6 h-6 text-blue-500" /></div>
-                  <div>
-                    <h4 className="text-sm font-bold text-white mb-2">Respiratory Impact Summary</h4>
-                    <p className="text-xs text-slate-400 mb-4 max-w-2xl leading-relaxed">
-                      Combined NO2 ({airQuality.no2} ppb) and O3 ({airQuality.o3} ppb) exposure creates a synergistic irritant effect, increasing bronchoconstriction probability by <span className="text-white font-bold">{metrics.respiratoryRisk.increase}%</span>.
-                    </p>
-                    {interventions.usingN95 ? (
-                      <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-md w-fit border border-emerald-500/20">
-                        <ShieldCheck className="w-3 h-3" /> N95 Reducing Particulate Uptake
-                      </div>
-                    ) : (
-                      <Button variant="outline" size="sm" onClick={() => setInterventions(p => ({ ...p, usingN95: true }))} className="text-xs h-7 border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
-                        Activate N95 Simulator
-                      </Button>
-                    )}
+            <TabsContent value="resp" className="mt-0 animate-in fade-in duration-500">
+              <div className="flex flex-col lg:flex-row gap-8 items-center">
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-center gap-3 text-blue-400 mb-2">
+                    <Wind className="w-5 h-5" />
+                    <span className="font-bold text-sm tracking-wide">IMPACT ANALYSIS</span>
                   </div>
+                  <p className="text-lg text-slate-200 leading-relaxed font-light">
+                    Synergistic exposure to Nitrogen Dioxide ({airQuality.no2} ppb) and Ozone ({airQuality.o3} ppb) creates a <span className="text-white font-semibold">+{metrics.respiratoryRisk.increase}% increase</span> in bronchoconstriction probability. Asthmatics advised to reduce exposure.
+                  </p>
+                </div>
+                <div className="w-full lg:w-auto min-w-[300px] p-6 bg-slate-950/30 rounded-2xl border border-white/5">
+                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Recommended Action</h4>
+                  {interventions.usingN95 ? (
+                    <div className="flex items-center gap-3 text-emerald-400 bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20">
+                      <ShieldCheck className="w-5 h-5" />
+                      <div>
+                        <p className="font-bold text-sm">N95 Mask Active</p>
+                        <p className="text-xs opacity-80">Particulates Filtered</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={() => setInterventions(p => ({ ...p, usingN95: true }))}
+                      className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl h-12 shadow-lg shadow-blue-500/20"
+                    >
+                      Activate N95 Simulation
+                    </Button>
+                  )}
                 </div>
               </div>
             </TabsContent>
@@ -358,21 +370,8 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
         </div>
 
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-white/5 px-10 py-6 mt-auto bg-[#0f172a]">
-        <div className="max-w-[1800px] mx-auto flex items-center justify-between opacity-60 text-[10px] font-mono uppercase tracking-[0.1em] text-slate-500">
-          <span>Model: ETH-Zurich / WHO-2024 Basis</span>
-          <span className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            ERF Engine Online
-          </span>
-        </div>
-      </footer>
-
     </div>
   );
 };
 
 export { QuantumHealthAnalysisComponent as QuantumHealthAnalysis };
-
