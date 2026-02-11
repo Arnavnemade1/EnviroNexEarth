@@ -23,10 +23,10 @@ interface LocationState {
 const Health = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Get data from navigation state
   const state = location.state as LocationState;
-  
+
   useEffect(() => {
     // Check if we have the required data
     if (!state?.cityName || !state?.airQuality) {
@@ -42,14 +42,14 @@ const Health = () => {
 
   if (!state?.cityName || !state?.airQuality) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
-        <Card className="glass p-8 text-center max-w-md animate-scale-in">
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+        <Card className="glass p-8 text-center max-w-md animate-scale-in border-white/10">
           <Shield className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">No Health Data Available</h2>
-          <p className="text-muted-foreground mb-4">
+          <h2 className="text-xl font-semibold mb-2 text-white">No Health Data Available</h2>
+          <p className="text-slate-400 mb-4">
             Please select a city first to view health analysis.
           </p>
-          <Button onClick={() => navigate('/')} className="w-full">
+          <Button onClick={() => navigate('/')} className="w-full bg-blue-600 hover:bg-blue-700">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Home
           </Button>
@@ -59,96 +59,15 @@ const Health = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 animate-fade-in">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8 animate-slide-in-right">
-          <Button variant="outline" onClick={handleBackToCity} className="glass hover-scale">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to {state.cityName}
-          </Button>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-              <Heart className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold">Health Dashboard</h1>
-              <p className="text-muted-foreground">Quantum-Enhanced Health Risk Analysis for {state.cityName}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="glass p-4 animate-fade-in hover-scale transition-all duration-300">
-            <div className="flex items-center gap-3">
-              <Activity className="w-8 h-8 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">Current AQI</p>
-                <p className="text-2xl font-bold">{state.airQuality.aqi}</p>
-              </div>
-            </div>
-          </Card>
-          <Card className="glass p-4 animate-fade-in hover-scale transition-all duration-300" style={{ animationDelay: '0.1s' }}>
-            <div className="flex items-center gap-3">
-              <Heart className="w-8 h-8 text-red-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">PM2.5 Level</p>
-                <p className="text-2xl font-bold">{state.airQuality.pm25} μg/m³</p>
-              </div>
-            </div>
-          </Card>
-          <Card className="glass p-4 animate-fade-in hover-scale transition-all duration-300" style={{ animationDelay: '0.2s' }}>
-            <div className="flex items-center gap-3">
-              <Shield className="w-8 h-8 text-green-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Health Status</p>
-                <p className="text-lg font-semibold">
-                  {state.airQuality.aqi <= 50 ? 'Good' : 
-                   state.airQuality.aqi <= 100 ? 'Moderate' :
-                   state.airQuality.aqi <= 150 ? 'Unhealthy for Sensitive' :
-                   state.airQuality.aqi <= 200 ? 'Unhealthy' : 'Very Unhealthy'}
-                </p>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Main Health Analysis Component */}
-        <QuantumHealthAnalysisComponent
-          cityName={state.cityName}
-          currentAQI={state.airQuality.aqi}
-          airQuality={state.airQuality}
-          forecast={state.forecast}
-        />
-
-        {/* Footer Info */}
-        <Card className="glass p-6 mt-8">
-          <div className="flex items-center gap-3 mb-3">
-            <Heart className="w-5 h-5 text-red-500" />
-            <h4 className="font-semibold">About Quantum Health Analysis</h4>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-            <div>
-              <strong className="text-foreground">Quantum Risk Assessment:</strong> Our quantum-enhanced algorithm 
-              uses superposition to simultaneously evaluate multiple health risk factors, providing more accurate 
-              personalized health predictions than traditional models.
-            </div>
-            <div>
-              <strong className="text-foreground">Real-time Adaptation:</strong> The analysis continuously adapts 
-              to your personal health profile, environmental conditions, and activity patterns to provide 
-              the most relevant health recommendations and risk assessments.
-            </div>
-          </div>
-          <div className="mt-4 p-4 bg-muted/20 rounded-lg">
-            <p className="text-xs text-muted-foreground">
-              <strong>Medical Disclaimer:</strong> This quantum health analysis is for informational purposes only 
-              and should not replace professional medical advice. Always consult with healthcare professionals 
-              for medical decisions, especially if you have pre-existing health conditions.
-            </p>
-          </div>
-        </Card>
-      </div>
+    <div className="min-h-screen bg-[#020617] text-white selection:bg-emerald-500/30">
+      {/* Main Health Analysis Component takes full space */}
+      <QuantumHealthAnalysisComponent
+        cityName={state.cityName}
+        currentAQI={state.airQuality.aqi}
+        airQuality={state.airQuality}
+        forecast={state.forecast}
+        onBack={handleBackToCity}
+      />
     </div>
   );
 };
