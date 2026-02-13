@@ -341,7 +341,10 @@ const Index = () => {
       {/* Natural Disasters Sidebar - Only show when requested */}
       {showDisasters && (
         <div className="absolute top-6 right-6 z-40">
-          <NaturalDisasters onDisasterClick={handleGlobeClick} />
+          <NaturalDisasters
+            onDisasterClick={handleGlobeClick}
+            onClose={() => setShowDisasters(false)}
+          />
         </div>
       )}
 

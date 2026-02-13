@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { TriangleAlert as AlertTriangle, Flame, CloudRain, Wind, Zap, Mountain, Sparkles, RefreshCw, MapPin, Calendar, ExternalLink, Loader as Loader2 } from 'lucide-react';
+import { TriangleAlert as AlertTriangle, Flame, CloudRain, Wind, Zap, Mountain, Sparkles, RefreshCw, MapPin, Calendar, ExternalLink, Loader as Loader2, X } from 'lucide-react';
 import { nasaEONET, type DisasterEvent } from '@/services/nasaEONET';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -48,9 +48,10 @@ interface NaturalDisastersProps {
     lat: number;
     lon: number;
   };
+  onClose?: () => void;
 }
 
-export const NaturalDisasters = ({ onDisasterClick, locationData }: NaturalDisastersProps) => {
+export const NaturalDisasters = ({ onDisasterClick, locationData, onClose }: NaturalDisastersProps) => {
   const [disasters, setDisasters] = useState<DisasterEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -145,13 +146,22 @@ export const NaturalDisasters = ({ onDisasterClick, locationData }: NaturalDisas
       <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-[60px] pointer-events-none opacity-50" />
 
       <div className="flex items-center justify-between mb-4 relative z-10">
-        <h3 className="font-bold text-lg text-white flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-red-500" />
-          Neural Sentinel
-        </h3>
-        <Button size="sm" variant="ghost" onClick={handleRefresh} disabled={refreshing} className="h-8 w-8 rounded-full hover:bg-white/10">
-          <RefreshCw className={`w-4 h-4 text-slate-400 ${refreshing ? 'animate-spin' : ''}`} />
-        </Button>
+          <h3 className="font-bold text-lg text-white">
+            Neural Sentinel
+          </h3>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button size="sm" variant="ghost" onClick={handleRefresh} disabled={refreshing} className="h-8 w-8 rounded-full hover:bg-white/10">
+            <RefreshCw className={`w-4 h-4 text-slate-400 ${refreshing ? 'animate-spin' : ''}`} />
+          </Button>
+          {onClose && (
+            <Button size="sm" variant="ghost" onClick={onClose} className="h-8 w-8 rounded-full hover:bg-white/10 text-slate-400 hover:text-white">
+              <X className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center gap-1 p-1 bg-slate-900/50 rounded-xl mb-4 border border-white/5">
