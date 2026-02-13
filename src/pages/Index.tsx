@@ -289,8 +289,8 @@ const Index = () => {
 
       {/* Dashboard Modal */}
       {showDashboard && (
-        <Dashboard 
-          onClose={() => setShowDashboard(false)} 
+        <Dashboard
+          onClose={() => setShowDashboard(false)}
           onSelectCity={(city) => {
             geocodingService.searchCity(city).then(cities => {
               if (cities.length > 0) handleCitySelect(cities[0]);
@@ -389,6 +389,7 @@ const Index = () => {
           onShowQuantumAnalytics={quantumForecast ? () => setShowQuantumAnalytics(true) : undefined}
           onShowHealth={() => setShowHealthAnalysis(true)}
           onShowClimatePredictions={() => setShowClimatePredictions(true)}
+          onShowDisasters={() => setShowDisasters(true)}
           onBackToHome={() => {
             setShowHomeScreen(true);
             setSelectedCity(null);

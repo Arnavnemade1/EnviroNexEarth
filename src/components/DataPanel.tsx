@@ -33,6 +33,7 @@ interface DataPanelProps {
   onShowQuantumAnalytics?: () => void;
   onShowHealth?: () => void;
   onShowClimatePredictions?: () => void;
+  onShowDisasters?: () => void;
 }
 
 export const DataPanel = ({
@@ -48,7 +49,8 @@ export const DataPanel = ({
   onBackToHome,
   onShowQuantumAnalytics,
   onShowHealth,
-  onShowClimatePredictions
+  onShowClimatePredictions,
+  onShowDisasters
 }: DataPanelProps) => {
   const [selectedScenario, setSelectedScenario] = useState<'current' | 'clean_energy' | 'no_action'>('current');
   const [animationSpeed, setAnimationSpeed] = useState(1);
@@ -466,6 +468,19 @@ export const DataPanel = ({
                 >
                   <Heart className="w-4 h-4 mr-2" />
                   Health Analysis
+                </Button>
+              )}
+
+              {/* Natural Disasters Button */}
+              {onShowDisasters && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full mt-2 glass"
+                  onClick={onShowDisasters}
+                >
+                  <Shield className="w-4 h-4 mr-2" />
+                  Natural Disasters
                 </Button>
               )}
             </div>
