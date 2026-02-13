@@ -193,7 +193,7 @@ export const NaturalDisasters = ({ onDisasterClick, locationData, onClose }: Nat
         </div>
       )}
 
-      <ScrollArea className="flex-1 -mr-2 pr-2">
+      <ScrollArea className="flex-1 -mr-2 pr-2 scrollbar-thin scrollbar-thumb-primary/30">
         <div className="space-y-3 pb-2">
           {activeView === 'live' ? (
             disasters.length === 0 ? (
