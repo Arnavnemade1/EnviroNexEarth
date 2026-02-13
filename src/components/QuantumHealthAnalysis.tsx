@@ -32,6 +32,9 @@ import {
   Interventions
 } from '@/services/quantumHealth';
 
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
 interface QuantumHealthProps {
   cityName: string;
   currentAQI: number;
@@ -44,11 +47,18 @@ interface QuantumHealthProps {
     so2: number;
     co: number;
   };
+  weather?: {
+    temperature: number;
+    humidity: number;
+    windSpeed: number;
+    precipitation: number;
+  };
   forecast?: Array<{ aqi: number; pm25: number; confidence: number }>;
   onBack?: () => void;
 }
 
-export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast, onBack }: QuantumHealthProps) => {
+export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast, weather, onBack }: QuantumHealthProps) => {
+  const { toast } = useToast();
   const [healthProfile] = useState<HealthProfile>({
     age: 30,
     hasAsthma: false,
@@ -66,33 +76,75 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
 
   const [healthAnalysis, setHealthAnalysis] = useState<QuantumHealthAnalysisType | null>(null);
   const [activeTab, setActiveTab] = useState('cardio');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const analysis = calculateEpidemiologicalRisk(
-      airQuality.aqi,
-      airQuality.pm25,
-      airQuality.o3,
-      airQuality.no2,
-      airQuality.so2,
-      airQuality.co,
-      healthProfile,
-      interventions
-    );
+    const fetchHealthAnalysis = async () => {
+      setLoading(true);
+      try {
+        console.log('Fetching neural health analysis for:', cityName);
 
-    if (forecast) {
-      analysis.activityWindows = predictHealthTrend(
-        analysis,
-        forecast,
-        airQuality.o3,
-        airQuality.no2,
-        airQuality.so2,
-        airQuality.co,
-        healthProfile
-      );
-    }
+        // Prepare climate data with weather fallback
+        const climateData = {
+          cityName,
+          lat: 0, // In a real app we'd pass lat/lon, but name works for context
+          lon: 0,
+          airQuality,
+          weather: weather || {
+            temperature: 22,
+            humidity: 45,
+            windSpeed: 10,
+            precipitation: 0
+          }
+        };
 
-    setHealthAnalysis(analysis);
-  }, [airQuality, healthProfile, forecast, interventions]);
+        const { data, error } = await supabase.functions.invoke('health-prediction-engine', {
+          body: { climateData, healthProfile, interventions }
+        });
+
+        if (error) throw error;
+
+        console.log('Neural health analysis received:', data);
+        setHealthAnalysis(data);
+      } catch (error) {
+        console.error('Failed to fetch health analysis:', error);
+        toast({
+          title: "Neural Engine Offline",
+          description: "Falling back to local epidemiological models.",
+          variant: "destructive"
+        });
+
+        // Fallback to local calculation
+        const analysis = calculateEpidemiologicalRisk(
+          airQuality.aqi,
+          airQuality.pm25,
+          airQuality.o3,
+          airQuality.no2,
+          airQuality.so2,
+          airQuality.co,
+          healthProfile,
+          interventions
+        );
+
+        if (forecast) {
+          analysis.activityWindows = predictHealthTrend(
+            analysis,
+            forecast,
+            airQuality.o3,
+            airQuality.no2,
+            airQuality.so2,
+            airQuality.co,
+            healthProfile
+          );
+        }
+        setHealthAnalysis(analysis);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHealthAnalysis();
+  }, [airQuality, healthProfile, forecast, interventions, weather, cityName]);
 
   if (!healthAnalysis || !healthAnalysis.metrics) return <div className="min-h-screen flex items-center justify-center text-slate-400 bg-slate-950 font-sans">Initializing Health Engine...</div>;
 
