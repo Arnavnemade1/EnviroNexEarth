@@ -353,10 +353,10 @@ const Index = () => {
         <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in-up">
           <div className="text-center max-w-2xl px-6">
             <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-earth bg-clip-text text-transparent animate-pulse-glow">
-              Earth's Skies in 2030
+              Atmospheric Intelligence
             </h1>
             <p className="text-xl md:text-2xl text-foreground/80 mb-8">
-              See tomorrow's air quality, today. Live NASA data meets Enviro AI predictions.
+              Deciphering the invisible chemical rhythms of our planet. Live NASA telemetry meets high-fidelity environmental foresight.
             </p>
             <div className="animate-bounce">
               <div className="w-8 h-8 bg-primary rounded-full mx-auto glow"></div>

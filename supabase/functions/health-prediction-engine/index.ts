@@ -190,7 +190,7 @@ function generateMockHealthAnalysis(climateData: ClimateData, healthProfile: Hea
         return {
             hour: hour,
             label: (hour < 10 ? '0' + hour : hour) + ":00",
-            status: windowRisk > 75 ? "prohibited" : windowRisk > 50 ? "limited" : windowRisk > 25 ? "guarded" : "optimal",
+            status: (windowRisk > 75 ? "prohibited" : windowRisk > 50 ? "limited" : windowRisk > 25 ? "guarded" : "optimal") as 'optimal' | 'guarded' | 'limited' | 'prohibited',
             riskScore: Math.round(windowRisk),
             riskIncreaseSteps: Math.round(windowRisk * 0.38)
         };
