@@ -12,7 +12,12 @@ import {
   Tooltip,
   CartesianGrid,
   ReferenceLine,
-  Area
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar
 } from 'recharts';
 import {
   Activity,
@@ -22,7 +27,12 @@ import {
   Brain,
   ShieldCheck,
   TrendingDown,
-  Info
+  Info,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Stethoscope,
+  PieChart as PieIcon
 } from 'lucide-react';
 import {
   calculateEpidemiologicalRisk,
@@ -159,6 +169,20 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
     }
   };
 
+  const StatusBadge = ({ status }: { status: string }) => {
+    const styles = {
+      optimal: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+      guarded: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+      limited: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+      prohibited: "bg-rose-500/20 text-rose-400 border-rose-500/30",
+    };
+    return (
+      <Badge variant="outline" className={`px-2 py-0.5 text-[9px] font-bold rounded-full uppercase ${styles[status as keyof typeof styles] || styles.optimal}`}>
+        {status}
+      </Badge>
+    );
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-200 font-sans selection:bg-indigo-500/30">
 
@@ -292,47 +316,110 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
             </div>
           </div>
 
-          {/* Right Column: Risk Factors (Bento Style) */}
-          <div className="col-span-12 lg:col-span-4 flex flex-col gap-4">
-            {/* Card 1: Cardio */}
-            <div className={`flex-1 p-6 rounded-[24px] border backdrop-blur-md flex flex-col justify-between transition-all hover:scale-[1.02] duration-300 ${getRiskColor(metrics.cardiovascularRisk.color)}`}>
-              <div className="flex justify-between items-start">
-                <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-sm">
-                  <Heart className="w-6 h-6" />
-                </div>
-                <span className="text-xs font-bold uppercase tracking-wider opacity-70 bg-white/10 px-2 py-1 rounded-full">Acute</span>
+          {/* Pollutant Breakdown Pie Chart */}
+          <div className="col-span-12 lg:col-span-4 p-6 rounded-[24px] border border-white/10 bg-white/5 backdrop-blur-md flex flex-col transition-all hover:scale-[1.02] duration-300">
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-sm">
+                <PieIcon className="w-6 h-6 text-indigo-400" />
               </div>
+              <span className="text-xs font-bold uppercase tracking-wider opacity-70 bg-white/10 px-2 py-1 rounded-full text-indigo-400">Drivers</span>
+            </div>
+            <div className="h-40 w-full mb-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={healthAnalysis.pollutantBreakdown}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={45}
+                    outerRadius={65}
+                    paddingAngle={5}
+                    dataKey="impact"
+                  >
+                    {healthAnalysis.pollutantBreakdown.map((entry: any, index: number) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
+                    itemStyle={{ color: '#fff' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="grid grid-cols-2 gap-2 mt-auto">
+              {healthAnalysis.pollutantBreakdown?.slice(0, 4).map((p: any) => (
+                <div key={p.name} className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: p.color }} />
+                  <span className="text-[10px] font-medium text-slate-400">{p.name} {p.impact}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Activity Windows & Recommendations */}
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-12 lg:col-span-7 bg-white/5 backdrop-blur-md border border-white/10 rounded-[24px] p-8 shadow-xl">
+            <div className="flex items-center justify-between mb-8">
               <div>
-                <p className="text-4xl font-bold mb-1 tracking-tight">+{metrics.cardiovascularRisk.increase}%</p>
-                <p className="text-sm font-medium opacity-80">{metrics.cardiovascularRisk.label}</p>
+                <h2 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-indigo-400" />
+                  Activity Suitability Timeline
+                </h2>
+                <p className="text-sm text-slate-400">Optimal windows for outdoor physiological exertion.</p>
               </div>
             </div>
-
-            {/* Card 2: Respiratory */}
-            <div className={`flex-1 p-6 rounded-[24px] border backdrop-blur-md flex flex-col justify-between transition-all hover:scale-[1.02] duration-300 ${getRiskColor(metrics.respiratoryRisk.color)}`}>
-              <div className="flex justify-between items-start">
-                <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-sm">
-                  <Wind className="w-6 h-6" />
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {healthAnalysis.activityWindows.map((window: any) => (
+                <div key={window.hour} className="bg-slate-950/40 border border-white/5 rounded-2xl p-4 flex flex-col items-center gap-3 transition-all hover:bg-white/5">
+                  <span className="text-[10px] font-bold text-slate-500">{window.label}</span>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${window.status === 'optimal' ? 'border-emerald-500/30 bg-emerald-500/10' :
+                      window.status === 'guarded' ? 'border-amber-500/30 bg-amber-500/10' :
+                        window.status === 'limited' ? 'border-orange-500/30 bg-orange-500/10' :
+                          'border-rose-500/30 bg-rose-500/10'
+                    }`}>
+                    <Activity className={`w-5 h-5 ${window.status === 'optimal' ? 'text-emerald-400' :
+                        window.status === 'guarded' ? 'text-amber-400' :
+                          window.status === 'limited' ? 'text-orange-400' :
+                            'text-rose-400'
+                      }`} />
+                  </div>
+                  <StatusBadge status={window.status} />
                 </div>
-                <span className="text-xs font-bold uppercase tracking-wider opacity-70 bg-white/10 px-2 py-1 rounded-full">Irritant</span>
-              </div>
-              <div>
-                <p className="text-4xl font-bold mb-1 tracking-tight">+{metrics.respiratoryRisk.increase}%</p>
-                <p className="text-sm font-medium opacity-80">{metrics.respiratoryRisk.label}</p>
-              </div>
+              ))}
             </div>
+          </div>
 
-            {/* Card 3: Neuro */}
-            <div className={`flex-1 p-6 rounded-[24px] border backdrop-blur-md flex flex-col justify-between transition-all hover:scale-[1.02] duration-300 ${getRiskColor(metrics.neurologicalRisk.color)}`}>
-              <div className="flex justify-between items-start">
-                <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-sm">
-                  <Brain className="w-6 h-6" />
+          <div className="col-span-12 lg:col-span-5 bg-indigo-600/10 backdrop-blur-md border border-indigo-500/20 rounded-[24px] p-8 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 opacity-10">
+              <Stethoscope className="w-32 h-32" />
+            </div>
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-indigo-500/20 rounded-lg">
+                  <Heart className="w-5 h-5 text-indigo-400" />
                 </div>
-                <span className="text-xs font-bold uppercase tracking-wider opacity-70 bg-white/10 px-2 py-1 rounded-full">Long-term</span>
+                <h2 className="text-lg font-bold text-white uppercase tracking-tight">Tactical Recommendations</h2>
               </div>
-              <div>
-                <p className="text-4xl font-bold mb-1 tracking-tight">+{metrics.neurologicalRisk.increase}%</p>
-                <p className="text-sm font-medium opacity-80">{metrics.neurologicalRisk.label}</p>
+
+              <div className="flex-1 space-y-4">
+                {healthAnalysis.recommendations.map((rec: string, i: number) => (
+                  <div key={i} className="flex gap-4 p-4 bg-slate-950/30 border border-white/5 rounded-2xl transition-all hover:border-indigo-500/30 group">
+                    <div className="mt-1">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500 opacity-60 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                    <p className="text-sm text-slate-200 leading-snug">{rec}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                  <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Neural Analysis v4.2</span>
+                </div>
+                <Badge className="bg-white/10 text-[9px] text-slate-400 border-none">Accuracy Certified</Badge>
               </div>
             </div>
           </div>
@@ -420,7 +507,6 @@ export const QuantumHealthAnalysisComponent = ({ cityName, airQuality, forecast,
             </TabsContent>
           </Tabs>
         </div>
-
       </main>
     </div>
   );

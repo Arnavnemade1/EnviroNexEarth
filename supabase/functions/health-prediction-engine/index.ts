@@ -35,6 +35,26 @@ interface ClimateData {
     };
 }
 
+interface HealthAnalysisResponse {
+    overallRisk: string;
+    riskScore: number;
+    metrics: {
+        aggregateRiskIncrease: number;
+        cardiovascularRisk: { label: string; increase: number; color: 'rose' | 'amber' | 'emerald' };
+        respiratoryRisk: { label: string; increase: number; color: 'rose' | 'amber' | 'emerald' };
+        neurologicalRisk: { label: string; increase: number; color: 'rose' | 'amber' | 'emerald' };
+    };
+    pollutantBreakdown: Array<{ name: string; impact: number; color: string }>;
+    recommendations: string[];
+    activityWindows: Array<{
+        hour: number;
+        label: string;
+        status: 'optimal' | 'guarded' | 'limited' | 'prohibited';
+        riskScore: number;
+        riskIncreaseSteps: number;
+    }>;
+}
+
 Deno.serve(async (req) => {
     if (req.method === 'OPTIONS') {
         return new Response(null, { headers: corsHeaders });
@@ -45,15 +65,35 @@ Deno.serve(async (req) => {
         const { climateData, healthProfile }: { climateData: ClimateData, healthProfile: HealthProfile } = payload;
         const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
-        let data;
+        let data: HealthAnalysisResponse;
 
         if (!LOVABLE_API_KEY) {
             console.warn('LOVABLE_API_KEY not found, using algorithmic fallback');
             data = generateMockHealthAnalysis(climateData, healthProfile);
         } else {
             try {
-                const systemPrompt = "You are the AuraEarth Neural Health Engine. Analyze environmental data and personal health profiles to predict hyper-local epidemiological risks.\n\nReturn ONLY valid JSON.";
-                const userPrompt = "Location: " + climateData.cityName + "\nEnvironmental Data: AQI " + climateData.airQuality.aqi + ", PM2.5 " + climateData.airQuality.pm25 + "\nHealth Profile: Age " + healthProfile.age + ", Asthma " + healthProfile.hasAsthma;
+                const systemPrompt = `You are the AuraEarth Neural Health Engine. Analyze environmental data and personal health profiles.
+                Return ONLY valid JSON with this schema:
+                {
+                  "overallRisk": "low"|"moderate"|"high"|"extreme",
+                  "riskScore": number (0-100),
+                  "metrics": {
+                    "aggregateRiskIncrease": number (percentage),
+                    "cardiovascularRisk": { "label": "Cardiovascular", "increase": number, "color": "rose"|"amber"|"emerald" },
+                    "respiratoryRisk": { "label": "Respiratory", "increase": number, "color": "rose"|"amber"|"emerald" },
+                    "neurologicalRisk": { "label": "Neurological", "increase": number, "color": "rose"|"amber"|"emerald" }
+                  },
+                  "pollutantBreakdown": [ { "name": "PM2.5"|"O3"|"NO2"|"SO2"|"CO", "impact": number (0-100 percentage contribution), "color": string } ],
+                  "recommendations": [ string (maximum 3, realistic, non-obvious) ],
+                  "activityWindows": [ { "hour": number, "label": "HH:00", "status": "optimal"|"guarded"|"limited"|"prohibited", "riskScore": number, "riskIncreaseSteps": number } ]
+                }
+                CRITICAL: Recommendations MUST be realistic. Do NOT suggest masks unless PM2.5 > 50 or AQI > 100. Do NOT suggest staying indoors unless AQI > 150.`;
+
+                const userPrompt = `Location: ${climateData.cityName}
+                AQI: ${climateData.airQuality.aqi}
+                PM2.5: ${climateData.airQuality.pm25}
+                O3: ${climateData.airQuality.o3}
+                Profile: Age ${healthProfile.age}, Asthma: ${healthProfile.hasAsthma}, Heart: ${healthProfile.hasHeartCondition}`;
 
                 const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
                     method: 'POST',
@@ -67,7 +107,7 @@ Deno.serve(async (req) => {
                             { role: 'system', content: systemPrompt },
                             { role: 'user', content: userPrompt }
                         ],
-                        temperature: 0.3
+                        temperature: 0.2
                     }),
                 });
 
@@ -78,7 +118,7 @@ Deno.serve(async (req) => {
                 content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
                 data = JSON.parse(content);
             } catch (e) {
-                console.error('AI call failed, falling back:', e.message);
+                console.error('AI call failed, falling back:', (e as Error).message);
                 data = generateMockHealthAnalysis(climateData, healthProfile);
             }
         }
@@ -87,40 +127,82 @@ Deno.serve(async (req) => {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
     } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
+        return new Response(JSON.stringify({ error: (error as Error).message }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
     }
 });
 
-function generateMockHealthAnalysis(climateData: ClimateData, healthProfile: HealthProfile) {
-    const aqi = climateData.airQuality.aqi;
-    const pm25 = climateData.airQuality.pm25;
+function generateMockHealthAnalysis(climateData: ClimateData, healthProfile: HealthProfile): HealthAnalysisResponse {
+    const aq = climateData.airQuality;
+    const aqi = aq.aqi;
 
-    let riskScore = Math.min(100, (aqi / 3) + (healthProfile.hasAsthma ? 20 : 0));
-    let overallRisk = riskScore > 70 ? "high" : riskScore > 40 ? "moderate" : "low";
+    // Weighted risk calculation
+    let baseRisk = (aqi / 2) + (healthProfile.hasAsthma ? 15 : 0) + (healthProfile.hasHeartCondition ? 20 : 0);
+    const riskScore = Math.min(100, Math.round(baseRisk));
+    const overallRisk = riskScore > 80 ? "extreme" : riskScore > 60 ? "high" : riskScore > 30 ? "moderate" : "low";
+
+    // Realistic recommendations
+    const recommendations: string[] = [];
+    if (aqi > 150) {
+        recommendations.push("Sensitive groups should remain indoors with HEPA filtration.");
+        recommendations.push("Mandatory N95 usage for essential outdoor activities.");
+    } else if (aqi > 100) {
+        recommendations.push("Limit strenuous outdoor exercise to reduce deep lung penetration.");
+        if (healthProfile.hasAsthma) recommendations.push("Carry rescue medication even for short outdoor durations.");
+    } else if (aqi > 50) {
+        recommendations.push("Monitor for mild respiratory irritation during high-intensity cardio.");
+        recommendations.push("Optimal time for outdoor activity is before peak traffic or after rain.");
+    } else {
+        recommendations.push("Atmospheric conditions are optimal for all health profiles.");
+        recommendations.push("No specific respiratory interventions required.");
+    }
+
+    // Pollutant Breakdown
+    const total = aq.pm25 + aq.o3 + aq.no2 + aq.so2 + 0.1;
+    const pollutantBreakdown = [
+        { name: "PM2.5", impact: Math.round((aq.pm25 / total) * 100), color: "#38bdf8" },
+        { name: "Ozone", impact: Math.round((aq.o3 / total) * 100), color: "#fbbf24" },
+        { name: "NO2", impact: Math.round((aq.no2 / total) * 100), color: "#f87171" },
+        { name: "Others", impact: Math.round(((aq.so2 + aq.co) / total) * 100), color: "#94a3b8" }
+    ].filter(p => p.impact > 0);
 
     return {
-        overallRisk: overallRisk,
-        riskScore: Math.round(riskScore),
+        overallRisk,
+        riskScore,
         metrics: {
-            aggregateRiskIncrease: Math.round((riskScore / 100) * 45),
-            cardiovascularRisk: { label: "Cardiovascular", increase: Math.round(riskScore * 0.4), color: riskScore > 60 ? "rose" : "amber" },
-            respiratoryRisk: { label: "Respiratory", increase: Math.round(riskScore * 0.6), color: riskScore > 60 ? "rose" : "amber" },
-            neurologicalRisk: { label: "Neurological", increase: Math.round(riskScore * 0.2), color: "emerald" }
+            aggregateRiskIncrease: Math.round((riskScore / 100) * 35),
+            cardiovascularRisk: {
+                label: "Cardiovascular",
+                increase: Math.round(riskScore * 0.35),
+                color: riskScore > 75 ? "rose" : riskScore > 45 ? "amber" : "emerald"
+            },
+            respiratoryRisk: {
+                label: "Respiratory",
+                increase: Math.round(riskScore * 0.55),
+                color: riskScore > 70 ? "rose" : riskScore > 40 ? "amber" : "emerald"
+            },
+            neurologicalRisk: {
+                label: "Neurological",
+                increase: Math.round(riskScore * 0.15),
+                color: riskScore > 85 ? "rose" : "emerald"
+            }
         },
-        recommendations: [
-            "Limit high-intensity outdoor activities during peak heat.",
-            healthProfile.hasAsthma ? "Ensure rescue inhaler is available at all times." : "Monitor air quality before prolonged outdoor exposure.",
-            "Increase indoor air filtration if AQI exceeds 100."
-        ],
-        activityWindows: Array.from({ length: 12 }, (_, i) => ({
-            hour: (new Date().getHours() + i) % 24,
-            label: `${((new Date().getHours() + i) % 24).toString().padStart(2, '0')}:00`,
-            status: aqi > 100 ? "limited" : "optimal",
-            riskScore: Math.round(riskScore + Math.sin(i * 0.5) * 10),
-            riskIncreaseSteps: Math.round(riskScore * 0.5)
-        }))
+        pollutantBreakdown,
+        recommendations: recommendations.slice(0, 3),
+        activityWindows: Array.from({ length: 8 }, (_, i) => {
+            const hour = (new Date().getHours() + (i * 3)) % 24;
+            const hourImpact = Math.sin((hour - 12) / 4) * 15; // Simulated diurnal variation
+            const currentRisk = Math.max(0, Math.min(100, riskScore + hourImpact));
+
+            return {
+                hour,
+                label: `${hour.toString().padStart(2, '0')}:00`,
+                status: currentRisk > 80 ? "prohibited" : currentRisk > 60 ? "limited" : currentRisk > 30 ? "guarded" : "optimal",
+                riskScore: Math.round(currentRisk),
+                riskIncreaseSteps: Math.round(currentRisk * 0.3)
+            };
+        })
     };
 }

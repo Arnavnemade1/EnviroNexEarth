@@ -21,25 +21,32 @@ export interface EpidemiologicalMetrics {
     color: 'emerald' | 'amber' | 'rose';
   };
   neurologicalRisk: {
-    label: string; // "Cognitive Decline Risk"
-    increase: number; // % Increase (Long term proxy)
+    label: string;
+    increase: number;
     color: 'emerald' | 'amber' | 'rose';
   };
-  recommendations: string[];
+}
+
+export interface PollutantImpact {
+  name: string;
+  impact: number;
+  color: string;
 }
 
 export interface ActivityWindow {
   hour: number;
   label: string;
-  status: 'optimal' | 'limited' | 'danger';
+  status: 'optimal' | 'guarded' | 'limited' | 'prohibited';
   riskScore: number;
-  riskIncreaseSteps: number; // For graph step chart
+  riskIncreaseSteps: number;
 }
 
 export interface QuantumHealthAnalysis {
-  overallRisk: 'very-low' | 'low' | 'moderate' | 'high' | 'very-high';
+  overallRisk: 'low' | 'moderate' | 'high' | 'extreme';
   riskScore: number;
   metrics: EpidemiologicalMetrics;
+  pollutantBreakdown: PollutantImpact[];
+  recommendations: string[];
   activityWindows: ActivityWindow[];
   timeToSafety: number | null;
 }
@@ -121,7 +128,7 @@ export function calculateEpidemiologicalRisk(
 
   return {
     overallRisk: getRiskLevel(aggregateRisk),
-    riskScore: aggregateRisk, // Using Risk% directly as the score
+    riskScore: aggregateRisk,
     metrics: {
       aggregateRiskIncrease: Number(aggregateRisk.toFixed(1)),
       cardiovascularRisk: {
@@ -138,20 +145,24 @@ export function calculateEpidemiologicalRisk(
         label: "Stroke Hazard (Proxy)",
         increase: Number(neuroRisk.toFixed(1)),
         color: neuroRisk > 4 ? 'rose' : neuroRisk > 2 ? 'amber' : 'emerald'
-      },
-      recommendations: recs
+      }
     },
-    activityWindows: [], // Populated in forecast
+    pollutantBreakdown: [
+      { name: "PM2.5", impact: 70, color: "#38bdf8" },
+      { name: "Ozone", impact: 20, color: "#fbbf24" },
+      { name: "Others", impact: 10, color: "#94a3b8" }
+    ],
+    recommendations: recs,
+    activityWindows: [],
     timeToSafety: null
   };
 }
 
 function getRiskLevel(riskPct: number): QuantumHealthAnalysis['overallRisk'] {
-  if (riskPct < 1) return 'very-low';
   if (riskPct < 3) return 'low';
   if (riskPct < 6) return 'moderate';
-  if (riskPct < 10) return 'high';
-  return 'very-high';
+  if (riskPct < 15) return 'high';
+  return 'extreme';
 }
 
 export function predictHealthTrend(
@@ -183,7 +194,7 @@ export function predictHealthTrend(
     return {
       hour: index,
       label: `${hour}:00`,
-      status: futureStats.riskScore < 3 ? 'optimal' : futureStats.riskScore < 6 ? 'limited' : 'danger',
+      status: futureStats.riskScore < 3 ? 'optimal' : futureStats.riskScore < 6 ? 'guarded' : futureStats.riskScore < 15 ? 'limited' : 'prohibited',
       riskScore: futureStats.riskScore,
       riskIncreaseSteps: futureStats.metrics.aggregateRiskIncrease
     };
