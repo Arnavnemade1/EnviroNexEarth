@@ -72,33 +72,33 @@ Deno.serve(async (req) => {
             data = generateMockHealthAnalysis(climateData, healthProfile);
         } else {
             try {
-                const systemPrompt = `You are the AuraEarth Neural Health Engine. Analyze environmental data and personal health profiles.
-                Return ONLY valid JSON with this schema:
-                {
-                  "overallRisk": "low"|"moderate"|"high"|"extreme",
-                  "riskScore": number (0-100),
-                  "metrics": {
-                    "aggregateRiskIncrease": number (percentage),
-                    "cardiovascularRisk": { "label": "Cardiovascular", "increase": number, "color": "rose"|"amber"|"emerald" },
-                    "respiratoryRisk": { "label": "Respiratory", "increase": number, "color": "rose"|"amber"|"emerald" },
-                    "neurologicalRisk": { "label": "Neurological", "increase": number, "color": "rose"|"amber"|"emerald" }
-                  },
-                  "pollutantBreakdown": [ { "name": "PM2.5"|"O3"|"NO2"|"SO2"|"CO", "impact": number (0-100 percentage contribution), "color": string } ],
-                  "recommendations": [ string (maximum 3, realistic, non-obvious) ],
-                  "activityWindows": [ { "hour": number, "label": "HH:00", "status": "optimal"|"guarded"|"limited"|"prohibited", "riskScore": number, "riskIncreaseSteps": number } ]
-                }
-                CRITICAL: Recommendations MUST be realistic. Do NOT suggest masks unless PM2.5 > 50 or AQI > 100. Do NOT suggest staying indoors unless AQI > 150.`;
+                const systemPrompt = "You are the AuraEarth Neural Health Engine. Analyze environmental data and personal health profiles.\n" +
+                    "Return ONLY valid JSON with this schema:\n" +
+                    "{\n" +
+                    "  \"overallRisk\": \"low\"|\"moderate\"|\"high\"|\"extreme\",\n" +
+                    "  \"riskScore\": number (0-100),\n" +
+                    "  \"metrics\": {\n" +
+                    "    \"aggregateRiskIncrease\": number (percentage),\n" +
+                    "    \"cardiovascularRisk\": { \"label\": \"Cardiovascular\", \"increase\": number, \"color\": \"rose\"|\"amber\"|\"emerald\" },\n" +
+                    "    \"respiratoryRisk\": { \"label\": \"Respiratory\", \"increase\": number, \"color\": \"rose\"|\"amber\"|\"emerald\" },\n" +
+                    "    \"neurologicalRisk\": { \"label\": \"Neurological\", \"increase\": number, \"color\": \"rose\"|\"amber\"|\"emerald\" }\n" +
+                    "  },\n" +
+                    "  \"pollutantBreakdown\": [ { \"name\": \"PM2.5\"|\"O3\"|\"NO2\"|\"SO2\"|\"CO\", \"impact\": number (0-100 percentage contribution), \"color\": string } ],\n" +
+                    "  \"recommendations\": [ string (maximum 3, realistic, non-obvious) ],\n" +
+                    "  \"activityWindows\": [ { \"hour\": number, \"label\": \"HH:00\", \"status\": \"optimal\"|\"guarded\"|\"limited\"|\"prohibited\", \"riskScore\": number, \"riskIncreaseSteps\": number } ]\n" +
+                    "}\n" +
+                    "CRITICAL: Recommendations MUST be realistic. Do NOT suggest masks unless PM2.5 > 50 or AQI > 100. Do NOT suggest staying indoors unless AQI > 150.";
 
-                const userPrompt = `Location: ${climateData.cityName}
-                AQI: ${climateData.airQuality.aqi}
-                PM2.5: ${climateData.airQuality.pm25}
-                O3: ${climateData.airQuality.o3}
-                Profile: Age ${healthProfile.age}, Asthma: ${healthProfile.hasAsthma}, Heart: ${healthProfile.hasHeartCondition}`;
+                const userPrompt = "Location: " + climateData.cityName + "\n" +
+                    "AQI: " + climateData.airQuality.aqi + "\n" +
+                    "PM2.5: " + climateData.airQuality.pm25 + "\n" +
+                    "O3: " + climateData.airQuality.o3 + "\n" +
+                    "Profile: Age " + healthProfile.age + ", Asthma: " + healthProfile.hasAsthma + ", Heart: " + healthProfile.hasHeartCondition;
 
                 const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+                        'Authorization': 'Bearer ' + LOVABLE_API_KEY,
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
@@ -135,31 +135,39 @@ Deno.serve(async (req) => {
 });
 
 function generateMockHealthAnalysis(climateData: ClimateData, healthProfile: HealthProfile): HealthAnalysisResponse {
-    const aq = climateData.airQuality;
+    const { airQuality: aq, weather: w, cityName } = climateData;
     const aqi = aq.aqi;
 
-    // Weighted risk calculation
-    let baseRisk = (aqi / 2) + (healthProfile.hasAsthma ? 15 : 0) + (healthProfile.hasHeartCondition ? 20 : 0);
+    // 1. Weather-Driven Risk Modulation
+    const windFactor = Math.max(0.4, 1 - (w.windSpeed / 50));
+    const thermalAmplifier = w.temperature > 30 ? 1.2 : 1.0;
+    const humidityAmplifier = w.humidity > 70 ? 1.15 : 1.0;
+
+    // 2. Base Risk Calculation
+    let baseRisk = (aqi * 0.45) * windFactor * thermalAmplifier * humidityAmplifier;
+    if (healthProfile.hasAsthma) baseRisk *= 1.4;
+    if (healthProfile.hasHeartCondition) baseRisk *= 1.7;
+
     const riskScore = Math.min(100, Math.round(baseRisk));
     const overallRisk = riskScore > 80 ? "extreme" : riskScore > 60 ? "high" : riskScore > 30 ? "moderate" : "low";
 
-    // Realistic recommendations
+    // 3. Realistic Recommendations
     const recommendations: string[] = [];
     if (aqi > 150) {
-        recommendations.push("Sensitive groups should remain indoors with HEPA filtration.");
-        recommendations.push("Mandatory N95 usage for essential outdoor activities.");
+        recommendations.push("Atmospheric stagnation detected. Sensitive groups should remain indoors.");
+        recommendations.push("Mandatory N95 respirator usage for outdoor transit.");
     } else if (aqi > 100) {
-        recommendations.push("Limit strenuous outdoor exercise to reduce deep lung penetration.");
-        if (healthProfile.hasAsthma) recommendations.push("Carry rescue medication even for short outdoor durations.");
-    } else if (aqi > 50) {
-        recommendations.push("Monitor for mild respiratory irritation during high-intensity cardio.");
-        recommendations.push("Optimal time for outdoor activity is before peak traffic or after rain.");
+        recommendations.push("Prohibit aerobic exertion during peak UV/Heat hours.");
+        if (healthProfile.hasAsthma) recommendations.push("Ensure rescue medication is immediately accessible.");
+    } else if (w.windSpeed < 5 && aqi > 50) {
+        recommendations.push("Low dispersion predicted. Risk will peak in high-traffic corridors.");
+        recommendations.push("Optimal outdoor window: 04:00 - 06:00.");
     } else {
-        recommendations.push("Atmospheric conditions are optimal for all health profiles.");
-        recommendations.push("No specific respiratory interventions required.");
+        recommendations.push("Environmental conditions are nominal for your profile.");
+        recommendations.push("No specific restrictive interventions required.");
     }
 
-    // Pollutant Breakdown
+    // 4. Pollutant Breakdown
     const total = aq.pm25 + aq.o3 + aq.no2 + aq.so2 + 0.1;
     const pollutantBreakdown = [
         { name: "PM2.5", impact: Math.round((aq.pm25 / total) * 100), color: "#38bdf8" },
@@ -168,6 +176,26 @@ function generateMockHealthAnalysis(climateData: ClimateData, healthProfile: Hea
         { name: "Others", impact: Math.round(((aq.so2 + aq.co) / total) * 100), color: "#94a3b8" }
     ].filter(p => p.impact > 0);
 
+    // 5. Activity Windows (Advanced Diurnal Multi-Peak Model)
+    const citySeed = cityName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 100;
+
+    const activityWindows = Array.from({ length: 8 }, (_, i) => {
+        const hour = (new Date().getHours() + (i * 3)) % 24;
+        const morningPeak = Math.exp(-Math.pow(hour - 8, 2) / 4) * 20;
+        const eveningPeak = Math.exp(-Math.pow(hour - 18, 2) / 6) * 25;
+        const noise = (Math.sin(hour + citySeed) * 4) + (Math.cos(hour * 2 + citySeed) * 2);
+
+        const windowRisk = Math.max(0, Math.min(100, riskScore + morningPeak + eveningPeak + noise));
+
+        return {
+            hour: hour,
+            label: (hour < 10 ? '0' + hour : hour) + ":00",
+            status: windowRisk > 75 ? "prohibited" : windowRisk > 50 ? "limited" : windowRisk > 25 ? "guarded" : "optimal",
+            riskScore: Math.round(windowRisk),
+            riskIncreaseSteps: Math.round(windowRisk * 0.38)
+        };
+    });
+
     return {
         overallRisk,
         riskScore,
@@ -175,12 +203,12 @@ function generateMockHealthAnalysis(climateData: ClimateData, healthProfile: Hea
             aggregateRiskIncrease: Math.round((riskScore / 100) * 35),
             cardiovascularRisk: {
                 label: "Cardiovascular",
-                increase: Math.round(riskScore * 0.35),
+                increase: Math.round(riskScore * 0.38),
                 color: riskScore > 75 ? "rose" : riskScore > 45 ? "amber" : "emerald"
             },
             respiratoryRisk: {
                 label: "Respiratory",
-                increase: Math.round(riskScore * 0.55),
+                increase: Math.round(riskScore * 0.52),
                 color: riskScore > 70 ? "rose" : riskScore > 40 ? "amber" : "emerald"
             },
             neurologicalRisk: {
@@ -191,18 +219,6 @@ function generateMockHealthAnalysis(climateData: ClimateData, healthProfile: Hea
         },
         pollutantBreakdown,
         recommendations: recommendations.slice(0, 3),
-        activityWindows: Array.from({ length: 8 }, (_, i) => {
-            const hour = (new Date().getHours() + (i * 3)) % 24;
-            const hourImpact = Math.sin((hour - 12) / 4) * 15; // Simulated diurnal variation
-            const currentRisk = Math.max(0, Math.min(100, riskScore + hourImpact));
-
-            return {
-                hour,
-                label: `${hour.toString().padStart(2, '0')}:00`,
-                status: currentRisk > 80 ? "prohibited" : currentRisk > 60 ? "limited" : currentRisk > 30 ? "guarded" : "optimal",
-                riskScore: Math.round(currentRisk),
-                riskIncreaseSteps: Math.round(currentRisk * 0.3)
-            };
-        })
+        activityWindows
     };
 }
