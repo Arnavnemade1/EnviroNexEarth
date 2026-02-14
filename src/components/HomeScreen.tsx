@@ -225,21 +225,21 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
             {/* Feature List - Clean Minimal Style */}
             <div className="space-y-8">
               {[
-                { 
-                  icon: Zap, 
-                  title: 'IBM Quantum Runtime', 
+                {
+                  icon: Zap,
+                  title: 'IBM Quantum Runtime',
                   desc: 'Real quantum circuit execution for complex climate modeling',
                   color: 'cyan'
                 },
-                { 
-                  icon: Shield, 
-                  title: 'Agentic AI Systems', 
+                {
+                  icon: Shield,
+                  title: 'Agentic AI Systems',
                   desc: 'Autonomous agents that navigate, analyze, and act on environmental data',
                   color: 'cyan'
                 },
-                { 
-                  icon: Activity, 
-                  title: 'Real-Time Processing', 
+                {
+                  icon: Activity,
+                  title: 'Real-Time Processing',
                   desc: 'Sub-second data ingestion from 500+ global monitoring stations',
                   color: 'cyan'
                 }
@@ -247,10 +247,10 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
                 <div
                   key={item.title}
                   className="group flex items-start gap-6 py-6 border-b border-white/[0.06] last:border-0 cursor-pointer transition-all duration-500 hover:pl-2"
-                  style={{ 
-                    transitionDelay: `${300 + i * 100}ms`, 
-                    opacity: techAnim.isVisible ? 1 : 0, 
-                    transform: techAnim.isVisible ? 'translateY(0)' : 'translateY(20px)' 
+                  style={{
+                    transitionDelay: `${300 + i * 100}ms`,
+                    opacity: techAnim.isVisible ? 1 : 0,
+                    transform: techAnim.isVisible ? 'translateY(0)' : 'translateY(20px)'
                   }}
                 >
                   <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center group-hover:bg-cyan-500/10 group-hover:border-cyan-500/20 transition-all duration-300">
@@ -325,14 +325,13 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
                   transform: capAnim.isVisible ? 'translateY(0)' : 'translateY(20px)'
                 }}
               >
-                <div className={`text-5xl md:text-6xl font-bold mb-4 ${
-                  stat.color === 'violet' ? 'text-violet-400' :
-                  stat.color === 'rose' ? 'text-rose-400' :
-                  stat.color === 'cyan' ? 'text-cyan-400' :
-                  stat.color === 'emerald' ? 'text-emerald-400' :
-                  stat.color === 'amber' ? 'text-amber-400' :
-                  'text-pink-400'
-                }`}>
+                <div className={`text-5xl md:text-6xl font-bold mb-4 ${stat.color === 'violet' ? 'text-violet-400' :
+                    stat.color === 'rose' ? 'text-rose-400' :
+                      stat.color === 'cyan' ? 'text-cyan-400' :
+                        stat.color === 'emerald' ? 'text-emerald-400' :
+                          stat.color === 'amber' ? 'text-amber-400' :
+                            'text-pink-400'
+                  }`}>
                   {stat.value}
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-2">{stat.title}</h3>
@@ -389,7 +388,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
               <span className="text-red-400">Killers</span> in Our Air
             </h2>
             <p className="text-xl text-white/60 max-w-3xl mx-auto">
-              Millions die each year from air pollution. Understanding these pollutants 
+              Millions die each year from air pollution. Understanding these pollutants
               is the first step to protecting yourself and your family.
             </p>
           </div>
@@ -438,7 +437,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
                 icon: Heart
               }
             ].map((pollutant, i) => (
-              <div 
+              <div
                 key={pollutant.name}
                 className={`group p-6 rounded-2xl bg-gradient-to-b from-${pollutant.color}-500/10 to-transparent border border-${pollutant.color}-500/20 hover:border-${pollutant.color}-500/40 transition-all duration-500`}
                 style={{ animationDelay: `${i * 100}ms` }}
@@ -446,17 +445,17 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
                 <div className={`w-12 h-12 rounded-xl bg-${pollutant.color}-500/20 flex items-center justify-center mb-4`}>
                   <pollutant.icon className={`w-6 h-6 text-${pollutant.color}-400`} />
                 </div>
-                
+
                 <h3 className="text-3xl font-bold text-white mb-1">{pollutant.name}</h3>
                 <p className="text-sm text-white/50 mb-4">{pollutant.fullName}</p>
-                
+
                 <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 mb-4`}>
                   <AlertTriangle className="w-3 h-3 text-red-400" />
                   <span className="text-xs font-semibold text-red-400">{pollutant.danger}</span>
                 </div>
-                
+
                 <p className="text-sm text-white/60 mb-4">{pollutant.description}</p>
-                
+
                 <div className="space-y-2 pt-4 border-t border-white/10">
                   <div className="flex items-center gap-2">
                     <Heart className="w-3 h-3 text-red-400" />
@@ -482,8 +481,8 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
                   99% of the world breathes unsafe air
                 </h4>
                 <p className="text-white/60 text-sm max-w-2xl">
-                  According to the World Health Organization, nearly all of humanity is exposed to 
-                  air pollution levels that exceed safe guidelines. EnviroNex helps you understand 
+                  According to the World Health Organization, nearly all of humanity is exposed to
+                  air pollution levels that exceed safe guidelines. EnviroNex helps you understand
                   your exposure and take action to protect your health.
                 </p>
               </div>
@@ -541,7 +540,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-3">
             <Globe className="w-5 h-5 text-cyan-400" />
-            <span className="text-sm text-white/50">EnviroNex © 2024. All rights reserved.</span>
+            <span className="text-sm text-white/50">EnviroNex © 2026. All rights reserved.</span>
           </div>
 
           <div className="flex items-center gap-8 text-sm text-white/50">

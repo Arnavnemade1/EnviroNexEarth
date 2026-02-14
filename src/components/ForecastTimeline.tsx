@@ -17,13 +17,13 @@ import {
   Sparkles, Target, Shield, AlertTriangle, Clock, BarChart3,
   Globe, Users, Building, TreePine, Droplets, Sun
 } from 'lucide-react';
-import { 
-  PollutantDetailCard, 
-  getPollutantSeverity, 
-  getWHOExceedance, 
-  WHO_GUIDELINES, 
+import {
+  PollutantDetailCard,
+  getPollutantSeverity,
+  getWHOExceedance,
+  WHO_GUIDELINES,
   SEVERITY_LEVELS,
-  type PollutantType 
+  type PollutantType
 } from './PollutantSeverity';
 import { AirQualityData } from '@/types';
 
@@ -62,7 +62,7 @@ const generateProjections = (
   const basePm25 = baseAQ?.pm25 || 15;
   const baseO3 = baseAQ?.o3 || 40;
   const baseNo2 = baseAQ?.no2 || 25;
-  
+
   // Scenario-specific decay/growth rates (based on environmental science literature)
   const scenarioParams = {
     current: {
@@ -96,56 +96,56 @@ const generateProjections = (
       renewableGrowth: 0.03
     }
   };
-  
+
   const params = scenarioParams[scenario];
   const projections: YearProjection[] = [];
-  
+
   // Current baselines
   let evAdoption = 15; // 15% current EV adoption
   let renewableEnergy = 25; // 25% renewable energy
   let greenSpaceIndex = 50; // Baseline green space index
-  
-  for (let i = 0; i <= 6; i++) {
+
+  for (let i = 0; i <= 7; i++) {
     const year = baseYear + i;
     const yearFactor = i;
-    
+
     // Compound growth/decay with saturation effects
     const aqiMultiplier = Math.pow(1 + params.aqiRate, yearFactor);
     const pm25Multiplier = Math.pow(1 + params.pm25Rate, yearFactor);
     const o3Multiplier = Math.pow(1 + params.o3Rate, yearFactor);
     const no2Multiplier = Math.pow(1 + params.no2Rate, yearFactor);
-    
+
     // Calculate projections with bounds
     const projectedAqi = Math.max(10, Math.min(300, baseAqi * aqiMultiplier));
     const projectedPm25 = Math.max(2, Math.min(200, basePm25 * pm25Multiplier));
     const projectedO3 = Math.max(10, Math.min(150, baseO3 * o3Multiplier));
     const projectedNo2 = Math.max(5, Math.min(150, baseNo2 * no2Multiplier));
-    
+
     // CO2 equivalent (relative index)
     const co2 = Math.max(60, Math.min(200, 100 * Math.pow(1 + params.co2Rate, yearFactor)));
-    
+
     // Update adoption metrics with saturation
     evAdoption = Math.min(95, evAdoption * (1 + params.evGrowth));
     renewableEnergy = Math.min(100, renewableEnergy * (1 + params.renewableGrowth));
     greenSpaceIndex = Math.max(20, Math.min(90, greenSpaceIndex * (1 + params.greenGrowth)));
-    
+
     // Health score inversely proportional to pollution
     const pollutionIndex = (projectedAqi + projectedPm25 * 2) / 3;
     const healthScore = Math.max(20, Math.min(100, 100 - pollutionIndex * 0.5));
-    
+
     // Outdoor activity days based on AQI
     const outdoorDays = Math.max(50, Math.min(340, 340 - projectedAqi * 1.2));
-    
+
     // Economic impact (billions in health costs, inverse to clean energy)
-    const economicImpact = scenario === 'clean_energy' 
+    const economicImpact = scenario === 'clean_energy'
       ? Math.max(5, 50 - yearFactor * 6)
       : scenario === 'no_action'
         ? Math.min(150, 50 + yearFactor * 15)
         : 50 + yearFactor * 2;
-    
+
     // Confidence decreases with projection horizon
     const confidence = Math.max(60, 98 - yearFactor * 5);
-    
+
     projections.push({
       year,
       aqi: Math.round(projectedAqi),
@@ -162,7 +162,7 @@ const generateProjections = (
       confidence: Math.round(confidence)
     });
   }
-  
+
   return projections;
 };
 
@@ -206,23 +206,23 @@ export const ForecastTimeline = ({
 }: ForecastTimelineProps) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'pollutants' | 'health' | 'economy'>('overview');
   const [comparisonMode, setComparisonMode] = useState(false);
-  
+
   // Generate all scenario projections for comparison
   const allProjections = useMemo(() => ({
     current: generateProjections(airQuality, 'current'),
     clean_energy: generateProjections(airQuality, 'clean_energy'),
     no_action: generateProjections(airQuality, 'no_action')
   }), [airQuality]);
-  
+
   const projections = allProjections[selectedScenario];
   const currentProjection = projections[currentYear] || projections[0];
   const baselineProjection = projections[0];
-  
+
   // Calculate changes from baseline
   const aqiChange = currentProjection.aqi - baselineProjection.aqi;
   const pm25Change = currentProjection.pm25 - baselineProjection.pm25;
   const healthChange = currentProjection.healthScore - baselineProjection.healthScore;
-  
+
   // Chart data for comparison view
   const comparisonData = useMemo(() => {
     return projections.map((p, i) => ({
@@ -233,7 +233,7 @@ export const ForecastTimeline = ({
       selected: p.aqi
     }));
   }, [projections, allProjections]);
-  
+
   const pollutantData = projections.map(p => ({
     year: p.year,
     AQI: p.aqi,
@@ -241,14 +241,14 @@ export const ForecastTimeline = ({
     O3: p.o3,
     NO2: p.no2
   }));
-  
+
   const healthData = projections.map(p => ({
     year: p.year,
     'Health Score': p.healthScore,
     'Outdoor Days': p.outdoorDays / 3.4, // Normalized to 100
     'Green Space': p.greenSpaceIndex
   }));
-  
+
   const adoptionData = projections.map(p => ({
     year: p.year,
     'EV Adoption': p.evAdoption,
@@ -283,7 +283,7 @@ export const ForecastTimeline = ({
               <Calendar className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">2030 Climate Forecast</h3>
+              <h3 className="text-lg font-bold text-white">2033 Climate Forecast</h3>
               <p className="text-xs text-white/50">{cityName} • Quantum-Enhanced Projections</p>
             </div>
           </div>
@@ -292,7 +292,7 @@ export const ForecastTimeline = ({
             {config.label}
           </Badge>
         </div>
-        
+
         {/* Scenario Selector */}
         <div className="grid grid-cols-3 gap-2">
           {(Object.keys(scenarioConfig) as Array<keyof typeof scenarioConfig>).map((key) => {
@@ -303,11 +303,10 @@ export const ForecastTimeline = ({
               <button
                 key={key}
                 onClick={() => onScenarioChange(key)}
-                className={`p-2 rounded-lg transition-all duration-300 ${
-                  isActive 
+                className={`p-2 rounded-lg transition-all duration-300 ${isActive
                     ? `bg-gradient-to-br ${sc.color} text-white shadow-lg shadow-${key === 'clean_energy' ? 'emerald' : key === 'no_action' ? 'red' : 'amber'}-500/30`
                     : 'bg-white/5 text-white/60 hover:bg-white/10'
-                }`}
+                  }`}
               >
                 <Icon className={`w-4 h-4 mx-auto mb-1 ${isActive ? 'text-white' : sc.textColor}`} />
                 <div className="text-[10px] font-medium truncate">{sc.label.split(' ')[0]}</div>
@@ -339,20 +338,20 @@ export const ForecastTimeline = ({
                 <Button
                   size="icon"
                   variant="ghost"
-                  onClick={() => currentYear < 6 && onYearChange(currentYear + 1)}
-                  disabled={currentYear >= 6}
+                  onClick={() => currentYear < 7 && onYearChange(currentYear + 1)}
+                  disabled={currentYear >= 7}
                   className="h-6 w-6"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-            
+
             <div className="relative">
               <Slider
                 value={[currentYear]}
                 onValueChange={(v) => onYearChange(v[0])}
-                max={6}
+                max={7}
                 step={1}
                 className="w-full"
               />
@@ -454,16 +453,16 @@ export const ForecastTimeline = ({
                     <AreaChart data={comparisonData}>
                       <defs>
                         <linearGradient id="gradientClean" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="gradientCurrent" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="gradientNoAction" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
@@ -509,7 +508,7 @@ export const ForecastTimeline = ({
                   { type: 'no2', value: currentProjection.no2 }
                 ];
                 const exceeding = pollutants.filter(p => getWHOExceedance(p.type, p.value) > 100);
-                
+
                 if (exceeding.length > 0) {
                   const worstPollutant = exceeding.reduce((worst, current) => {
                     const currentExceedance = getWHOExceedance(current.type, current.value);
@@ -518,7 +517,7 @@ export const ForecastTimeline = ({
                   }, exceeding[0]);
                   const severity = getPollutantSeverity(worstPollutant.type, worstPollutant.value);
                   const exceedance = getWHOExceedance(worstPollutant.type, worstPollutant.value);
-                  
+
                   return (
                     <Card className={`p-3 ${severity.bgColor} border ${severity.borderColor}`}>
                       <div className="flex items-start gap-2">
@@ -541,7 +540,7 @@ export const ForecastTimeline = ({
                     </Card>
                   );
                 }
-                
+
                 return (
                   <Card className="p-3 bg-emerald-500/10 border border-emerald-500/30">
                     <div className="flex items-center gap-2">
@@ -553,7 +552,7 @@ export const ForecastTimeline = ({
                   </Card>
                 );
               })()}
-              
+
               {/* Pollutant Projections Chart */}
               <Card className="p-3 bg-white/5 border-white/10">
                 <div className="flex items-center justify-between mb-3">
@@ -587,26 +586,26 @@ export const ForecastTimeline = ({
                   <Heart className="w-3 h-3" />
                   Projected Health Impact by {currentProjection.year}
                 </h4>
-                <PollutantDetailCard 
-                  type="pm25" 
-                  value={currentProjection.pm25} 
+                <PollutantDetailCard
+                  type="pm25"
+                  value={currentProjection.pm25}
                   showHealthEffects={true}
                   compact={false}
                 />
-                <PollutantDetailCard 
-                  type="o3" 
-                  value={currentProjection.o3} 
+                <PollutantDetailCard
+                  type="o3"
+                  value={currentProjection.o3}
                   showHealthEffects={true}
                   compact={false}
                 />
-                <PollutantDetailCard 
-                  type="no2" 
-                  value={currentProjection.no2} 
+                <PollutantDetailCard
+                  type="no2"
+                  value={currentProjection.no2}
                   showHealthEffects={true}
                   compact={false}
                 />
               </div>
-              
+
               {/* EPA Scale Reference */}
               <Card className="p-3 bg-white/5 border-white/10">
                 <h4 className="text-xs font-medium text-white/60 mb-2">EPA Air Quality Index Scale</h4>
@@ -667,7 +666,7 @@ export const ForecastTimeline = ({
                   <Building className="w-4 h-4 text-white/60" />
                   <h4 className="text-sm font-medium text-white">Economic Impact Analysis</h4>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-lg bg-white/5">
@@ -690,14 +689,14 @@ export const ForecastTimeline = ({
                       <div>
                         <p className="text-xs font-medium text-white">Scenario Insight</p>
                         <p className="text-[11px] text-white/60 mt-1">
-                          {selectedScenario === 'clean_energy' && 
-                            `By ${currentProjection.year}, clean energy transition could save $${Math.round((projections[projections.length-1].economicImpact - allProjections.clean_energy[projections.length-1].economicImpact) * 10)}B in health costs and create ${Math.round(currentProjection.renewableEnergy * 50)}K green jobs.`
+                          {selectedScenario === 'clean_energy' &&
+                            `By ${currentProjection.year}, clean energy transition could save $${Math.round((projections[projections.length - 1].economicImpact - allProjections.clean_energy[projections.length - 1].economicImpact) * 10)}B in health costs and create ${Math.round(currentProjection.renewableEnergy * 50)}K green jobs.`
                           }
-                          {selectedScenario === 'no_action' && 
-                            `Without action, health costs could reach $${allProjections.no_action[projections.length-1].economicImpact}B by 2030, with significant impacts on productivity and quality of life.`
+                          {selectedScenario === 'no_action' &&
+                            `Without action, health costs could reach $${allProjections.no_action[projections.length - 1].economicImpact}B by 2033, with significant impacts on productivity and quality of life.`
                           }
-                          {selectedScenario === 'current' && 
-                            `Current trends suggest moderate improvements, but falling short of WHO air quality guidelines by 2030.`
+                          {selectedScenario === 'current' &&
+                            `Current trends suggest moderate improvements, but falling short of WHO air quality guidelines by 2033.`
                           }
                         </p>
                       </div>

@@ -126,7 +126,7 @@ export const modelDefinitions: ModelArchitecture[] = [
     },
 
     training: {
-      dataset: 'OpenAQ Global (2019-2024)',
+      dataset: 'OpenAQ Global (2019-2026)',
       datasetSize: '2.4M samples',
       optimizer: 'COBYLA',
       learningRate: 0.01,
@@ -137,9 +137,9 @@ export const modelDefinitions: ModelArchitecture[] = [
     },
 
     benchmarks: [
-      { name: 'AQI-Pred Benchmark', dataset: 'OpenAQ Test', metric: 'RMSE', score: 4.2, date: '2024-11' },
-      { name: 'Multi-city Eval', dataset: '50 Global Cities', metric: 'MAE', score: 3.8, date: '2024-11' },
-      { name: 'Quantum Advantage', dataset: 'vs Classical Baseline', metric: 'Speedup', score: 2.3, date: '2024-10' }
+      { name: 'AQI-Pred Benchmark', dataset: 'OpenAQ Test', metric: 'RMSE', score: 4.2, date: '2025-11' },
+      { name: 'Multi-city Eval', dataset: '50 Global Cities', metric: 'MAE', score: 3.8, date: '2025-11' },
+      { name: 'Quantum Advantage', dataset: 'vs Classical Baseline', metric: 'Speedup', score: 2.3, date: '2025-10' }
     ],
 
     references: [
@@ -196,9 +196,9 @@ export const modelDefinitions: ModelArchitecture[] = [
     },
 
     benchmarks: [
-      { name: 'Climate Pattern Classification', dataset: 'ERA5 Test', metric: 'Top-1 Acc', score: 92.3, date: '2024-12' },
-      { name: 'Extreme Event Detection', dataset: 'NOAA Storm DB', metric: 'F1', score: 0.89, date: '2024-11' },
-      { name: 'Seasonal Prediction', dataset: 'CPC Seasonal', metric: 'Correlation', score: 0.84, date: '2024-10' }
+      { name: 'Climate Pattern Classification', dataset: 'ERA5 Test', metric: 'Top-1 Acc', score: 92.3, date: '2025-12' },
+      { name: 'Extreme Event Detection', dataset: 'NOAA Storm DB', metric: 'F1', score: 0.89, date: '2025-11' },
+      { name: 'Seasonal Prediction', dataset: 'CPC Seasonal', metric: 'Correlation', score: 0.84, date: '2025-10' }
     ],
 
     references: [
@@ -265,9 +265,9 @@ export const modelDefinitions: ModelArchitecture[] = [
     },
 
     benchmarks: [
-      { name: 'Disaster Detection', dataset: 'EONET 2024', metric: 'AUC-ROC', score: 0.967, date: '2024-12' },
-      { name: 'Early Warning', dataset: 'Historical Events', metric: 'Lead Time', score: 14.2, date: '2024-11' },
-      { name: 'Multi-hazard', dataset: '8-class Test', metric: 'Macro F1', score: 0.91, date: '2024-11' }
+      { name: 'Disaster Detection', dataset: 'EONET 2026', metric: 'AUC-ROC', score: 0.967, date: '2025-12' },
+      { name: 'Early Warning', dataset: 'Historical Events', metric: 'Lead Time', score: 14.2, date: '2025-11' },
+      { name: 'Multi-hazard', dataset: '8-class Test', metric: 'Macro F1', score: 0.91, date: '2025-11' }
     ],
 
     references: [
@@ -324,9 +324,9 @@ export const modelDefinitions: ModelArchitecture[] = [
     },
 
     benchmarks: [
-      { name: '24h Temperature Forecast', dataset: 'NOAA Test', metric: 'MAE', score: 0.42, date: '2024-12' },
-      { name: '72h Precipitation', dataset: 'CPC Verification', metric: 'Brier Score', score: 0.18, date: '2024-11' },
-      { name: 'Inference Speed', dataset: 'Production Load', metric: 'p99 Latency', score: 145, date: '2024-12' }
+      { name: '24h Temperature Forecast', dataset: 'NOAA Test', metric: 'MAE', score: 0.42, date: '2025-12' },
+      { name: '72h Precipitation', dataset: 'CPC Verification', metric: 'Brier Score', score: 0.18, date: '2025-11' },
+      { name: 'Inference Speed', dataset: 'Production Load', metric: 'p99 Latency', score: 145, date: '2026-01' }
     ],
 
     references: [
@@ -453,9 +453,9 @@ export const modelDefinitions: ModelArchitecture[] = [
     },
 
     benchmarks: [
-      { name: 'Anomaly Detection', dataset: 'EPA Sensor Faults', metric: 'AUC-PR', score: 0.962, date: '2024-12' },
-      { name: 'Early Detection', dataset: 'Pollution Spikes', metric: 'Avg Lead Time', score: 23.5, date: '2024-11' },
-      { name: 'False Alarm Rate', dataset: 'Production 30d', metric: 'FAR', score: 0.024, date: '2024-12' }
+      { name: 'Anomaly Detection', dataset: 'EPA Sensor Faults', metric: 'AUC-PR', score: 0.962, date: '2025-12' },
+      { name: 'Early Detection', dataset: 'Pollution Spikes', metric: 'Avg Lead Time', score: 23.5, date: '2025-11' },
+      { name: 'False Alarm Rate', dataset: 'Production 30d', metric: 'FAR', score: 0.024, date: '2026-01' }
     ],
 
     references: [
@@ -519,8 +519,8 @@ export const modelDefinitions: ModelArchitecture[] = [
     },
 
     benchmarks: [
-      { name: 'Link Stability', dataset: 'LEO Constellation', metric: 'Uptime', score: 99.99, date: '2024-12' },
-      { name: 'Throughput Opt', dataset: 'Global Traffic', metric: 'Gbps', score: 150, date: '2024-11' }
+      { name: 'Link Stability', dataset: 'LEO Constellation', metric: 'Uptime', score: 99.99, date: '2025-12' },
+      { name: 'Throughput Opt', dataset: 'Global Traffic', metric: 'Gbps', score: 150, date: '2025-11' }
     ],
 
     references: [
@@ -574,8 +574,8 @@ export const modelDefinitions: ModelArchitecture[] = [
     },
 
     benchmarks: [
-      { name: 'Risk Assessment', dataset: 'Historical Disasters', metric: 'Accuracy', score: 88.5, date: '2024-12' },
-      { name: 'Text Generation', dataset: 'Impact Reports', metric: 'BLEU', score: 45.2, date: '2024-11' }
+      { name: 'Risk Assessment', dataset: 'Historical Disasters', metric: 'Accuracy', score: 88.5, date: '2025-12' },
+      { name: 'Text Generation', dataset: 'Impact Reports', metric: 'BLEU', score: 45.2, date: '2025-11' }
     ],
 
     references: [
