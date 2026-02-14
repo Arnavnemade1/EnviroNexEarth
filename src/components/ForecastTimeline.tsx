@@ -57,94 +57,112 @@ const generateProjections = (
   baseAQ: AirQualityData | null,
   scenario: 'current' | 'clean_energy' | 'no_action'
 ): YearProjection[] => {
-  const baseYear = new Date().getFullYear();
-  const baseAqi = baseAQ?.aqi || 50;
-  const basePm25 = baseAQ?.pm25 || 15;
-  const baseO3 = baseAQ?.o3 || 40;
-  const baseNo2 = baseAQ?.no2 || 25;
+  const baseYear = 2026;
+  if (!baseAQ) return [];
 
-  // Scenario-specific decay/growth rates (based on environmental science literature)
-  const scenarioParams = {
-    current: {
-      aqiRate: 0.02,      // 2% annual increase
-      pm25Rate: 0.025,
-      o3Rate: 0.015,
-      no2Rate: 0.02,
-      co2Rate: 0.018,
-      greenGrowth: 0.01,
-      evGrowth: 0.12,
-      renewableGrowth: 0.08
-    },
-    clean_energy: {
-      aqiRate: -0.12,     // 12% annual decrease
-      pm25Rate: -0.15,
-      o3Rate: -0.08,
-      no2Rate: -0.14,
-      co2Rate: -0.10,
-      greenGrowth: 0.08,
-      evGrowth: 0.35,
-      renewableGrowth: 0.20
-    },
-    no_action: {
-      aqiRate: 0.08,      // 8% annual increase
-      pm25Rate: 0.10,
-      o3Rate: 0.05,
-      no2Rate: 0.09,
-      co2Rate: 0.06,
-      greenGrowth: -0.02,
-      evGrowth: 0.05,
-      renewableGrowth: 0.03
-    }
+  // City-specific entropy seed for consistent but realistic volatility
+  const cityName = baseAQ.cityName || 'Earth';
+  const citySeed = cityName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+
+  const getSimulatedNoise = (year: number, factor: number) => {
+    // Deterministic noise based on city and year/factor
+    const val = Math.sin(year * 0.5 + citySeed) * Math.cos(year * 0.8 + factor);
+    return val;
   };
 
-  const params = scenarioParams[scenario];
+  // Scenario-specific growth/decay rates (non-linear)
+  const scenarioConfig = {
+    clean_energy: {
+      aqiRate: -0.06,
+      pm25Rate: -0.08,
+      o3Rate: -0.03,
+      no2Rate: -0.07,
+      co2Rate: -0.04,
+      renewableGrowth: 0.15,
+      evGrowth: 0.25,
+      greenGrowth: 0.05,
+      volatility: 0.04
+    },
+    no_action: {
+      aqiRate: 0.07,
+      pm25Rate: 0.09,
+      o3Rate: 0.04,
+      no2Rate: 0.08,
+      co2Rate: 0.05,
+      renewableGrowth: 0.02,
+      evGrowth: 0.05,
+      greenGrowth: -0.02,
+      volatility: 0.10
+    },
+    current: {
+      aqiRate: 0.02,
+      pm25Rate: 0.03,
+      o3Rate: 0.015,
+      no2Rate: 0.025,
+      co2Rate: 0.02,
+      renewableGrowth: 0.06,
+      evGrowth: 0.12,
+      greenGrowth: 0.01,
+      volatility: 0.07
+    }
+  }[scenario];
+
   const projections: YearProjection[] = [];
 
-  // Current baselines
-  let evAdoption = 15; // 15% current EV adoption
-  let renewableEnergy = 25; // 25% renewable energy
-  let greenSpaceIndex = 50; // Baseline green space index
+  // Starting values
+  let currentAQI = baseAQ.aqi;
+  let currentPM25 = baseAQ.pm25;
+  let currentO3 = baseAQ.o3;
+  let currentNo2 = baseAQ.no2;
+  let currentCo2 = 100; // relative base
+  let currentEvAdoption = 15;
+  let currentRenewableEnergy = 25;
+  let currentGreenSpaceIndex = 50;
+  let cumulativeEconomicImpact = 50; // Starting base billion index
 
   for (let i = 0; i <= 7; i++) {
     const year = baseYear + i;
-    const yearFactor = i;
+    const progress = i / 7;
 
-    // Compound growth/decay with saturation effects
-    const aqiMultiplier = Math.pow(1 + params.aqiRate, yearFactor);
-    const pm25Multiplier = Math.pow(1 + params.pm25Rate, yearFactor);
-    const o3Multiplier = Math.pow(1 + params.o3Rate, yearFactor);
-    const no2Multiplier = Math.pow(1 + params.no2Rate, yearFactor);
+    // Atmospheric feedback loops and deterministic chaos
+    const noise = getSimulatedNoise(year, i);
+    const atmosphericVolatility = 1 + (noise * scenarioConfig.volatility);
 
-    // Calculate projections with bounds
-    const projectedAqi = Math.max(10, Math.min(300, baseAqi * aqiMultiplier));
-    const projectedPm25 = Math.max(2, Math.min(200, basePm25 * pm25Multiplier));
-    const projectedO3 = Math.max(10, Math.min(150, baseO3 * o3Multiplier));
-    const projectedNo2 = Math.max(5, Math.min(150, baseNo2 * no2Multiplier));
+    // Compound effects with non-linear saturations
+    const calculateValue = (base: number, rate: number, horizon: number) => {
+      return base * Math.pow(1 + rate, horizon) * atmosphericVolatility;
+    };
 
-    // CO2 equivalent (relative index)
-    const co2 = Math.max(60, Math.min(200, 100 * Math.pow(1 + params.co2Rate, yearFactor)));
+    const projectedAqi = Math.max(10, Math.min(450, calculateValue(currentAQI, scenarioConfig.aqiRate, i)));
+    const projectedPm25 = Math.max(2, Math.min(300, calculateValue(currentPM25, scenarioConfig.pm25Rate, i)));
+    const projectedO3 = Math.max(10, Math.min(200, calculateValue(currentO3, scenarioConfig.o3Rate, i)));
+    const projectedNo2 = Math.max(5, Math.min(200, calculateValue(currentNo2, scenarioConfig.no2Rate, i)));
+    const projectedCo2 = Math.max(50, Math.min(300, calculateValue(currentCo2, scenarioConfig.co2Rate, i)));
 
-    // Update adoption metrics with saturation
-    evAdoption = Math.min(95, evAdoption * (1 + params.evGrowth));
-    renewableEnergy = Math.min(100, renewableEnergy * (1 + params.renewableGrowth));
-    greenSpaceIndex = Math.max(20, Math.min(90, greenSpaceIndex * (1 + params.greenGrowth)));
+    // Update adoption metrics with saturation (using sigmoid-like growth)
+    const sigmoidGrowth = (currentValue: number, growth: number, limit: number) => {
+      const remaining = limit - currentValue;
+      return currentValue + (remaining * growth * 0.5 * (1 + noise * 0.1));
+    };
 
-    // Health score inversely proportional to pollution
-    const pollutionIndex = (projectedAqi + projectedPm25 * 2) / 3;
-    const healthScore = Math.max(20, Math.min(100, 100 - pollutionIndex * 0.5));
+    currentEvAdoption = i === 0 ? currentEvAdoption : sigmoidGrowth(currentEvAdoption, scenarioConfig.evGrowth, 95);
+    currentRenewableEnergy = i === 0 ? currentRenewableEnergy : sigmoidGrowth(currentRenewableEnergy, scenarioConfig.renewableGrowth, 100);
+    currentGreenSpaceIndex = i === 0 ? currentGreenSpaceIndex : Math.max(10, Math.min(95, currentGreenSpaceIndex + (scenarioConfig.greenGrowth * 5 * atmosphericVolatility)));
 
-    // Outdoor activity days based on AQI
-    const outdoorDays = Math.max(50, Math.min(340, 340 - projectedAqi * 1.2));
+    // Health score inversely proportional to pollution + green space bonus
+    const pollutionIndex = (projectedAqi + projectedPm25 * 2 + projectedO3) / 4;
+    const healthScore = Math.max(10, Math.min(100, (100 - pollutionIndex * 0.4) + (currentGreenSpaceIndex * 0.1)));
 
-    // Economic impact (billions in health costs, inverse to clean energy)
-    const economicImpact = scenario === 'clean_energy'
-      ? Math.max(5, 50 - yearFactor * 6)
-      : scenario === 'no_action'
-        ? Math.min(150, 50 + yearFactor * 15)
-        : 50 + yearFactor * 2;
+    // Outdoor activity days based on AQI and noise (weather events)
+    const weatherEventModifier = noise > 0.8 ? 0.7 : (noise < -0.8 ? 0.9 : 1.0);
+    const outdoorDays = Math.max(40, Math.min(350, (350 - projectedAqi * 1.1) * weatherEventModifier));
+
+    // Economic impact (billions in health costs, compounds over time)
+    const yearlyEconomicCost = (projectedAqi / 40) * (1 + i * 0.1) * (scenario === 'clean_energy' ? 0.8 : (scenario === 'no_action' ? 1.5 : 1.1));
+    if (i > 0) cumulativeEconomicImpact += yearlyEconomicCost;
 
     // Confidence decreases with projection horizon
-    const confidence = Math.max(60, 98 - yearFactor * 5);
+    const confidence = Math.max(45, 96 - i * 6 + (noise * 2));
 
     projections.push({
       year,
@@ -152,13 +170,13 @@ const generateProjections = (
       pm25: Math.round(projectedPm25 * 10) / 10,
       o3: Math.round(projectedO3),
       no2: Math.round(projectedNo2),
-      co2: Math.round(co2),
-      greenSpaceIndex: Math.round(greenSpaceIndex),
-      evAdoption: Math.round(evAdoption),
-      renewableEnergy: Math.round(renewableEnergy),
+      co2: Math.round(projectedCo2),
+      greenSpaceIndex: Math.round(currentGreenSpaceIndex),
+      evAdoption: Math.round(currentEvAdoption),
+      renewableEnergy: Math.round(currentRenewableEnergy),
       healthScore: Math.round(healthScore),
       outdoorDays: Math.round(outdoorDays),
-      economicImpact: Math.round(economicImpact),
+      economicImpact: Math.round(cumulativeEconomicImpact),
       confidence: Math.round(confidence)
     });
   }
@@ -304,8 +322,8 @@ export const ForecastTimeline = ({
                 key={key}
                 onClick={() => onScenarioChange(key)}
                 className={`p-2 rounded-lg transition-all duration-300 ${isActive
-                    ? `bg-gradient-to-br ${sc.color} text-white shadow-lg shadow-${key === 'clean_energy' ? 'emerald' : key === 'no_action' ? 'red' : 'amber'}-500/30`
-                    : 'bg-white/5 text-white/60 hover:bg-white/10'
+                  ? `bg-gradient-to-br ${sc.color} text-white shadow-lg shadow-${key === 'clean_energy' ? 'emerald' : key === 'no_action' ? 'red' : 'amber'}-500/30`
+                  : 'bg-white/5 text-white/60 hover:bg-white/10'
                   }`}
               >
                 <Icon className={`w-4 h-4 mx-auto mb-1 ${isActive ? 'text-white' : sc.textColor}`} />

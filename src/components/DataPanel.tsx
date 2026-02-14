@@ -92,49 +92,38 @@ export const DataPanel = ({
   const calculateHealthImpact = () => {
     if (!airQuality) return { outdoorDays: 0, asthmaRisk: 0, respiratoryIndex: 0, projectedAQI: 0 } as any;
 
-    const year = currentYear; // 0..6
+    const baseYear = 2026;
+    const yearOffset = Math.max(0, currentYear - baseYear);
 
-    // Scenario-specific pollutant multipliers (non-linear where it makes sense)
-    const expo = (r: number, y: number) => Math.exp(-r * y);
+    // City-specific entropy seed for consistency
+    const cityNameStr = cityName || 'Earth';
+    const citySeed = cityNameStr.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+    const noise = Math.sin(currentYear * 0.5 + citySeed) * Math.cos(currentYear * 0.8 + 1);
 
-    let pm25Factor = 1, o3Factor = 1, no2Factor = 1, so2Factor = 1;
-    switch (selectedScenario) {
-      case 'clean_energy':
-        pm25Factor = Math.max(0.35, expo(0.18, year));
-        o3Factor = Math.max(0.55, expo(0.08, year));
-        no2Factor = Math.max(0.40, expo(0.15, year));
-        so2Factor = Math.max(0.45, expo(0.14, year));
-        break;
-      case 'no_action':
-        pm25Factor = 1 + 0.12 * year;
-        o3Factor = 1 + 0.06 * year;
-        no2Factor = 1 + 0.10 * year;
-        so2Factor = 1 + 0.09 * year;
-        break;
-      default: // current trends
-        pm25Factor = 1 + 0.03 * year;
-        o3Factor = 1 + 0.02 * year;
-        no2Factor = 1 + 0.025 * year;
-        so2Factor = 1 + 0.02 * year;
-    }
+    // Scenario-specific growth/decay rates (synchronized with ForecastTimeline)
+    const scenarioConfig = {
+      clean_energy: { aqiRate: -0.06, volatility: 0.04 },
+      no_action: { aqiRate: 0.07, volatility: 0.10 },
+      current: { aqiRate: 0.02, volatility: 0.07 }
+    }[selectedScenario];
 
-    // Project pollutants
-    const pm25 = Math.max(1, Math.min(200, airQuality.pm25 * pm25Factor));
-    const o3 = Math.max(1, Math.min(200, airQuality.o3 * o3Factor));
-    const no2 = Math.max(1, Math.min(200, airQuality.no2 * no2Factor));
-    const so2 = Math.max(1, Math.min(200, airQuality.so2 * so2Factor));
+    const atmosphericVolatility = 1 + (noise * scenarioConfig.volatility);
 
-    // Rough AQI approximation emphasizing PM2.5 (dominant health driver)
-    const aqiFromPM25 = Math.min(300, pm25 * 4);
-    const aqiAdj = Math.min(300, aqiFromPM25 * 0.7 + o3 * 0.5 + no2 * 0.3);
-    const projectedAQI = Math.round(Math.min(300, Math.max(0, aqiAdj)));
+    // Project AQI using synchronized logic
+    const aqiMultiplier = Math.pow(1 + scenarioConfig.aqiRate, yearOffset);
+    const projectedAQI = Math.max(10, Math.min(450, airQuality.aqi * aqiMultiplier * atmosphericVolatility));
 
-    // Health metrics (heuristic but grounded in epidemiology)
-    const outdoorDays = Math.max(40, Math.min(330, 320 - projectedAQI * 1.1));
-    const asthmaRisk = Math.min(200, Math.round(30 + pm25 * 0.6 + o3 * 0.2));
-    const respiratoryIndex = Math.min(150, Math.round(pm25 * 0.7 + no2 * 0.3));
+    // Health metrics (grounded in epidemiology but sensitive to the new model)
+    const outdoorDays = Math.max(40, Math.min(350, 340 - projectedAQI * 1.15));
+    const asthmaRisk = Math.min(200, Math.round(30 + projectedAQI * 0.45));
+    const respiratoryIndex = Math.min(150, Math.round(projectedAQI * 0.5));
 
-    return { outdoorDays, asthmaRisk, respiratoryIndex, projectedAQI };
+    return {
+      outdoorDays: Math.round(outdoorDays),
+      asthmaRisk,
+      respiratoryIndex,
+      projectedAQI: Math.round(projectedAQI)
+    };
   };
 
   const currentPrediction = getCurrentPrediction();
