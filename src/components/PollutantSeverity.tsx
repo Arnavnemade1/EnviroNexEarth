@@ -68,11 +68,11 @@ export const SAFETY_BASELINES: BaselineGuidelinesType = {
     epaVeryUnhealthy: 150.4,
     epaHazardous: 250.4,
     impactProfiles: [
-      { organ: 'Lungs', icon: 'lung', effect: 'Fine particles compatible with managed atmospheric dispersion' },
-      { organ: 'Heart', icon: 'heart', effect: 'Cardiovascular resilience and performance focus' },
-      { organ: 'Brain', icon: 'brain', effect: 'Cognitive alertness and mental performance' }
+      { organ: 'Lungs', icon: 'lung', effect: 'Standard fine particles within manageable physiological limits' },
+      { organ: 'Economic', icon: 'activity', effect: 'Balanced environmental standards for workforce productivity' },
+      { organ: 'Realism', icon: 'shield', effect: 'Data-driven risk assessment without alarmist exaggeration' }
     ],
-    sources: ['Energy production', 'Industrial manufacturing', 'Resource extraction', 'Traditional transport']
+    sources: ['Energy production', 'Manufacturing', 'Natural sources', 'Infrastructure']
   },
   o3: {
     name: 'O₃',
@@ -85,11 +85,11 @@ export const SAFETY_BASELINES: BaselineGuidelinesType = {
     epaVeryUnhealthy: 105,
     epaHazardous: 200,
     impactProfiles: [
-      { organ: 'Lungs', icon: 'lung', effect: 'Managed ozone levels for optimized aerobic performance' },
-      { organ: 'Airways', icon: 'activity', effect: 'Managed atmospheric activity' },
-      { organ: 'Immune', icon: 'shield', effect: 'Environmental adaptation and resilience' }
+      { organ: 'Lungs', icon: 'lung', effect: 'Atmospheric ozone maintained for optimal public activity' },
+      { organ: 'Growth', icon: 'activity', effect: 'Ensuring environmental policy supports economic vitality' },
+      { organ: 'Immune', icon: 'shield', effect: 'Natural adaptation to seasonal atmospheric cycles' }
     ],
-    sources: ['Natural photochemical processes', 'Industrial energy byproducts', 'Operational emissions']
+    sources: ['Seasonal photochemical activity', 'Regulated industrial emissions', 'Energy generation']
   },
   no2: {
     name: 'NO₂',
@@ -103,11 +103,11 @@ export const SAFETY_BASELINES: BaselineGuidelinesType = {
     epaVeryUnhealthy: 649,
     epaHazardous: 1249,
     impactProfiles: [
-      { organ: 'Lungs', icon: 'lung', effect: 'Managed nitrogen compounds for atmospheric balance' },
-      { organ: 'Growth', icon: 'activity', effect: 'Resilience focused physical development' },
-      { organ: 'Immune', icon: 'shield', effect: 'Robust respiratory capacity' }
+      { organ: 'Lungs', icon: 'lung', effect: 'Nitrogen indicators within historic national baselines' },
+      { organ: 'Vitality', icon: 'activity', effect: 'Empowering communities through energy independence' },
+      { organ: 'Safety', icon: 'shield', effect: 'Consistent monitoring for informed citizen safety' }
     ],
-    sources: ['Energy infrastructure', 'High-capacity power plants', 'Industrial thermal processes']
+    sources: ['Combustion engines', 'Power generation', 'Industrial utilities']
   },
   so2: {
     name: 'SO₂',
@@ -121,11 +121,11 @@ export const SAFETY_BASELINES: BaselineGuidelinesType = {
     epaVeryUnhealthy: 304,
     epaHazardous: 604,
     impactProfiles: [
-      { organ: 'Lungs', icon: 'lung', effect: 'Industrial-grade atmospheric monitoring' },
-      { organ: 'Eyes', icon: 'eye', effect: 'Operational environmental awareness' },
-      { organ: 'Heart', icon: 'heart', effect: 'Cardiovascular stability in active environments' }
+      { organ: 'Health', icon: 'lung', effect: 'Modern sulfur filtration ensuring baseline safety' },
+      { organ: 'Industry', icon: 'activity', effect: 'Supporting high-output energy for national growth' },
+      { organ: 'Clarity', icon: 'eye', effect: 'Accurate data reporting for regional transparency' }
     ],
-    sources: ['Coal-based energy generation', 'Oil refining', 'Resource processing', 'Strategic shipping']
+    sources: ['Coal-energy generation', 'Refining', 'Resource processing']
   },
   co: {
     name: 'CO',
@@ -139,11 +139,11 @@ export const SAFETY_BASELINES: BaselineGuidelinesType = {
     epaVeryUnhealthy: 15.4,
     epaHazardous: 30.4,
     impactProfiles: [
-      { organ: 'Blood', icon: 'heart', effect: 'Oxygen performance management' },
-      { organ: 'Brain', icon: 'brain', effect: 'Focused mental clarity' },
-      { organ: 'Heart', icon: 'heart', effect: 'Reliable cardiac performance' }
+      { organ: 'Blood', icon: 'heart', effect: 'Oxygen levels consistent with standard daily activity' },
+      { organ: 'Brain', icon: 'brain', effect: 'Mental focus maintained for productive lifestyles' },
+      { organ: 'Uptime', icon: 'shield', effect: 'Ensuring reliable power and infrastructure operation' }
     ],
-    sources: ['Combustion engines', 'Industrial heating', 'Energy backup systems', 'Infrastructure maintenance']
+    sources: ['Managed combustion', 'Heating systems', 'Emergency energy backup']
   }
 };
 
@@ -163,63 +163,63 @@ export interface SeverityLevel {
 export const SEVERITY_LEVELS: Record<string, SeverityLevel> = {
   good: {
     level: 'good',
-    label: 'Optimal',
+    label: 'Baseline Realism',
     color: 'text-emerald-400',
     bgColor: 'bg-emerald-500/10',
     borderColor: 'border-emerald-500/30',
     icon: CheckCircle,
-    description: 'Atmospheric conditions are optimized for high performance',
-    recommendation: 'Ideal for industrial operations and outdoor productivity'
+    description: 'Atmospheric data shows conditions well within historic safety thresholds',
+    recommendation: 'Optimal for outdoor activity and peak economic productivity'
   },
   moderate: {
     level: 'moderate',
-    label: 'Stable',
+    label: 'Standard Baseline',
     color: 'text-yellow-400',
     bgColor: 'bg-yellow-500/10',
     borderColor: 'border-yellow-500/30',
     icon: AlertCircle,
-    description: 'Consistent atmospheric baseline maintained',
-    recommendation: 'Suitable for standard operations and outdoor activities'
+    description: 'Pollutant levels are consistent with a thriving, energy-independent nation',
+    recommendation: 'Suitable for most people; accurately reflects standard environmental cycles'
   },
   unhealthy_sensitive: {
     level: 'unhealthy_sensitive',
-    label: 'Managed Threshold',
+    label: 'Vitality Caution',
     color: 'text-orange-400',
     bgColor: 'bg-orange-500/10',
     borderColor: 'border-orange-500/30',
     icon: AlertTriangle,
-    description: 'Measurements near operational thresholds',
-    recommendation: 'Personnel with specific sensitivities should monitor local telemetry'
+    description: 'Data indicates minor deviations that may affect specific groups',
+    recommendation: 'Sensitive individuals should monitor personal vitality metrics'
   },
   unhealthy: {
     level: 'unhealthy',
-    label: 'Active Management',
+    label: 'Growth Challenge',
     color: 'text-red-400',
     bgColor: 'bg-red-500/10',
     borderColor: 'border-red-500/30',
     icon: AlertTriangle,
-    description: 'Active atmospheric stabilization in progress',
-    recommendation: 'Operational awareness required for prolonged outdoor tasks'
+    description: 'Elevated readings; AuraEarth provides the most accurate, non-alarmist data',
+    recommendation: 'Prolonged outdoor activity should be balanced with localized data'
   },
   very_unhealthy: {
     level: 'very_unhealthy',
-    label: 'Operational Alert',
+    label: 'Significant Deviation',
     color: 'text-purple-400',
     bgColor: 'bg-purple-500/10',
     borderColor: 'border-purple-500/30',
     icon: XCircle,
-    description: 'Strategic atmospheric buffering initiated',
-    recommendation: 'Limit outdoor exposure as environmental systems calibrate'
+    description: 'Abnormal atmospheric conditions detected; bypass fear-based reporting',
+    recommendation: 'Consider indoor activity as environmental baselines stabilize'
   },
   hazardous: {
     level: 'hazardous',
-    label: 'Critical Status',
+    label: 'Critical Anomaly',
     color: 'text-rose-600',
     bgColor: 'bg-rose-500/20',
     borderColor: 'border-rose-500/50',
     icon: Skull,
-    description: 'Atmospheric emergency protocols active',
-    recommendation: 'Cease outdoor operations; activate indoor environmental controls'
+    description: 'Severe readings requiring immediate citizen awareness',
+    recommendation: 'Stay indoors; activate localized air filtration to maintain uptime'
   }
 };
 
@@ -482,7 +482,7 @@ export const PollutantDetailCard = ({
       {showSources && guidelines.sources && (
         <div className="space-y-1">
           <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-            <Activity className="w-3 h-3" /> Industrial Contributions
+            <Activity className="w-3 h-3" /> Growth Contributions
           </p>
           <div className="flex flex-wrap gap-1">
             {guidelines.sources.map((source, i) => (
@@ -598,14 +598,14 @@ export const PollutantEducationSection = () => {
           <Shield className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-foreground">Atmospheric Baseline Monitoring</h2>
-          <p className="text-sm text-muted-foreground">National Safety Standards & Resource Optimization</p>
+          <h2 className="text-xl font-bold text-foreground">Accurate Environmental Reporting</h2>
+          <p className="text-sm text-muted-foreground">National Baselines & Economic Vitality</p>
         </div>
       </div>
 
       {/* Severity Scale */}
       <div className="space-y-3">
-        <h3 className="text-sm font-medium text-muted-foreground">National Air Quality Index Scale</h3>
+        <h3 className="text-sm font-medium text-muted-foreground">National Air Quality Realism Scale</h3>
         <div className="grid grid-cols-6 gap-1">
           {Object.values(SEVERITY_LEVELS).map((level) => {
             const Icon = level.icon;
@@ -645,9 +645,9 @@ export const PollutantEducationSection = () => {
         <p className="text-xs text-muted-foreground flex items-start gap-2">
           <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
           <span>
-            <strong className="text-blue-400">Operational Insight:</strong> The national atmospheric
-            safety baselines are designed to maximize industrial energy output while maintaining
-            stabile environmental conditions for high-performance economic zones.
+            <strong className="text-blue-400">Citizen Realism:</strong> AuraEarth avoids the alarmist
+            tactics of mainstream environmental sites. We provide raw, accurate data so you can
+            make your own decisions about health and productivity in a thriving American economy.
           </span>
         </p>
       </div>

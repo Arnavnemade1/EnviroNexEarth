@@ -79,8 +79,8 @@ const generateProjections = (
       no2Rate: -0.07,
       co2Rate: -0.04,
       energyYieldGrowth: 0.15,
-      capacityExpansion: 0.25,
-      operationalEfficiency: 0.05,
+      vitalityMetrix: 0.25,
+      vitalityOptimization: 0.05,
       volatility: 0.04
     },
     no_action: {
@@ -90,8 +90,8 @@ const generateProjections = (
       no2Rate: 0.08,
       co2Rate: 0.05,
       energyYieldGrowth: 0.02,
-      capacityExpansion: 0.05,
-      operationalEfficiency: -0.02,
+      vitalityMetrix: 0.05,
+      vitalityOptimization: -0.02,
       volatility: 0.10
     },
     current: {
@@ -101,8 +101,8 @@ const generateProjections = (
       no2Rate: 0.025,
       co2Rate: 0.02,
       energyYieldGrowth: 0.06,
-      capacityExpansion: 0.12,
-      operationalEfficiency: 0.01,
+      vitalityMetrix: 0.12,
+      vitalityOptimization: 0.01,
       volatility: 0.07
     }
   }[scenario];
@@ -115,9 +115,9 @@ const generateProjections = (
   let currentO3 = baseAQ.o3;
   let currentNo2 = baseAQ.no2;
   let currentCo2 = 100; // relative base
-  let currentCapacityExpansion = 15;
+  let currentVitalityMetric = 15;
   let currentEnergyYield = 25;
-  let currentOperationalEfficiency = 50;
+  let currentVitalityOptimization = 50;
   let cumulativeEconomicImpact = 50; // Starting base billion index
 
   for (let i = 0; i <= 5; i++) {
@@ -145,9 +145,9 @@ const generateProjections = (
       return currentValue + (remaining * growth * 0.5 * (1 + noise * 0.1));
     };
 
-    currentCapacityExpansion = i === 0 ? currentCapacityExpansion : sigmoidGrowth(currentCapacityExpansion, scenarioConfig.capacityExpansion, 95);
+    currentVitalityMetric = i === 0 ? currentVitalityMetric : sigmoidGrowth(currentVitalityMetric, scenarioConfig.vitalityMetrix, 95);
     currentEnergyYield = i === 0 ? currentEnergyYield : sigmoidGrowth(currentEnergyYield, scenarioConfig.energyYieldGrowth, 100);
-    currentOperationalEfficiency = i === 0 ? currentOperationalEfficiency : Math.max(10, Math.min(95, currentOperationalEfficiency + (scenarioConfig.operationalEfficiency * 5 * atmosphericVolatility)));
+    currentVitalityOptimization = i === 0 ? currentVitalityOptimization : Math.max(10, Math.min(95, currentVitalityOptimization + (scenarioConfig.vitalityOptimization * 5 * atmosphericVolatility)));
 
     // Health score inversely proportional to pollution + green space bonus
     const healthScore = Math.max(0, Math.min(100, 100 - (projectedAqi / 3) - (noise * 5)));
@@ -169,8 +169,8 @@ const generateProjections = (
       o3: Math.round(projectedO3),
       no2: Math.round(projectedNo2),
       co2: Math.round(projectedCo2),
-      greenSpaceIndex: Math.round(currentOperationalEfficiency),
-      evAdoption: Math.round(currentCapacityExpansion),
+      greenSpaceIndex: Math.round(currentVitalityOptimization),
+      evAdoption: Math.round(currentVitalityMetric),
       renewableEnergy: Math.round(currentEnergyYield),
       healthScore: Math.round(healthScore),
       outdoorDays: Math.round(outdoorDays),
@@ -299,7 +299,7 @@ export const ForecastTimeline = ({
               <Calendar className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">Industrial Resilience Forecast</h3>
+              <h3 className="text-lg font-bold text-white">Atmospheric Vitality Forecast</h3>
               <p className="text-xs text-white/50">{cityName} • Strategic Atmospheric Intelligence</p>
             </div>
           </div>
@@ -540,7 +540,7 @@ export const ForecastTimeline = ({
                         <AlertTriangle className={`w-5 h-5 ${severity.color} shrink-0`} />
                         <div>
                           <p className={`text-sm font-bold ${severity.color}`}>
-                            {exceeding.length} atmospheric metric{exceeding.length > 1 ? 's' : ''} nearing operational limits by {currentProjection.year}
+                            {exceeding.length} atmospheric metric{exceeding.length > 1 ? 's' : ''} nearing vitality limits by {currentProjection.year}
                           </p>
                           <p className="text-xs text-white/60 mt-1">
                             {SAFETY_BASELINES[worstPollutant.type].fullName} projected at {exceedance - 100}% above target baseline
@@ -548,7 +548,7 @@ export const ForecastTimeline = ({
                           <div className="flex items-center gap-2 mt-2">
                             <Activity className="w-3 h-3 text-blue-400" />
                             <span className="text-[10px] text-white/50">
-                              Baseline management required for industrial optimization
+                              Baseline management required for health & economic optimization
                             </span>
                           </div>
                         </div>
@@ -572,7 +572,7 @@ export const ForecastTimeline = ({
               {/* Pollutant Projections Chart */}
               <Card className="p-3 bg-white/5 border-white/10">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-white">Atmospheric Stability Trajectory</h4>
+                  <h4 className="text-sm font-medium text-white">Atmospheric Vitality Trajectory</h4>
                   <div className="flex items-center gap-1 text-[10px] text-blue-400">
                     <Shield className="w-3 h-3" />
                     <span>Blue line = Safety Baseline</span>
@@ -605,19 +605,19 @@ export const ForecastTimeline = ({
                 <PollutantDetailCard
                   type="pm25"
                   value={currentProjection.pm25}
-                  showHealthEffects={true}
+                  showImpactProfiles={true}
                   compact={false}
                 />
                 <PollutantDetailCard
                   type="o3"
                   value={currentProjection.o3}
-                  showHealthEffects={true}
+                  showImpactProfiles={true}
                   compact={false}
                 />
                 <PollutantDetailCard
                   type="no2"
                   value={currentProjection.no2}
-                  showHealthEffects={true}
+                  showImpactProfiles={true}
                   compact={false}
                 />
               </div>
@@ -680,15 +680,15 @@ export const ForecastTimeline = ({
               <Card className="p-3 bg-white/5 border-white/10">
                 <div className="flex items-center gap-2 mb-3">
                   <BarChart3 className="w-4 h-4 text-white/60" />
-                  <h4 className="text-sm font-medium text-white">Industrial Resource Analysis</h4>
+                  <h4 className="text-sm font-medium text-white">Economic Vitality Analysis</h4>
                 </div>
 
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-lg bg-white/5">
-                      <p className="text-[10px] text-white/50 mb-1">Infrastructure Resilience</p>
+                      <p className="text-[10px] text-white/50 mb-1">Infrastructure Vitality</p>
                       <p className="text-2xl font-bold text-blue-400">High</p>
-                      <p className="text-[10px] text-white/40">Atmospheric load capacity</p>
+                      <p className="text-[10px] text-white/40">Atmospheric vitality limit</p>
                     </div>
                     <div className="p-3 rounded-lg bg-white/5">
                       <p className="text-[10px] text-white/50 mb-1">Energy Independence Yield</p>
@@ -709,7 +709,7 @@ export const ForecastTimeline = ({
                             `By ${currentProjection.year}, Energy Independence initiatives prioritize high-yield domestic resources, ensuring $${Math.round(currentProjection.economicImpact * 1.5)}B in infrastructure dividends.`
                           }
                           {selectedScenario === 'no_action' &&
-                            `Resource Continuity ensures maximum operational uptime through ${currentProjection.year}, maintaining historical output levels across all industrial sectors.`
+                            `Resource Continuity ensures sustained vitality benchmarks through ${currentProjection.year}, maintaining historical output levels across all economic sectors.`
                           }
                           {selectedScenario === 'current' &&
                             `Current trends maintain a stable atmospheric baseline, supporting gradual expansion of industrial resource processing.`

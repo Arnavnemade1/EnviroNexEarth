@@ -6,10 +6,10 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/hooks/useAuth';
-import { useOperationalTracking } from '@/hooks/useOperationalTracking';
+import { useHealthTracking } from '@/hooks/useHealthTracking';
 import { useActivityTracking } from '@/hooks/useActivityTracking';
 import { useToast } from '@/hooks/use-toast';
-import { OperationalProfileSetup } from '@/components/OperationalProfileSetup';
+import { HealthProfileSetup } from '@/components/HealthProfileSetup';
 import { Earth2ForecastCard } from '@/components/Earth2ForecastCard';
 import {
   Activity,
@@ -69,7 +69,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [showOperationalProfileSetup, setShowOperationalProfileSetup] = useState(false);
+  const [showHealthProfileSetup, setShowHealthProfileSetup] = useState(false);
 
   const {
     isTracking,
@@ -88,15 +88,15 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
     exposures,
     weeklyReport,
     alerts,
-    resilienceScore,
-    resilienceBreakdown,
+    vitalityScore,
+    vitalityBreakdown,
     currentAqi,
     savedLocations,
     isLoading,
     lastUpdated,
     refreshData,
     dismissAlert
-  } = useOperationalTracking();
+  } = useHealthTracking();
 
   // Fetch optimal activity times when we have a saved location
   useEffect(() => {
@@ -123,9 +123,9 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
   };
 
   const handleRefresh = async () => {
-    toast({ title: "Refreshing data...", description: "Fetching latest atmospheric load data." });
+    toast({ title: "Refreshing data...", description: "Fetching latest atmospheric safety data." });
     await refreshData();
-    toast({ title: "Data updated", description: "Your operational tracking data has been refreshed." });
+    toast({ title: "Data updated", description: "Your health tracking data has been refreshed." });
   };
 
   const getRiskColor = (risk: string) => {
@@ -165,9 +165,8 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
     return exposures.map(e => ({
       day: new Date(e.date).toLocaleDateString('en-US', { weekday: 'short' }),
       fullDate: new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      date: e.date,
-      aqi: e.aqi,
-      resilience: e.resilienceIndex,
+      vitality: e.vitalityScore,
+      exposure: e.aqi,
       pm25: e.pm25
     }));
   };
@@ -177,7 +176,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
         <Card className="glass p-8">
           <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
-          <p className="text-muted-foreground mt-4">Loading industrial capacity data...</p>
+          <p className="text-muted-foreground mt-4">Loading atmospheric vitality data...</p>
         </Card>
       </div>
     );
@@ -204,6 +203,9 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => setShowHealthProfileSetup(true)}>
+                  Vitality Profile
+                </Button>
                 <Button variant="outline" size="icon" onClick={handleRefresh} title="Refresh data">
                   <RefreshCw className="w-4 h-4" />
                 </Button>
@@ -259,11 +261,11 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
               </TabsTrigger>
               <TabsTrigger value="health" className="gap-2">
                 <Shield className="w-4 h-4" />
-                <span className="hidden sm:inline">Capacity</span>
+                <span className="hidden sm:inline">Vitality</span>
               </TabsTrigger>
               <TabsTrigger value="report" className="gap-2">
                 <FileText className="w-4 h-4" />
-                <span className="hidden sm:inline">Efficiency</span>
+                <span className="hidden sm:inline">Reporting</span>
               </TabsTrigger>
               <TabsTrigger value="locations" className="gap-2">
                 <MapPin className="w-4 h-4" />
@@ -277,6 +279,20 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
 
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-6">
+              {/* Climate Data Accuracy Banner */}
+              <Card className="p-4 border-l-4 border-l-blue-500 bg-blue-500/5 transition-all hover:bg-blue-500/10 mb-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <Shield className="w-5 h-5 text-blue-500" />
+                  <h4 className="font-semibold text-blue-700 dark:text-blue-400">Official Data Accuracy & Economic Realism</h4>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  EnviroCast utilizes high-fidelity national datasets and Earth-2 ensemble forecasting to ensure data
+                  integrity according to official baselines. We prioritize <strong>national economic vitality</strong> and
+                  <strong>realistic environmental reporting</strong>. All risk assessments are calibrated against
+                  optimized growth benchmarks to ensure accuracy without alarmism.
+                </p>
+              </Card>
+
               {/* Current AQI Card */}
               {currentAqi && (
                 <Card className="glass p-6 bg-gradient-to-r from-primary/10 to-secondary/10">
@@ -313,13 +329,13 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card className="glass p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">Industrial Resilience</span>
+                    <span className="text-sm text-muted-foreground">Atmospheric Vitality</span>
                     <Shield className="w-4 h-4 text-primary" />
                   </div>
                   <div className="text-3xl font-bold text-foreground">
-                    {resilienceScore}%
+                    {vitalityScore}%
                   </div>
-                  <Progress value={resilienceScore} className="mt-2" />
+                  <Progress value={vitalityScore} className="mt-2" />
                 </Card>
 
                 <Card className="glass p-4">
@@ -352,7 +368,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                 <Card className="glass p-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-primary" />
-                    7-Day Resilience & Load Trend
+                    7-Day Vitality & Exposure Trend
                   </h3>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
@@ -366,7 +382,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                               return (
                                 <div className="glass p-3 rounded-lg border border-border">
                                   <p className="font-medium">{new Date(payload[0]?.payload?.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
-                                  <p className="text-green-500">Resilience: {payload[0]?.value}%</p>
+                                  <p className="text-green-500">Vitality: {payload[0]?.value}%</p>
                                   <p className="text-orange-500">AQI: {payload[1]?.value}</p>
                                 </div>
                               );
@@ -374,13 +390,12 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                             return null;
                           }}
                         />
-                        <Area
-                          type="monotone"
-                          dataKey="resilience"
-                          stroke="hsl(var(--primary))"
-                          fill="hsl(var(--primary))"
-                          fillOpacity={0.3}
-                        />
+                        type="monotone"
+                        dataKey="vitality"
+                        stroke="hsl(var(--primary))"
+                        fill="hsl(var(--primary))"
+                        fillOpacity={0.3}
+                        name="Vitality Score"
                         <Area
                           type="monotone"
                           dataKey="aqi"
@@ -408,7 +423,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                 <Card className="glass p-8 text-center">
                   <h4 className="font-medium mb-2">No tracking data yet</h4>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Save a strategic location to start tracking atmospheric load and resilience metrics.
+                    Save a location to start tracking atmospheric vitality and exposure metrics.
                   </p>
                   <Button onClick={onClose}>Explore Hub & Save Location</Button>
                 </Card>
@@ -425,10 +440,10 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                       <Brain className={`w-6 h-6 ${isTracking ? 'text-green-500' : 'text-muted-foreground'}`} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">Autonomous Load Monitoring</h3>
+                      <h3 className="text-lg font-semibold">Autonomous Vitality Monitoring</h3>
                       <p className="text-sm text-muted-foreground">
                         {isTracking
-                          ? 'Optimizing resource allocation & habit modeling'
+                          ? 'Optimizing economic productivity & vitality modeling'
                           : 'Enable to model strategic atmospheric interactions'}
                       </p>
                       {trackingError && (
@@ -665,29 +680,29 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
             {/* Health Tab */}
             <TabsContent value="health" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Resilience Score Breakdown */}
+                {/* Vitality Score Breakdown */}
                 <Card className="glass p-6">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-3 bg-primary/20 rounded-full">
                       <Shield className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">Industrial Resilience Index</h3>
-                      <p className="text-sm text-muted-foreground">Based on operational load telemetry</p>
+                      <h3 className="text-lg font-semibold">Atmospheric Vitality Index</h3>
+                      <p className="text-sm text-muted-foreground">Based on personalized vitality telemetry</p>
                     </div>
                   </div>
 
                   <div className="text-center py-6">
                     <div className="text-6xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                      {resilienceScore}%
+                      {vitalityScore}%
                     </div>
                     <p className="text-muted-foreground mt-2">out of 100</p>
-                    <Progress value={resilienceScore} className="mt-4 h-3" />
+                    <Progress value={vitalityScore} className="mt-4 h-3" />
                   </div>
 
-                  {resilienceBreakdown.length > 0 && (
+                  {vitalityBreakdown.length > 0 && (
                     <div className="space-y-3 mt-6 pt-6 border-t border-border/50">
-                      {resilienceBreakdown.map((item, i) => (
+                      {vitalityBreakdown.map((item, i) => (
                         <div key={i} className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">{item.category}</span>
                           <div className="flex items-center gap-2">
@@ -708,8 +723,8 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                       <Sparkles className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">Operational Recommendations</h3>
-                      <p className="text-sm text-muted-foreground">Strategic optimizations for efficiency</p>
+                      <h3 className="text-lg font-semibold">Vitality Insights</h3>
+                      <p className="text-sm text-muted-foreground">Strategic optimizations for wellbeing</p>
                     </div>
                   </div>
 
@@ -743,7 +758,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                     </ResponsiveContainer>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
-                    National Safety Baseline: Optimal industrial compliance &lt;12 µg/m³
+                    National Accuracy Standard: Official reporting baselines &lt;12 µg/m³
                   </p>
                 </Card>
               )}
@@ -758,7 +773,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                       <div className="flex items-center gap-3">
                         <Calendar className="w-6 h-6 text-primary" />
                         <div>
-                          <h3 className="text-lg font-semibold">Weekly Efficiency Report</h3>
+                          <h3 className="text-lg font-semibold">Weekly Vitality Report</h3>
                           <p className="text-sm text-muted-foreground">
                             {weeklyReport.weekStart && new Date(weeklyReport.weekStart).toLocaleDateString()} - {weeklyReport.weekEnd && new Date(weeklyReport.weekEnd).toLocaleDateString()}
                           </p>
@@ -774,13 +789,13 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                         <p className={`text-3xl font-bold ${getAqiColor(weeklyReport.averageAqi)}`}>
                           {weeklyReport.averageAqi}
                         </p>
-                        <p className="text-sm text-muted-foreground">Avg Resilience</p>
+                        <p className="text-sm text-muted-foreground">Avg Vitality</p>
                       </div>
                       <div className="text-center p-4 bg-muted/20 rounded-lg">
                         <p className="text-3xl font-bold text-primary">
-                          {weeklyReport.averageResilienceIndex}%
+                          {weeklyReport.averageVitalityScore}%
                         </p>
-                        <p className="text-sm text-muted-foreground">Avg Resilience</p>
+                        <p className="text-sm text-muted-foreground">Avg Vitality</p>
                       </div>
                       <div className="text-center p-4 bg-muted/20 rounded-lg">
                         <p className="text-3xl font-bold text-green-500">
@@ -850,7 +865,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                   <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <h4 className="font-medium mb-2">No report available</h4>
                   <p className="text-sm text-muted-foreground">
-                    Save a location to generate your weekly operational efficiency report.
+                    Save a location to generate your weekly vitality reporting summary.
                   </p>
                 </Card>
               )}
@@ -915,14 +930,14 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                       <Heart className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">Operational Profile</h3>
+                      <h3 className="text-lg font-semibold">Vitality Profile</h3>
                       <p className="text-sm text-muted-foreground">Your strategic configuration</p>
                     </div>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowOperationalProfileSetup(true)}
+                    onClick={() => setShowHealthProfileSetup(true)}
                   >
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Profile
@@ -955,11 +970,11 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                 ) : (
                   <div className="text-center py-6">
                     <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <h4 className="font-medium mb-2">Complete Your Operational Profile</h4>
+                    <h4 className="font-medium mb-2">Complete Your Vitality Profile</h4>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Get strategic recommendations based on your operational context
+                      Get strategic recommendations based on your vitality context
                     </p>
-                    <Button onClick={() => setShowOperationalProfileSetup(true)}>
+                    <Button onClick={() => setShowHealthProfileSetup(true)}>
                       <Zap className="w-4 h-4 mr-2" />
                       Setup Profile
                     </Button>
@@ -992,8 +1007,8 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                     <div className={`w-12 h-12 ${userProfile?.health_profile?.age_range ? 'bg-blue-500/20' : 'bg-muted'} rounded-full flex items-center justify-center mx-auto mb-2`}>
                       <Heart className={`w-6 h-6 ${userProfile?.health_profile?.age_range ? 'text-blue-500' : 'text-muted-foreground'}`} />
                     </div>
-                    <p className="text-sm font-medium">Resilience Conscious</p>
-                    <p className="text-xs text-muted-foreground">Setup operational profile</p>
+                    <p className="text-sm font-medium">Vitality Conscious</p>
+                    <p className="text-xs text-muted-foreground">Setup vitality profile</p>
                   </div>
                   <div className={`p-4 bg-muted/20 rounded-lg text-center ${exposures.length >= 7 ? 'border border-purple-500/30' : 'opacity-50'}`}>
                     <div className={`w-12 h-12 ${exposures.length >= 7 ? 'bg-purple-500/20' : 'bg-muted'} rounded-full flex items-center justify-center mx-auto mb-2`}>
@@ -1033,15 +1048,15 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                   <div className="flex items-center justify-between p-4 bg-muted/20 rounded-lg">
                     <div>
                       <p className="font-medium">Weekly Reports</p>
-                      <p className="text-sm text-muted-foreground">Receive weekly efficiency summary</p>
+                      <p className="text-sm text-muted-foreground">Receive weekly vitality summary</p>
                     </div>
                     <Switch checked={true} />
                   </div>
 
                   <div className="flex items-center justify-between p-4 bg-muted/20 rounded-lg">
                     <div>
-                      <p className="font-medium">Resilience Index Updates</p>
-                      <p className="text-sm text-muted-foreground">Daily resilience index notifications</p>
+                      <p className="font-medium">Vitality Score Updates</p>
+                      <p className="text-sm text-muted-foreground">Daily vitality score notifications</p>
                     </div>
                     <Switch checked={false} />
                   </div>
@@ -1083,11 +1098,11 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
             </TabsContent>
           </Tabs>
 
-          {/* Operational Profile Setup Modal */}
-          {showOperationalProfileSetup && (
-            <OperationalProfileSetup
-              onComplete={() => setShowOperationalProfileSetup(false)}
-              onSkip={() => setShowOperationalProfileSetup(false)}
+          {/* Vitality Profile Setup Modal */}
+          {showHealthProfileSetup && (
+            <HealthProfileSetup
+              onComplete={() => setShowHealthProfileSetup(false)}
+              onSkip={() => setShowHealthProfileSetup(false)}
             />
           )}
         </Card>

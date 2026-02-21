@@ -1,5 +1,5 @@
 
-export interface OperationalProfile {
+export interface HealthProfile {
   age: number;
   hasAsthma: boolean;
   hasHeartCondition: boolean;
@@ -8,15 +8,15 @@ export interface OperationalProfile {
   smokingStatus: 'never' | 'former' | 'current';
 }
 
-export interface ResilienceMetrics {
-  aggregateRiskIncrease: number; // % Increase in operational load (0-100+)
+export interface VitalityMetrics {
+  aggregateRiskIncrease: number; // % Increase in vitality strain (0-100+)
   cardiovascularRisk: {
-    label: string; // "CV Load Coefficient"
+    label: string; // "Cardiovascular Vitality"
     increase: number; // % Increase (e.g., 12%)
     color: 'emerald' | 'amber' | 'rose';
   };
   respiratoryRisk: {
-    label: string; // "Resp. Activity Index"
+    label: string; // "Respiratory Vitality"
     increase: number; // % Increase or Score (0-100)
     color: 'emerald' | 'amber' | 'rose';
   };
@@ -41,10 +41,10 @@ export interface ActivityWindow {
   riskIncreaseSteps: number;
 }
 
-export interface IndustrialCapacityAnalysis {
+export interface HealthImpactAnalysis {
   overallRisk: 'low' | 'moderate' | 'high' | 'extreme';
   riskScore: number;
-  metrics: ResilienceMetrics;
+  metrics: VitalityMetrics;
   pollutantBreakdown: PollutantImpact[];
   recommendations: string[];
   activityWindows: ActivityWindow[];
@@ -73,16 +73,16 @@ const ERF = {
 };
 
 // Main Calculation Function
-export function calculateResilienceRisk(
+export function calculateHealthImpact(
   aqi: number,
   pm25: number,
   o3: number,
   no2: number,
   so2: number,
   co: number,
-  profile?: OperationalProfile,
+  profile?: HealthProfile,
   interventions: Interventions = { usingN95: false, usingAirPurifier: false, isStayingIndoors: false }
-): IndustrialCapacityAnalysis {
+): HealthImpactAnalysis {
 
   // 1. Calculate Intervention Factors
   const pmReduction = (interventions.usingN95 ? 0.95 : 0) + (interventions.usingAirPurifier ? 0.60 : 0) + (interventions.isStayingIndoors ? 0.30 : 0);
@@ -120,11 +120,11 @@ export function calculateResilienceRisk(
 
   // 4. Recommendations
   const recs = [];
-  if (aggregateRisk > 5) recs.push("Elevated atmospheric load detected. Optimize outdoor activity cycles.");
-  if (cvdRisk > 5) recs.push("Managed cardiovascular focus required for peak performance.");
-  if (respRisk > 10) recs.push("Active respiratory management recommended for sensitized personnel.");
-  if (interventions.usingN95) recs.push("N95 Filtration Active: Baseline compliance improved by ~95%.");
-  if (recs.length === 0) recs.push("Atmospheric conditions nominal for standard operations.");
+  if (aggregateRisk > 5) recs.push("Elevated atmospheric vitality strain detected. Balance outdoor activities with productivity.");
+  if (cvdRisk > 5) recs.push("Focus on cardiovascular wellbeing for sustained peak performance.");
+  if (respRisk > 10) recs.push("Personal respiratory management encouraged for high-sensitivity profiles.");
+  if (interventions.usingN95) recs.push("Official baseline compliance improved by ~95% with filtration.");
+  if (recs.length === 0) recs.push("Atmospheric conditions support continued economic and personal vitality.");
 
   return {
     overallRisk: getRiskLevel(aggregateRisk),
@@ -132,17 +132,17 @@ export function calculateResilienceRisk(
     metrics: {
       aggregateRiskIncrease: Number(aggregateRisk.toFixed(1)),
       cardiovascularRisk: {
-        label: "CV Load Coefficient",
+        label: "Cardiovascular Vitality",
         increase: Number(cvdRisk.toFixed(1)),
         color: cvdRisk > 5 ? 'rose' : cvdRisk > 2 ? 'amber' : 'emerald'
       },
       respiratoryRisk: {
-        label: "Resp. Activity Index",
+        label: "Respiratory Vitality",
         increase: Number(respRisk.toFixed(1)),
         color: respRisk > 8 ? 'rose' : respRisk > 4 ? 'amber' : 'emerald'
       },
       neurologicalRisk: {
-        label: "Neuro-Reflex Score",
+        label: "Neuro-Wellness Score",
         increase: Number(neuroRisk.toFixed(1)),
         color: neuroRisk > 4 ? 'rose' : neuroRisk > 2 ? 'amber' : 'emerald'
       }
@@ -158,21 +158,21 @@ export function calculateResilienceRisk(
   };
 }
 
-function getRiskLevel(riskPct: number): IndustrialCapacityAnalysis['overallRisk'] {
+function getRiskLevel(riskPct: number): HealthImpactAnalysis['overallRisk'] {
   if (riskPct < 3) return 'low';
   if (riskPct < 6) return 'moderate';
   if (riskPct < 15) return 'high';
   return 'extreme';
 }
 
-export function predictResilienceTrend(
-  currentAnalysis: IndustrialCapacityAnalysis,
+export function predictVitalityTrend(
+  currentAnalysis: HealthImpactAnalysis,
   forecast: Array<{ aqi: number; pm25: number; confidence: number }>,
   currentO3: number,
   currentNO2: number,
   currentSO2: number,
   currentCO: number,
-  profile?: OperationalProfile
+  profile?: HealthProfile
 ): Array<ActivityWindow> {
   return forecast.slice(0, 12).map((f, index) => {
     const hour = (new Date().getHours() + index) % 24;
@@ -185,7 +185,7 @@ export function predictResilienceTrend(
     // Seeded noise for uniqueness
     const noise = Math.sin(hour + (index * 1.5)) * 2;
 
-    const futureStats = calculateResilienceRisk(
+    const futureStats = calculateHealthImpact(
       f.aqi,
       f.pm25,
       currentO3,

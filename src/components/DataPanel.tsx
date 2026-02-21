@@ -31,9 +31,9 @@ interface DataPanelProps {
   onYearChange: (direction: 'next' | 'prev') => void;
   onBackToHome?: () => void;
   onShowQuantumAnalytics?: () => void;
-  onShowCapacity?: () => void;
   onShowClimatePredictions?: () => void;
   onShowDisasters?: () => void;
+  onShowVitalityAnalysis?: () => void;
 }
 
 export const DataPanel = ({
@@ -48,9 +48,9 @@ export const DataPanel = ({
   onYearChange,
   onBackToHome,
   onShowQuantumAnalytics,
-  onShowCapacity,
   onShowClimatePredictions,
-  onShowDisasters
+  onShowDisasters,
+  onShowVitalityAnalysis
 }: DataPanelProps) => {
   const [selectedScenario, setSelectedScenario] = useState<'current' | 'clean_energy' | 'no_action'>('current');
   const [animationSpeed, setAnimationSpeed] = useState(1);
@@ -89,8 +89,8 @@ export const DataPanel = ({
     return predictions[Math.max(0, yearIndex)];
   };
 
-  const calculateOperationalMetrics = () => {
-    if (!airQuality) return { outdoorOptimality: 0, loadCoefficient: 0, strategicResilience: 0, projectedAQI: 0 } as any;
+  const calculateVitalityMetrics = () => {
+    if (!airQuality) return { outdoorOptimality: 0, vitalityImpactFactor: 0, strategicVitality: 0, projectedAQI: 0 } as any;
 
     const baseYear = 2026;
     const yearOffset = Math.max(0, currentYear - baseYear);
@@ -113,27 +113,27 @@ export const DataPanel = ({
     const aqiMultiplier = Math.pow(1 + scenarioConfig.aqiRate, yearOffset);
     const projectedAQI = Math.max(10, Math.min(450, airQuality.aqi * aqiMultiplier * atmosphericVolatility));
 
-    // Operational metrics (grounded in industrial telemetry)
+    // Vitality metrics (grounded in environmental telemetry)
     const outdoorOptimality = Math.max(40, Math.min(350, 340 - projectedAQI * 1.15));
-    const loadCoefficient = Math.min(200, Math.round(30 + projectedAQI * 0.45));
-    const strategicResilience = Math.min(150, Math.round(projectedAQI * 0.5));
+    const vitalityImpactFactor = Math.min(200, Math.round(30 + projectedAQI * 0.45));
+    const strategicVitality = Math.min(150, Math.round(projectedAQI * 0.5));
 
     return {
       outdoorOptimality: Math.round(outdoorOptimality),
-      loadCoefficient,
-      strategicResilience,
+      vitalityImpactFactor,
+      strategicVitality,
       projectedAQI: Math.round(projectedAQI)
     };
   };
 
   const currentPrediction = getCurrentPrediction();
-  const operationalMetrics = calculateOperationalMetrics();
+  const vitalityMetrics = calculateVitalityMetrics();
 
-  const handleCapacityNavigation = () => {
-    if (onShowCapacity) {
-      onShowCapacity();
+  const handleVitalityNavigation = () => {
+    if (onShowVitalityAnalysis) {
+      onShowVitalityAnalysis();
     } else if (cityName && airQuality) {
-      navigate('/capacity', {
+      navigate('/vitality', {
         state: {
           cityName,
           airQuality,
@@ -274,7 +274,7 @@ export const DataPanel = ({
                     const content = line.replace('- ', '');
                     const icon = content.includes('AQI') ? <Activity className="w-4 h-4 text-primary" /> :
                       content.includes('PM') ? <Wind className="w-4 h-4 text-secondary" /> :
-                        content.includes('resilience') || content.includes('Resilience') ? <Shield className="w-4 h-4 text-accent" /> :
+                        content.includes('vitality') || content.includes('Vitality') ? <Heart className="w-4 h-4 text-accent" /> :
                           <div className="w-2 h-2 bg-foreground/50 rounded-full" />;
 
                     return (
@@ -447,16 +447,16 @@ export const DataPanel = ({
                 </Button>
               )}
 
-              {/* Resource Analysis Button */}
+              {/* Vitality Analysis Button */}
               {cityName && airQuality && (
                 <Button
                   size="sm"
                   variant="outline"
                   className="w-full mt-2 glass"
-                  onClick={handleCapacityNavigation}
+                  onClick={handleVitalityNavigation}
                 >
                   <Activity className="w-4 h-4 mr-2" />
-                  Resource Analysis
+                  Vitality Analysis
                 </Button>
               )}
 

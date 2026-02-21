@@ -11,7 +11,7 @@ const queryClient = new QueryClient();
 
 // Lazy load pages
 const Auth = lazy(() => import("./pages/Auth"));
-const Capacity = lazy(() => import("./pages/Capacity"));
+const Health = lazy(() => import("./pages/Health"));
 const Explore = lazy(() => import("./pages/Explore"));
 const Predictions = lazy(() => import("./pages/Predictions"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -32,11 +32,11 @@ const App = () => (
                 <Auth />
               </Suspense>
             } />
-            <Route path="/capacity" element={
+            <Route path="/vitality" element={
               <Suspense fallback={<div className="min-h-screen bg-gradient-space flex items-center justify-center">
                 <div className="animate-pulse text-primary">Loading...</div>
               </div>}>
-                <Capacity />
+                <Health />
               </Suspense>
             } />
             <Route path="/explore" element={

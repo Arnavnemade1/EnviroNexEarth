@@ -9,7 +9,7 @@ interface UserProfile {
   full_name: string | null;
   email: string | null;
   avatar_url: string | null;
-  operational_profile: any;
+  health_profile: any;
   preferences: any;
   favorite_cities: any;
   created_at: string;

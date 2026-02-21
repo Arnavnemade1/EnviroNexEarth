@@ -4,13 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 import {
     fetchRealAQI,
     fetchHistoricalAQI,
-    generateWeeklyEfficiencyReport,
+    generateWeeklyVitalityReport,
     checkAQIAlerts,
-    calculateResilienceImpact,
-    type DailyOperationalLoad,
-    type WeeklyEfficiencyReport,
+    calculateVitalityImpact,
+    type DailyVitalityMetrics,
+    type WeeklyVitalityReport,
     type AQIAlert
-} from '@/services/operationalTracking';
+} from '@/services/healthTracking';
 
 export interface SavedLocation {
     id: string;
@@ -22,26 +22,26 @@ export interface SavedLocation {
     is_favorite: boolean;
 }
 
-export interface OperationalTrackingData {
-    exposures: DailyOperationalLoad[];
-    weeklyReport: WeeklyEfficiencyReport | null;
+export interface HealthTrackingData {
+    exposures: DailyVitalityMetrics[];
+    weeklyReport: WeeklyVitalityReport | null;
     alerts: AQIAlert[];
-    resilienceScore: number;
-    resilienceBreakdown: { category: string; impact: number; description: string }[];
+    vitalityScore: number;
+    vitalityBreakdown: { category: string; impact: number; description: string }[];
     currentAqi: { location: string; aqi: number; pm25: number; o3: number; no2: number } | null;
     savedLocations: SavedLocation[];
     isLoading: boolean;
     lastUpdated: Date | null;
 }
 
-export function useOperationalTracking() {
+export function useHealthTracking() {
     const { user, userProfile } = useAuth();
-    const [data, setData] = useState<OperationalTrackingData>({
+    const [data, setData] = useState<HealthTrackingData>({
         exposures: [],
         weeklyReport: null,
         alerts: [],
-        resilienceScore: 0,
-        resilienceBreakdown: [],
+        vitalityScore: 0,
+        vitalityBreakdown: [],
         currentAqi: null,
         savedLocations: [],
         isLoading: true,
@@ -81,7 +81,7 @@ export function useOperationalTracking() {
             // Get primary location (favorite or first)
             const primaryLocation = locations.find(l => l.is_favorite) || locations[0];
 
-            let exposures: DailyOperationalLoad[] = [];
+            let exposures: DailyVitalityMetrics[] = [];
             let currentAqi = null;
             let alerts: AQIAlert[] = [];
 
@@ -112,25 +112,25 @@ export function useOperationalTracking() {
             }
 
             // Generate weekly report
-            const operationalProfile = userProfile?.operational_profile || {};
-            const weeklyReport = generateWeeklyEfficiencyReport(exposures, operationalProfile);
+            const healthProfile = userProfile?.health_profile || {};
+            const weeklyReport = generateWeeklyVitalityReport(exposures, healthProfile);
 
-            // Calculate resilience impact
-            const { score, breakdown } = calculateResilienceImpact(exposures, operationalProfile);
+            // Calculate vitality impact
+            const { score, breakdown } = calculateVitalityImpact(exposures, healthProfile);
 
             setData({
                 exposures,
                 weeklyReport,
                 alerts,
-                resilienceScore: score,
-                resilienceBreakdown: breakdown,
+                vitalityScore: score,
+                vitalityBreakdown: breakdown,
                 currentAqi,
                 savedLocations: locations,
                 isLoading: false,
                 lastUpdated: new Date()
             });
         } catch (error) {
-            console.error('Error refreshing operational data:', error);
+            console.error('Error refreshing health data:', error);
             setData(prev => ({ ...prev, isLoading: false }));
         }
     }, [user, userProfile, loadSavedLocations]);

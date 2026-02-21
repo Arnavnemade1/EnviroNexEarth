@@ -140,7 +140,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           <div className={`mb-8 transition-all duration-700 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white text-sm font-medium backdrop-blur-sm">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              Quantum-Powered Environmental Intelligence
+              Quantum-Powered Health & Vitality Foresight
             </span>
           </div>
 
@@ -151,8 +151,8 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
 
           <p className={`text-xl md:text-2xl text-white/70 max-w-3xl mx-auto mb-12 leading-relaxed font-light transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
             The first platform combining <span className="text-white font-medium">IBM Quantum Computing</span>,
-            <span className="text-white font-medium"> Industrial Intel AI</span>, and real-time telemetry
-            to optimize and secure our nation's atmospheric resilience.
+            <span className="text-white font-medium"> Vitality Insight AI</span>, and real-time telemetry
+            to maximize personal health and national economic productivity.
           </p>
 
           <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 transition-all duration-1000 delay-900 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -301,8 +301,8 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           {/* Header */}
           <div className={`text-center mb-20 transition-all duration-1000 ${capAnim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <h2 className="text-5xl md:text-6xl lg:text-[80px] font-bold text-white mb-4">
-              Industrial Resilience<br />
-              <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Optimized</span>
+              Atmospheric Vitality<br />
+              <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Restored</span>
             </h2>
           </div>
 
@@ -381,15 +381,15 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           <div className="text-center mb-16">
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-sm font-medium mb-6">
               <Activity className="w-4 h-4" />
-              Strategic Load Monitoring
+              Strategic Vitality Monitoring
             </span>
             <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
-              Optimizing<br />
-              <span className="text-cyan-400">Atmospheric Capacity</span>
+              Maximizing<br />
+              <span className="text-cyan-400">Personal Vitality</span>
             </h2>
             <p className="text-xl text-white/60 max-w-3xl mx-auto">
-              Effective industrial management requires deep intelligence on atmospheric displacement.
-              Understanding these load factors is essential for high-yield operational continuity.
+              Effective health management requires deep intelligence on atmospheric interactions.
+              Understanding these vitality factors is essential for high-yield personal and economic productivity.
             </p>
           </div>
 
@@ -399,40 +399,40 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
               {
                 name: 'PM2.5',
                 fullName: 'Fine Particulate Matter',
-                danger: 'Industrial Displacement Priority',
-                description: 'Operational particulates that require strategic management of regional air corridors',
-                effect: 'Equipment performance, atmospheric visibility',
-                whoLimit: 'National Baseline: 12 μg/m³',
+                danger: 'Health & Growth Sensitivity',
+                description: 'Vitality-altering particulates that require strategic management of regional air corridors',
+                effect: 'Lung health, cognitive clarity',
+                whoLimit: 'Official Baseline: 12 μg/m³',
                 color: 'orange',
                 icon: Wind
               },
               {
                 name: 'O₃',
                 fullName: 'Ground-level Ozone',
-                danger: 'Thermal Yield Interaction',
-                description: 'Photochemical indicators used for heat-management and production timing',
-                effect: 'Cooling efficiency, atmospheric stability',
-                whoLimit: 'Baseline: 100 μg/m³',
+                danger: 'Oxidative Vitality Interaction',
+                description: 'Photochemical indicators used for health-management and outdoor productivity timing',
+                effect: 'Lung function, metabolic energy',
+                whoLimit: 'Official Baseline: 100 μg/m³',
                 color: 'cyan',
                 icon: Activity
               },
               {
                 name: 'NO₂',
                 fullName: 'Nitrogen Dioxide',
-                danger: 'Combustion Performance Index',
-                description: 'High-density tracers of sustained industrial power generation and logistics movement',
-                effect: 'Energy output, regional logistics flow',
-                whoLimit: 'Baseline: 25 μg/m³',
+                danger: 'Metabolic Activity Index',
+                description: 'High-density tracers linked to regional energy production and logistical flow',
+                effect: 'Cardiovascular efficiency, air clarity',
+                whoLimit: 'Official Baseline: 25 μg/m³',
                 color: 'purple',
                 icon: Eye
               },
               {
                 name: 'SO₂',
                 fullName: 'Sulfur Dioxide',
-                danger: 'Resource Intensity Metric',
-                description: 'Direct indicators of large-scale resource extraction and high-capacity processing',
-                effect: 'Industrial throughput, grid reliability',
-                whoLimit: 'Baseline: 40 μg/m³',
+                danger: 'Environmental Integrity Metric',
+                description: 'Direct indicators of large-scale resource processing and atmospheric integrity',
+                effect: 'Respiratory health, environmental stability',
+                whoLimit: 'Official Baseline: 40 μg/m³',
                 color: 'rose',
                 icon: Heart
               }
@@ -478,12 +478,12 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
               </div>
               <div className="text-center md:text-left">
                 <h4 className="text-xl font-bold text-white mb-2">
-                  Optimizing National Production Capacity
+                  Optimizing National Vitality & Economic Growth
                 </h4>
                 <p className="text-white/60 text-sm max-w-2xl">
-                  AuraEarth ensures that strategic industrial expansion remains compatible with atmospheric
-                  stability. By leveraging national safety baselines, we enable maximum resource output
-                  without compromising the technical integrity of regional ecosystems.
+                  AuraEarth ensures that strategic economic expansion remains compatible with personal health.
+                  By leveraging official reporting baselines, we enable maximum productivity without
+                  compromising the physical integrity of our citizens.
                 </p>
               </div>
               <button

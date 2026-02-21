@@ -217,8 +217,8 @@ const Auth = () => {
             <div className="grid gap-6">
               <FeatureCard
                 icon={<Activity className="w-6 h-6" />}
-                title="Real-time Capacity Analytics"
-                description="Strategic resource assessment based on atmospheric load and operational profiles"
+                title="Atmospheric Vitality Analytics"
+                description="Real-world health assessments based on atmospheric impact and vitality profiles"
                 color="primary"
               />
               <FeatureCard
@@ -230,7 +230,7 @@ const Auth = () => {
               <FeatureCard
                 icon={<Shield className="w-6 h-6" />}
                 title="Personalized Insights"
-                description="AI-driven optimizations tailored to your operational requirements"
+                description="AI-driven health optimizations tailored to your vitality and growth goals"
                 color="accent"
               />
               <FeatureCard

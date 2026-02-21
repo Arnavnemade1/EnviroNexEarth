@@ -66,7 +66,7 @@ const categoryIcons: Record<string, React.ReactNode> = {
   clothing: <Shirt className="w-5 h-5" />,
   sports: <Dumbbell className="w-5 h-5" />,
   outdoor: <TreePine className="w-5 h-5" />,
-  resilience: <Shield className="w-5 h-5" />,
+  vitality: <Heart className="w-5 h-5" />,
   energy: <Zap className="w-5 h-5" />,
   travel: <Plane className="w-5 h-5" />,
   events: <PartyPopper className="w-5 h-5" />,
@@ -190,7 +190,7 @@ export const ClimatePredictions = ({
                   <div className="space-y-2">
                     <h3 className="text-xl font-semibold text-foreground">Climate Intelligence Ready</h3>
                     <p className="text-muted-foreground max-w-md mx-auto">
-                      Analyze current climate conditions to predict impacts on traffic, infrastructure, energy, resilience, events, and more for the next 24 hours.
+                      Analyze current climate conditions to predict impacts on traffic, infrastructure, energy, vitality, events, and more for the next 24 hours.
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2 justify-center">
@@ -381,7 +381,7 @@ export const ClimatePredictions = ({
                               </div>
                             )}
 
-                            {/* Risk Groups for Operational Capacity */}
+                            {/* Risk Groups for Atmospheric Vitality */}
                             {category.riskGroups && category.riskGroups.length > 0 && (
                               <div className="flex flex-wrap gap-2">
                                 <span className="text-xs text-muted-foreground">At Risk:</span>

@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Shield } from 'lucide-react';
-import { IndustrialCapacityAnalysis } from '@/components/IndustrialCapacityAnalysis';
+import { ArrowLeft, Heart } from 'lucide-react';
+import { HealthAnalysis } from '@/components/HealthAnalysis';
 import { toast } from 'sonner';
 
 interface LocationState {
@@ -20,7 +20,7 @@ interface LocationState {
   forecast?: Array<{ aqi: number; pm25: number; confidence: number }>;
 }
 
-const Capacity = () => {
+const Health = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -30,7 +30,7 @@ const Capacity = () => {
   useEffect(() => {
     // Check if we have the required data
     if (!state?.cityName || !state?.airQuality) {
-      toast.error("Capacity analysis requires atmospheric load data. Redirecting to home...");
+      toast.error("Vitality analysis requires atmospheric impact data. Redirecting to home...");
       setTimeout(() => navigate('/'), 2000);
     }
   }, [state, navigate]);
@@ -44,10 +44,10 @@ const Capacity = () => {
     return (
       <div className="min-h-screen bg-[#020617] flex items-center justify-center">
         <Card className="glass p-8 text-center max-w-md animate-scale-in border-white/10">
-          <Shield className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2 text-white">No Capacity Data Available</h2>
+          <Heart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2 text-white">No Vitality Data Available</h2>
           <p className="text-slate-400 mb-4">
-            Please select a target city first to view industrial resilience analysis.
+            Please select a target city first to view atmospheric vitality analysis.
           </p>
           <Button onClick={() => navigate('/')} className="w-full bg-indigo-600 hover:bg-indigo-700">
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -60,7 +60,7 @@ const Capacity = () => {
 
   return (
     <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30">
-      <IndustrialCapacityAnalysis
+      <HealthAnalysis
         cityName={state.cityName}
         currentAQI={state.airQuality.aqi}
         airQuality={state.airQuality}
@@ -71,4 +71,4 @@ const Capacity = () => {
   );
 };
 
-export default Capacity;
+export default Health;

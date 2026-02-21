@@ -31,17 +31,17 @@ import {
   PieChart as PieIcon
 } from 'lucide-react';
 import {
-  calculateResilienceRisk,
-  predictResilienceTrend,
-  OperationalProfile,
-  IndustrialCapacityAnalysis as IndustrialCapacityAnalysisType,
+  calculateHealthImpact as calculateHealthRisk,
+  predictVitalityTrend as predictHealthTrend,
+  HealthProfile,
+  HealthImpactAnalysis as HealthImpactAnalysisType,
   Interventions
-} from '@/services/resilienceEngine';
+} from '@/services/healthRiskEngine';
 
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-interface IndustrialCapacityProps {
+interface HealthAnalysisProps {
   cityName: string;
   currentAQI: number;
   airQuality: {
@@ -63,9 +63,9 @@ interface IndustrialCapacityProps {
   onBack?: () => void;
 }
 
-export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, forecast, weather, onBack }: IndustrialCapacityProps) => {
+export const HealthAnalysisComponent = ({ cityName, airQuality, forecast, weather, onBack }: HealthAnalysisProps) => {
   const { toast } = useToast();
-  const [operationalProfile] = useState<OperationalProfile>({
+  const [healthProfile] = useState<HealthProfile>({
     age: 30,
     hasAsthma: false,
     hasHeartCondition: false,
@@ -80,15 +80,15 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
     isStayingIndoors: false
   });
 
-  const [capacityAnalysis, setCapacityAnalysis] = useState<IndustrialCapacityAnalysisType | null>(null);
+  const [vitalityAnalysis, setVitalityAnalysis] = useState<HealthImpactAnalysisType | null>(null);
   const [activeTab, setActiveTab] = useState('cardio');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCapacityAnalysis = async () => {
+    const fetchVitalityAnalysis = async () => {
       setLoading(true);
       try {
-        console.log('Fetching neural capacity analysis for:', cityName);
+        console.log('Fetching neural vitality analysis for:', cityName);
 
         const climateData = {
           cityName,
@@ -104,55 +104,55 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
         };
 
         const { data, error } = await supabase.functions.invoke('health-prediction-engine', {
-          body: { climateData, operationalProfile, interventions }
+          body: { climateData, healthProfile, interventions }
         });
 
         if (error) throw error;
 
-        console.log('Neural capacity analysis received:', data);
-        setCapacityAnalysis(data);
+        console.log('Neural vitality analysis received:', data);
+        setVitalityAnalysis(data);
       } catch (error) {
-        console.error('Failed to fetch capacity analysis:', error);
+        console.error('Failed to fetch vitality analysis:', error);
         toast({
-          title: "Neural Engine Offline",
-          description: "Falling back to local resilience models.",
+          title: "Vitality Engine Offline",
+          description: "Falling back to personal vitality models.",
           variant: "destructive"
         });
 
-        const analysis = calculateResilienceRisk(
+        const analysis = calculateHealthRisk(
           airQuality.aqi,
           airQuality.pm25,
           airQuality.o3,
           airQuality.no2,
           airQuality.so2,
           airQuality.co,
-          operationalProfile,
+          healthProfile,
           interventions
         );
 
         if (forecast) {
-          analysis.activityWindows = predictResilienceTrend(
+          analysis.activityWindows = predictHealthTrend(
             analysis,
             forecast,
             airQuality.o3,
             airQuality.no2,
             airQuality.so2,
             airQuality.co,
-            operationalProfile
+            healthProfile
           );
         }
-        setCapacityAnalysis(analysis);
+        setVitalityAnalysis(analysis);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCapacityAnalysis();
-  }, [airQuality, operationalProfile, forecast, interventions, weather, cityName]);
+    fetchVitalityAnalysis();
+  }, [airQuality, healthProfile, forecast, interventions, weather, cityName]);
 
-  if (!capacityAnalysis || !capacityAnalysis.metrics) return <div className="min-h-screen flex items-center justify-center text-slate-400 bg-slate-950 font-sans">Initializing Capacity Engine...</div>;
+  if (!vitalityAnalysis || !vitalityAnalysis.metrics) return <div className="min-h-screen flex items-center justify-center text-slate-400 bg-slate-950 font-sans">Initializing Vitality Engine...</div>;
 
-  const { metrics } = capacityAnalysis;
+  const { metrics } = vitalityAnalysis;
 
   const StatusBadge = ({ status }: { status: string }) => {
     const styles = {
@@ -190,21 +190,21 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
             <div>
               <div className="flex items-center gap-3 mb-1">
                 <h1 className="text-2xl font-bold tracking-tight text-white">
-                  Capacity Forecast
+                  Vitality Forecast
                 </h1>
                 <Badge variant="outline" className="border-indigo-500/20 text-indigo-400 bg-indigo-500/5 px-2.5 py-0.5 text-[10px] font-medium rounded-full">
                   Live Analytics
                 </Badge>
               </div>
               <p className="text-sm text-slate-400 font-medium tracking-wide">
-                Operational resilience assessment for <span className="text-slate-200">{cityName}</span>
+                Environmental vitality assessment for <span className="text-slate-200">{cityName}</span>
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-8">
             <div className="text-right">
-              <p className="text-xs text-slate-500 font-medium mb-1">Personnel Load Factor</p>
+              <p className="text-xs text-slate-500 font-medium mb-1">Vitality Impact Factor</p>
               <div className="flex items-center justify-end gap-2 text-white">
                 <Activity className="w-5 h-5 text-indigo-500" />
                 <span className="text-3xl font-bold tracking-tight">
@@ -224,10 +224,10 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
             <div className="flex items-center justify-between mb-8 relative z-10">
               <div>
                 <h2 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-                  Aggregate Atmospheric Load
+                  Atmospheric Vitality Impact
                 </h2>
                 <p className="text-sm text-slate-400 max-w-md">
-                  Projected 24-hour relative increase in operational strain based on forecasted particulate exposure.
+                  Projected 24-hour relative impact on personal vitality based on forecasted exposure.
                 </p>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/5 text-xs text-slate-400">
@@ -238,7 +238,7 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
 
             <div className="h-[350px] w-full relative z-10">
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={capacityAnalysis.activityWindows} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <ComposedChart data={vitalityAnalysis.activityWindows} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="riskGradientSmooth" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#6366f1" stopOpacity={0.4} />
@@ -264,14 +264,14 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
                     axisLine={false}
                     fontFamily="Inter, sans-serif"
                     domain={[0, 'auto']}
-                    label={{ value: '% Load Increase', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 11, dx: 10 }}
+                    label={{ value: '% Vitality Impact', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 11, dx: 10 }}
                   />
                   <Tooltip
                     contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', backdropFilter: 'blur(12px)' }}
                     itemStyle={{ color: '#fff', fontWeight: 600, fontSize: '12px', fontFamily: 'Inter, sans-serif' }}
                     labelStyle={{ color: '#94a3b8', fontSize: '11px', marginBottom: '4px' }}
                     cursor={{ stroke: '#ffffff', strokeWidth: 1, strokeOpacity: 0.2 }}
-                    formatter={(value: number) => [`+${value}%`, 'Load Increase']}
+                    formatter={(value: number) => [`+${value}%`, 'Vitality Impact']}
                   />
 
                   <ReferenceLine y={0} stroke="#ffffff" strokeOpacity={0.1} />
@@ -308,7 +308,7 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={capacityAnalysis.pollutantBreakdown}
+                    data={vitalityAnalysis.pollutantBreakdown}
                     cx="50%"
                     cy="50%"
                     innerRadius={45}
@@ -316,7 +316,7 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
                     paddingAngle={5}
                     dataKey="impact"
                   >
-                    {capacityAnalysis.pollutantBreakdown.map((entry: any, index: number) => (
+                    {vitalityAnalysis.pollutantBreakdown.map((entry: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
                     ))}
                   </Pie>
@@ -328,7 +328,7 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
               </ResponsiveContainer>
             </div>
             <div className="grid grid-cols-2 gap-2 mt-auto">
-              {capacityAnalysis.pollutantBreakdown?.slice(0, 4).map((p: any) => (
+              {vitalityAnalysis.pollutantBreakdown?.slice(0, 4).map((p: any) => (
                 <div key={p.name} className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: p.color }} />
                   <span className="text-[10px] font-medium text-slate-400">{p.name} {p.impact}%</span>
@@ -344,13 +344,13 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
               <div>
                 <h2 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
                   <Clock className="w-5 h-5 text-indigo-400" />
-                  Efficiency Suitability Timeline
+                  Vitality Optimization Timeline
                 </h2>
-                <p className="text-sm text-slate-400">Optimal windows for peak industrial physiological output.</p>
+                <p className="text-sm text-slate-400">Optimal windows for peak personal vitality and productivity.</p>
               </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-              {capacityAnalysis.activityWindows.map((window: any) => (
+              {vitalityAnalysis.activityWindows.map((window: any) => (
                 <div key={window.hour} className="bg-slate-950/40 border border-white/5 rounded-2xl p-4 flex flex-col items-center gap-3 transition-all hover:bg-white/5">
                   <span className="text-[10px] font-bold text-slate-500">{window.label}</span>
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${window.status === 'optimal' ? 'border-emerald-500/30 bg-emerald-500/10' :
@@ -379,11 +379,11 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
                 <div className="p-2 bg-indigo-500/20 rounded-lg">
                   <Shield className="w-5 h-5 text-indigo-400" />
                 </div>
-                <h2 className="text-lg font-bold text-white uppercase tracking-tight">Tactical Optimizations</h2>
+                <h2 className="text-lg font-bold text-white uppercase tracking-tight">Vitality Optimizations</h2>
               </div>
 
               <div className="flex-1 space-y-4">
-                {capacityAnalysis.recommendations.map((rec: string, i: number) => (
+                {vitalityAnalysis.recommendations.map((rec: string, i: number) => (
                   <div key={i} className="flex gap-4 p-4 bg-slate-950/30 border border-white/5 rounded-2xl transition-all hover:border-indigo-500/30 group">
                     <div className="mt-1">
                       <CheckCircle2 className="w-5 h-5 text-emerald-500 opacity-60 group-hover:opacity-100 transition-opacity" />
@@ -396,7 +396,7 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
               <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-                  <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Neural Analysis v5.0</span>
+                  <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Neural Vitality v5.0</span>
                 </div>
                 <Badge className="bg-white/10 text-[9px] text-slate-400 border-none">Accuracy Certified</Badge>
               </div>
@@ -407,13 +407,13 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
         <div className="min-h-[250px] bg-white/5 backdrop-blur-md border border-white/10 rounded-[24px] p-6 lg:p-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-white">Capacity Risks</h3>
+              <h3 className="text-lg font-bold text-white">Vitality Factors</h3>
               <TabsList className="bg-slate-950/50 border border-white/5 p-1 rounded-full h-auto">
                 <TabsTrigger value="cardio" className="rounded-full px-6 py-2 text-xs font-bold transition-all data-[state=active]:bg-white/10 data-[state=active]:text-white data-[state=active]:shadow-none hover:text-white">
-                  Systemic Load
+                  Vitality Impact
                 </TabsTrigger>
                 <TabsTrigger value="resp" className="rounded-full px-6 py-2 text-xs font-bold transition-all data-[state=active]:bg-white/10 data-[state=active]:text-white data-[state=active]:shadow-none hover:text-white">
-                  Resilience Index
+                  Wellbeing Index
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -426,7 +426,7 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
                     <span className="font-bold text-sm tracking-wide">IMPACT ANALYSIS</span>
                   </div>
                   <p className="text-lg text-slate-200 leading-relaxed font-light">
-                    Current fine particulate matter ({airQuality.pm25} µg/m³) exposure is correlated with a <span className="text-white font-semibold">+{metrics.cardiovascularRisk.increase}% relative increase</span> in systemic physiological load compared to safety baseline.
+                    Current fine particulate matter ({airQuality.pm25} µg/m³) exposure is correlated with a <span className="text-white font-semibold">+{metrics.cardiovascularRisk.increase}% relative increase</span> in systemic vitality strain.
                   </p>
                 </div>
                 <div className="w-full lg:w-auto min-w-[300px] p-6 bg-slate-950/30 rounded-2xl border border-white/5">
@@ -435,8 +435,8 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
                     <div className="flex items-center gap-3 text-emerald-400 bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20">
                       <ShieldCheck className="w-5 h-5" />
                       <div>
-                        <p className="font-bold text-sm">HEPA Active</p>
-                        <p className="text-xs opacity-80">Load Reduced ~60%</p>
+                        <p className="font-bold text-sm">Vitality Guard Active</p>
+                        <p className="text-xs opacity-80">Impact Reduced ~60%</p>
                       </div>
                     </div>
                   ) : (
@@ -459,7 +459,7 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
                     <span className="font-bold text-sm tracking-wide">IMPACT ANALYSIS</span>
                   </div>
                   <p className="text-lg text-slate-200 leading-relaxed font-light">
-                    Synergistic exposure to Nitrogen Dioxide ({airQuality.no2} ppb) and Ozone ({airQuality.o3} ppb) creates a <span className="text-white font-semibold">+{metrics.respiratoryRisk.increase}% increase</span> in localized atmospheric strain. Tactical adjustments advised.
+                    Synergistic exposure to Nitrogen Dioxide ({airQuality.no2} ppb) and Ozone ({airQuality.o3} ppb) creates a <span className="text-white font-semibold">+{metrics.respiratoryRisk.increase}% increase</span> in localized vitality impact. Personal optimizations advised.
                   </p>
                 </div>
                 <div className="w-full lg:w-auto min-w-[300px] p-6 bg-slate-950/30 rounded-2xl border border-white/5">
@@ -477,7 +477,7 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
                       onClick={() => setInterventions(p => ({ ...p, usingN95: true }))}
                       className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl h-12 shadow-lg shadow-blue-500/20"
                     >
-                      Activate Personnel Bypass
+                      Enhance Personal Vitality
                     </Button>
                   )}
                 </div>
@@ -490,4 +490,4 @@ export const IndustrialCapacityAnalysisComponent = ({ cityName, airQuality, fore
   );
 };
 
-export { IndustrialCapacityAnalysisComponent as IndustrialCapacityAnalysis };
+export { HealthAnalysisComponent as HealthAnalysis };

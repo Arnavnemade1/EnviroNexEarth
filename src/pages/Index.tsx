@@ -10,9 +10,9 @@ import Chatbot from '@/components/Chatbot';
 import HomeScreen from '@/components/HomeScreen';
 import { UserProfile } from '@/components/UserProfile';
 import Dashboard from '@/components/Dashboard';
-import { OperationalProfileSetup } from '@/components/OperationalProfileSetup';
+import { HealthProfileSetup } from '@/components/HealthProfileSetup';
 import QuantumAnalytics from '@/components/QuantumAnalytics';
-import { IndustrialCapacityAnalysis } from '@/components/IndustrialCapacityAnalysis';
+import { HealthAnalysis } from '@/components/HealthAnalysis';
 import { ClimatePredictions } from '@/components/ClimatePredictions';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -41,18 +41,18 @@ const Index = () => {
   const [showHomeScreen, setShowHomeScreen] = useState(true);
   const [showDisasters, setShowDisasters] = useState(false);
   const [showQuantumAnalytics, setShowQuantumAnalytics] = useState(false);
-  const [showCapacityAnalysis, setShowCapacityAnalysis] = useState(false);
+  const [showVitalityAnalysis, setShowVitalityAnalysis] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
   const [showClimatePredictions, setShowClimatePredictions] = useState(false);
-  const [showOperationalProfileSetup, setShowOperationalProfileSetup] = useState(false);
+  const [showVitalityProfileSetup, setShowVitalityProfileSetup] = useState(false);
 
-  // Check if user needs operational profile setup
+  // Check if user needs vitality profile setup
   useEffect(() => {
-    if (user && userProfile && !userProfile.operational_profile?.age_range) {
+    if (user && userProfile && !userProfile.health_profile?.age_range) {
       // Show setup prompt after a short delay
       const timer = setTimeout(() => {
-        setShowOperationalProfileSetup(true);
+        setShowVitalityProfileSetup(true);
       }, 1000);
       return () => clearTimeout(timer);
     }
@@ -80,7 +80,7 @@ const Index = () => {
       setShowIntro(false);
       setShowDisasters(false);
       setShowQuantumAnalytics(false);
-      setShowCapacityAnalysis(false);
+      setShowVitalityAnalysis(false);
 
       toast({
         title: "Loading city data...",
@@ -228,26 +228,26 @@ const Index = () => {
         />
       )}
 
-      {/* Industrial Capacity Analysis Overlay */}
-      {showCapacityAnalysis && selectedCity && airQuality && (
+      {/* Environmental Vitality Analysis Overlay */}
+      {showVitalityAnalysis && selectedCity && airQuality && (
         <div className="fixed inset-0 z-[60] bg-background/95 backdrop-blur-xl animate-in fade-in zoom-in duration-300 p-6 overflow-auto">
           <div className="max-w-7xl mx-auto">
-            <IndustrialCapacityAnalysis
+            <HealthAnalysis
               cityName={`${selectedCity.name}, ${selectedCity.country}`}
               currentAQI={airQuality.aqi}
               airQuality={airQuality}
               forecast={quantumForecast?.hourly}
-              onBack={() => setShowCapacityAnalysis(false)}
+              onBack={() => setShowVitalityAnalysis(false)}
             />
           </div>
         </div>
       )}
 
-      {/* Operational Profile Setup */}
-      {showOperationalProfileSetup && (
-        <OperationalProfileSetup
-          onComplete={() => setShowOperationalProfileSetup(false)}
-          onSkip={() => setShowOperationalProfileSetup(false)}
+      {/* Vitality Profile Setup */}
+      {showVitalityProfileSetup && (
+        <HealthProfileSetup
+          onComplete={() => setShowVitalityProfileSetup(false)}
+          onSkip={() => setShowVitalityProfileSetup(false)}
         />
       )}
 
@@ -378,7 +378,7 @@ const Index = () => {
       </div>
 
       {/* Data Panel */}
-      {selectedCity && airQuality && predictions.length > 0 && !showQuantumAnalytics && !showCapacityAnalysis && (
+      {selectedCity && airQuality && predictions.length > 0 && !showQuantumAnalytics && !showVitalityAnalysis && (
         <DataPanel
           cityName={`${selectedCity.name}, ${selectedCity.country}`}
           airQuality={airQuality}
@@ -390,7 +390,7 @@ const Index = () => {
           currentYear={currentYear}
           onYearChange={handleYearChange}
           onShowQuantumAnalytics={quantumForecast ? () => setShowQuantumAnalytics(true) : undefined}
-          onShowCapacity={() => setShowCapacityAnalysis(true)}
+          onShowVitalityAnalysis={() => setShowVitalityAnalysis(true)}
           onShowClimatePredictions={() => setShowClimatePredictions(true)}
           onShowDisasters={() => setShowDisasters(true)}
           onBackToHome={() => {

@@ -1197,7 +1197,7 @@ export type Database = {
           family_safety_enabled: boolean | null
           favorite_cities: Json | null
           full_name: string | null
-          operational_profile: Json | null
+          health_profile: Json | null
           id: string
           last_check_in: string | null
           location_sharing_active: boolean | null
@@ -1216,7 +1216,7 @@ export type Database = {
           family_safety_enabled?: boolean | null
           favorite_cities?: Json | null
           full_name?: string | null
-          operational_profile?: Json | null
+          health_profile?: Json | null
           id?: string
           last_check_in?: string | null
           location_sharing_active?: boolean | null
@@ -1235,7 +1235,7 @@ export type Database = {
           family_safety_enabled?: boolean | null
           favorite_cities?: Json | null
           full_name?: string | null
-          operational_profile?: Json | null
+          health_profile?: Json | null
           id?: string
           last_check_in?: string | null
           location_sharing_active?: boolean | null

@@ -20,7 +20,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-interface OperationalProfileSetupProps {
+interface HealthProfileSetupProps {
   onComplete: () => void;
   onSkip: () => void;
 }
@@ -35,36 +35,36 @@ const ageRanges = [
 ];
 
 const activityLevels = [
-  { value: 'sedentary', label: 'Low Intensity', desc: 'Minimal physical exertion' },
-  { value: 'light', label: 'Standard load', desc: 'Standard operational cycles' },
-  { value: 'moderate', label: 'Active Deployment', desc: 'Sustained industrial activity' },
-  { value: 'active', label: 'High Performance', desc: 'Intense operational demands' },
-  { value: 'athlete', label: 'Peak Capacity', desc: 'Extreme physical output requirements' },
+  { value: 'sedentary', label: 'Low Intensity', desc: 'Minimal daily physical effort' },
+  { value: 'light', label: 'Standard Living', desc: 'Regular daily activity cycles' },
+  { value: 'moderate', label: 'Active Lifestyle', desc: 'Consistent physical engagement' },
+  { value: 'active', label: 'High Performance', desc: 'Intense daily activity demands' },
+  { value: 'athlete', label: 'Peak Vitality', desc: 'Extreme physical engagement' },
 ];
 
 const smokingStatuses = [
-  { value: 'never', label: 'Filtered Environment' },
-  { value: 'former', label: 'Legacy Exposure' },
-  { value: 'current', label: 'Active Load' },
+  { value: 'never', label: 'Balanced Lifestyle' },
+  { value: 'former', label: 'Previous Exposure' },
+  { value: 'current', label: 'Active Baseline' },
 ];
 
 const sensitivities = [
-  { value: 'low', label: 'Resilient', desc: 'High tolerance to atmospheric load' },
-  { value: 'normal', label: 'Standard', desc: 'Baseline atmospheric interaction' },
-  { value: 'high', label: 'Sensitive', desc: 'Noticeable impact from load spikes' },
-  { value: 'very_high', label: 'Critical', desc: 'Strategic requirements for load management' },
+  { value: 'low', label: 'Robust', desc: 'High tolerance to atmospheric baseline' },
+  { value: 'normal', label: 'Balanced', desc: 'Standard atmospheric interaction' },
+  { value: 'high', label: 'Responsive', desc: 'Awareness of atmospheric variance' },
+  { value: 'very_high', label: 'Attentive', desc: 'Specific needs for baseline management' },
 ];
 
-const operationalConditions = [
+const healthConditions = [
   { value: 'asthma', label: 'Resp. Sensitivity' },
-  { value: 'copd', label: 'Load Limitation' },
-  { value: 'heart_disease', label: 'CV Intensity' },
-  { value: 'allergies', label: 'Particulate Reaction' },
+  { value: 'copd', label: 'Vitality Focused' },
+  { value: 'heart_disease', label: 'CV Vitality' },
+  { value: 'allergies', label: 'Particulate Awareness' },
   { value: 'diabetes', label: 'Metabolic Focus' },
-  { value: 'none', label: 'Nominal Profile' },
+  { value: 'none', label: 'Standard Profile' },
 ];
 
-export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfileSetupProps) => {
+export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupProps) => {
   const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [step, setStep] = useState(1);
@@ -76,7 +76,7 @@ export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfi
     activity_level: '',
     smoking_status: 'never',
     air_sensitivity: 'normal',
-    operational_conditions: [] as string[],
+    health_conditions: [] as string[],
   });
 
   const totalSteps = 5;
@@ -93,22 +93,22 @@ export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfi
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('operational_profile')
+          .select('health_profile')
           .eq('user_id', user.id)
           .single();
 
         if (error) {
-          console.error('Error loading operational profile:', error);
-        } else if (data?.operational_profile) {
-          const existingProfile = data.operational_profile as any;
+          console.error('Error loading health profile:', error);
+        } else if (data?.health_profile) {
+          const existingProfile = data.health_profile as any;
           setProfile({
             age_range: existingProfile.age_range || '',
             activity_level: existingProfile.activity_level || '',
             smoking_status: existingProfile.smoking_status || 'never',
             air_sensitivity: existingProfile.air_sensitivity || 'normal',
-            operational_conditions: existingProfile.operational_conditions || [],
+            health_conditions: existingProfile.health_conditions || [],
           });
-          console.log('Loaded existing operational profile:', existingProfile);
+          console.log('Loaded existing health profile:', existingProfile);
         }
       } catch (error) {
         console.error('Error loading profile:', error);
@@ -122,13 +122,13 @@ export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfi
 
   const handleConditionToggle = (condition: string) => {
     if (condition === 'none') {
-      setProfile(p => ({ ...p, operational_conditions: ['none'] }));
+      setProfile(p => ({ ...p, health_conditions: ['none'] }));
     } else {
       setProfile(p => ({
         ...p,
-        operational_conditions: p.operational_conditions.includes(condition)
-          ? p.operational_conditions.filter(c => c !== condition)
-          : [...p.operational_conditions.filter(c => c !== 'none'), condition]
+        health_conditions: p.health_conditions.includes(condition)
+          ? p.health_conditions.filter(c => c !== condition)
+          : [...p.health_conditions.filter(c => c !== 'none'), condition]
       }));
     }
   };
@@ -139,7 +139,7 @@ export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfi
       case 2: return !!profile.activity_level;
       case 3: return !!profile.smoking_status;
       case 4: return !!profile.air_sensitivity;
-      case 5: return profile.operational_conditions.length > 0;
+      case 5: return profile.health_conditions.length > 0;
       default: return false;
     }
   };
@@ -148,7 +148,7 @@ export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfi
     if (!user) {
       toast({
         title: "Error",
-        description: "You must be logged in to save your operational profile.",
+        description: "You must be logged in to save your health profile.",
         variant: "destructive"
       });
       return;
@@ -156,12 +156,12 @@ export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfi
 
     setIsSubmitting(true);
     try {
-      console.log('Saving operational profile:', profile);
+      console.log('Saving health profile:', profile);
 
       const { data, error } = await supabase
         .from('profiles')
         .update({
-          operational_profile: profile,
+          health_profile: profile,
           updated_at: new Date().toISOString()
         })
         .eq('user_id', user.id)
@@ -176,16 +176,16 @@ export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfi
       await refreshProfile();
 
       toast({
-        title: "✅ Operational Profile Active!",
-        description: `Deployment parameters configured. Age: ${profile.age_range}, Load: ${profile.activity_level}`,
+        title: "✅ Health Profile Active!",
+        description: `Vitality parameters configured. Age: ${profile.age_range}, Engagement: ${profile.activity_level}`,
       });
 
       onComplete();
     } catch (error: any) {
-      console.error('Error saving operational profile:', error);
+      console.error('Error saving health profile:', error);
       toast({
         title: "❌ Config Failed",
-        description: error.message || "Failed to save operational profile. Please try again.",
+        description: error.message || "Failed to save health profile. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -198,7 +198,7 @@ export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfi
       <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 z-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-indigo-400 mx-auto mb-4" />
-          <p className="text-white/60">Loading operational profile...</p>
+          <p className="text-white/60">Loading vitality profile...</p>
         </div>
       </div>
     );
@@ -219,8 +219,8 @@ export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfi
                 <Target className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white tracking-tight">Operational Profile</h2>
-                <p className="text-sm text-slate-400 font-medium">Configure deployment metrics</p>
+                <h2 className="text-2xl font-bold text-white tracking-tight">Vitality Profile</h2>
+                <p className="text-sm text-slate-400 font-medium">Configure vitality metrics</p>
               </div>
             </div>
             <Button
@@ -261,7 +261,7 @@ export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfi
                   <User className="w-16 h-16 text-indigo-400" />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2">Age Range</h3>
-                <p className="text-slate-400">Baseline demographics for resilience assessment</p>
+                <p className="text-slate-400">Baseline demographics for vitality assessment</p>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {ageRanges.map(age => (
@@ -287,8 +287,8 @@ export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfi
                 <div className="inline-block p-4 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-3xl mb-4">
                   <Activity className="w-16 h-16 text-emerald-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Operational Intensity</h3>
-                <p className="text-slate-400">Cycle complexity affects atmospheric interaction</p>
+                <h3 className="text-2xl font-bold text-white mb-2">Vitality Activity</h3>
+                <p className="text-slate-400">Engagement levels affect atmospheric interaction</p>
               </div>
               <div className="space-y-3">
                 {activityLevels.map(level => (
@@ -321,8 +321,8 @@ export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfi
                 <div className="inline-block p-4 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-3xl mb-4">
                   <Wind className="w-16 h-16 text-blue-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Inhalation Environment</h3>
-                <p className="text-slate-400">Strategic respiratory load assessment</p>
+                <h3 className="text-2xl font-bold text-white mb-2">Personal Environment</h3>
+                <p className="text-slate-400">Respiratory baseline assessment</p>
               </div>
               <div className="space-y-3">
                 {smokingStatuses.map(status => (
@@ -352,8 +352,8 @@ export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfi
                 <div className="inline-block p-4 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-3xl mb-4">
                   <AlertTriangle className="w-16 h-16 text-amber-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Load Sensitivity</h3>
-                <p className="text-slate-400">Industrial tolerance to atmospheric variance</p>
+                <h3 className="text-2xl font-bold text-white mb-2">Atmospheric Sensitivity</h3>
+                <p className="text-slate-400">Personal tolerance to atmospheric variance</p>
               </div>
               <div className="space-y-3">
                 {sensitivities.map(sens => (
@@ -386,14 +386,14 @@ export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfi
                 <div className="inline-block p-4 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-3xl mb-4">
                   <Sparkles className="w-16 h-16 text-purple-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Operational Limitations</h3>
-                <p className="text-slate-400">Select all that apply to specific resilience profiling</p>
+                <h3 className="text-2xl font-bold text-white mb-2">Vitality Awareness</h3>
+                <p className="text-slate-400">Select all that apply for specific vitality profiling</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                {operationalConditions.map(condition => (
+                {healthConditions.map(condition => (
                   <button
                     key={condition.value}
-                    className={`p-5 rounded-2xl border text-center transition-all duration-300 ${profile.operational_conditions.includes(condition.value)
+                    className={`p-5 rounded-2xl border text-center transition-all duration-300 ${profile.health_conditions.includes(condition.value)
                       ? 'border-purple-500/50 bg-gradient-to-br from-purple-500/20 to-pink-500/20 shadow-lg shadow-purple-500/20 scale-[1.02]'
                       : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02]'
                       }`}
@@ -401,7 +401,7 @@ export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfi
                   >
                     <div className="flex flex-col items-center gap-2">
                       <span className="font-bold text-white text-sm">{condition.label}</span>
-                      {profile.operational_conditions.includes(condition.value) && (
+                      {profile.health_conditions.includes(condition.value) && (
                         <Check className="w-5 h-5 text-purple-400" />
                       )}
                     </div>

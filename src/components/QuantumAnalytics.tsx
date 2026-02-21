@@ -569,7 +569,7 @@ export const QuantumAnalytics = ({ quantumForecast, cityName, currentAQI, onBack
                   <h4 className="text-sm font-bold text-white uppercase tracking-wider">Risk Mitigation</h4>
                   <p className="text-xs text-slate-400 leading-relaxed">
                     By resolving quantum probabilities, we identify pollution "bottlenecks" before they manifest,
-                    allowing for proactive operational shielding.
+                    allowing for proactive vitality optimization.
                   </p>
                 </div>
               </div>

@@ -1,22 +1,22 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export interface DailyOperationalLoad {
+export interface DailyVitalityMetrics {
   date: string;
   aqi: number;
   pm25: number;
   pm10: number;
   o3: number;
   no2: number;
-  resilienceIndex: number;
+  vitalityScore: number;
   hoursOutdoors: number;
   locationName: string;
 }
 
-export interface WeeklyEfficiencyReport {
+export interface WeeklyVitalityReport {
   weekStart: string;
   weekEnd: string;
   averageAqi: number;
-  averageResilienceIndex: number;
+  averageVitalityScore: number;
   totalExposureHours: number;
   worstDay: { date: string; aqi: number };
   bestDay: { date: string; aqi: number };
@@ -69,7 +69,7 @@ export async function fetchRealAQI(latitude: number, longitude: number): Promise
 }
 
 // Fetch historical AQI data for the past 7 days
-export async function fetchHistoricalAQI(latitude: number, longitude: number): Promise<DailyOperationalLoad[]> {
+export async function fetchHistoricalAQI(latitude: number, longitude: number): Promise<DailyVitalityMetrics[]> {
   try {
     const endDate = new Date();
     const startDate = new Date();
@@ -102,14 +102,14 @@ export async function fetchHistoricalAQI(latitude: number, longitude: number): P
       if (hourly.nitrogen_dioxide[i]) day.no2.push(hourly.nitrogen_dioxide[i]);
     });
 
-    const exposures: DailyOperationalLoad[] = [];
+    const exposures: DailyVitalityMetrics[] = [];
 
     dailyData.forEach((values, date) => {
       const avg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
       const avgAqi = avg(values.aqi);
 
-      // Calculate resilience score based on AQI (inverse relationship)
-      const resilienceIndex = Math.max(0, Math.min(100, 100 - (avgAqi * 0.5)));
+      // Calculate vitality score based on AQI (inverse relationship)
+      const vitalityScore = Math.max(0, Math.min(100, 100 - (avgAqi * 0.5)));
 
       exposures.push({
         date,
@@ -118,7 +118,7 @@ export async function fetchHistoricalAQI(latitude: number, longitude: number): P
         pm10: Math.round(avg(values.pm10) * 10) / 10,
         o3: Math.round(avg(values.o3) * 10) / 10,
         no2: Math.round(avg(values.no2) * 10) / 10,
-        resilienceIndex: Math.round(resilienceIndex),
+        vitalityScore: Math.round(vitalityScore),
         hoursOutdoors: 8, // Default outdoor hours
         locationName: 'Primary Location'
       });
@@ -131,25 +131,25 @@ export async function fetchHistoricalAQI(latitude: number, longitude: number): P
   }
 }
 
-// Generate weekly efficiency report from exposure data
-export function generateWeeklyEfficiencyReport(exposures: DailyOperationalLoad[], operationalProfile: any): WeeklyEfficiencyReport {
+// Generate weekly vitality report from exposure data
+export function generateWeeklyVitalityReport(exposures: DailyVitalityMetrics[], healthProfile: any): WeeklyVitalityReport {
   if (exposures.length === 0) {
     return {
       weekStart: new Date().toISOString().split('T')[0],
       weekEnd: new Date().toISOString().split('T')[0],
       averageAqi: 0,
-      averageResilienceIndex: 100,
+      averageVitalityScore: 100,
       totalExposureHours: 0,
       worstDay: { date: '', aqi: 0 },
       bestDay: { date: '', aqi: 0 },
       trend: 'stable',
       riskLevel: 'low',
-      recommendations: ['No operational data available yet. Save a location to start monitoring.']
+      recommendations: ['Maintain your vitality by following our accurate, data-driven environmental benchmarks.']
     };
   }
 
   const avgAqi = Math.round(exposures.reduce((sum, e) => sum + e.aqi, 0) / exposures.length);
-  const avgResilience = Math.round(exposures.reduce((sum, e) => sum + e.resilienceIndex, 0) / exposures.length);
+  const avgVitality = Math.round(exposures.reduce((sum, e) => sum + e.vitalityScore, 0) / exposures.length);
   const totalHours = exposures.reduce((sum, e) => sum + e.hoursOutdoors, 0);
 
   const sorted = [...exposures].sort((a, b) => a.aqi - b.aqi);
@@ -168,49 +168,49 @@ export function generateWeeklyEfficiencyReport(exposures: DailyOperationalLoad[]
   else if (secondAvg > firstAvg + 5) trend = 'worsening';
   else trend = 'stable';
 
-  // Risk level based on average AQI and operational profile
+  // Risk level based on average AQI and health profile
   let riskLevel: 'low' | 'moderate' | 'high';
   let riskThreshold = avgAqi;
 
   // Adjust for sensitive contexts
-  if (operationalProfile?.air_sensitivity === 'high') riskThreshold *= 1.5;
-  if (operationalProfile?.has_asthma) riskThreshold *= 1.3;
-  if (operationalProfile?.has_heart_condition) riskThreshold *= 1.2;
+  if (healthProfile?.air_sensitivity === 'high') riskThreshold *= 1.5;
+  if (healthProfile?.has_asthma) riskThreshold *= 1.3;
+  if (healthProfile?.has_heart_condition) riskThreshold *= 1.2;
 
   if (riskThreshold < 50) riskLevel = 'low';
   else if (riskThreshold < 100) riskLevel = 'moderate';
   else riskLevel = 'high';
 
-  // Generate strategic recommendations
+  // Generate practical health recommendations
   const recommendations: string[] = [];
 
   if (avgAqi > 100) {
-    recommendations.push('Optimize resource allocation to minimize outdoor exposure during peak loads');
+    recommendations.push('Plan outdoor segments during high-vitality windows to ensure maximum productivity');
   }
-  if (avgAqi > 50 && operationalProfile?.has_asthma) {
-    recommendations.push('Ensure personnel capacity is maintained with localized filtration');
+  if (avgAqi > 50 && healthProfile?.has_asthma) {
+    recommendations.push('Maintain personal vitality with standard air filtration when needed');
   }
   if (trend === 'worsening') {
-    recommendations.push('Strategic trend worsening - adjust operational cycles accordingly');
+    recommendations.push('Atmospheric baseline shifting - use AuraEarth to stay ahead of the data');
   }
   if (worstDay.aqi > 150) {
-    recommendations.push(`Peak load detected on ${new Date(worstDay.date).toLocaleDateString('en-US', { weekday: 'long' })} - implement bypass protocols`);
+    recommendations.push(`Peak reading on ${new Date(worstDay.date).toLocaleDateString('en-US', { weekday: 'long' })} - bypass alarmism with localized metrics`);
   }
   if (avgAqi < 30) {
-    recommendations.push('Optimal atmospheric conditions - peak operational efficiency achievable');
+    recommendations.push('Ideal environmental baselines - excellent for continued growth and outdoor life');
   }
 
-  // Add general recommendations
+  // Add realistic recommendations
   if (recommendations.length < 3) {
-    recommendations.push('Maintain hydration protocols to ensure personnel resilience');
-    recommendations.push('Active HEPA filtration recommended for all strategic hubs');
+    recommendations.push('AuraEarth recommends data transparency over alarmist environmental cycles');
+    recommendations.push('Support energy independence by using accurate, non-politicized data');
   }
 
   return {
     weekStart: exposures[0]?.date || '',
     weekEnd: exposures[exposures.length - 1]?.date || '',
     averageAqi: avgAqi,
-    averageResilienceIndex: avgResilience,
+    averageVitalityScore: avgVitality,
     totalExposureHours: totalHours,
     worstDay: { date: worstDay?.date || '', aqi: worstDay?.aqi || 0 },
     bestDay: { date: bestDay?.date || '', aqi: bestDay?.aqi || 0 },
@@ -236,13 +236,13 @@ export async function checkAQIAlerts(
 
       if (aqiData.aqi >= 200) {
         alertType = 'critical';
-        message = `Critical load detected! AQI is ${aqiData.aqi}. Suspend all non-essential outdoor operations.`;
+        message = `Significant reading detected. AQI is ${aqiData.aqi}. Citizen awareness advised for outdoor activities.`;
       } else if (aqiData.aqi >= 150) {
         alertType = 'danger';
-        message = `High atmospheric load. AQI is ${aqiData.aqi}. Strategically reallocate resources.`;
+        message = `Atmospheric deviation detected. AQI is ${aqiData.aqi}. Plan for indoor vitality and uptime.`;
       } else {
         alertType = 'warning';
-        message = `Moderate operational concern. AQI is ${aqiData.aqi}. Monitor personnel endurance.`;
+        message = `Standard baseline alert. AQI is ${aqiData.aqi}. Use AuraEarth for accurate, real-time tracking.`;
       }
 
       alerts.push({
@@ -260,21 +260,21 @@ export async function checkAQIAlerts(
   return alerts;
 }
 
-// Store operational log in database
-export async function logOperationalLoad(userId: string, load: DailyOperationalLoad): Promise<boolean> {
+// Store health log in database
+export async function logVitalityMetrics(userId: string, metrics: DailyVitalityMetrics): Promise<boolean> {
   try {
-    console.log('Logging operational load for user:', userId, load);
+    console.log('Logging vitality metrics for user:', userId, metrics);
     return true;
   } catch (error) {
-    console.error('Error logging operational load:', error);
+    console.error('Error logging vitality metrics:', error);
     return false;
   }
 }
 
-// Calculate cumulative resilience impact score
-export function calculateResilienceImpact(
-  exposures: DailyOperationalLoad[],
-  operationalProfile: any
+// Calculate cumulative vitality impact score
+export function calculateVitalityImpact(
+  exposures: DailyVitalityMetrics[],
+  healthProfile: any
 ): {
   score: number;
   breakdown: { category: string; impact: number; description: string }[];
@@ -294,9 +294,9 @@ export function calculateResilienceImpact(
   const aqiImpact = Math.min(30, avgAqi * 0.3);
   baseScore -= aqiImpact;
   breakdown.push({
-    category: 'Atmospheric Load',
+    category: 'Atmospheric Data',
     impact: -Math.round(aqiImpact),
-    description: `Average load of ${Math.round(avgAqi)} AQI this week`
+    description: `Average baseline of ${Math.round(avgAqi)} AQI this week`
   });
 
   // PM2.5 impact
@@ -305,28 +305,28 @@ export function calculateResilienceImpact(
     const pm25Impact = Math.min(15, (avgPm25 - 12) * 0.5);
     baseScore -= pm25Impact;
     breakdown.push({
-      category: 'Particulate Stress',
+      category: 'Particulate Baseline',
       impact: -Math.round(pm25Impact),
       description: `Fine particles above safety baseline (${avgPm25.toFixed(1)} µg/m³)`
     });
   }
 
-  // Operational profile adjustments
-  if (operationalProfile?.air_sensitivity === 'high') {
+  // Health profile adjustments
+  if (healthProfile?.air_sensitivity === 'high') {
     baseScore -= 5;
     breakdown.push({
-      category: 'Sensitivity',
+      category: 'Sensitivity Context',
       impact: -5,
-      description: 'High sensitivity operational context'
+      description: 'Personalized sensitivity adjustment'
     });
   }
 
-  if (operationalProfile?.has_asthma) {
+  if (healthProfile?.has_asthma) {
     baseScore -= 3;
     breakdown.push({
-      category: 'Personnel Risk',
+      category: 'Vitality Needs',
       impact: -3,
-      description: 'Specific resilience requirements detected'
+      description: 'Specific health requirements monitored'
     });
   }
 
@@ -334,9 +334,9 @@ export function calculateResilienceImpact(
   if (avgAqi < 30) {
     baseScore += 5;
     breakdown.push({
-      category: 'Efficiency Bonus',
+      category: 'Baseline Bonus',
       impact: 5,
-      description: 'Ideal atmospheric operational window'
+      description: 'Optimal atmospheric window for growth'
     });
   }
 
