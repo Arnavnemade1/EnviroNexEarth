@@ -63,12 +63,12 @@ Deno.serve(async (req) => {
     try {
         const payload = await req.json();
         const { climateData, healthProfile }: { climateData: ClimateData, healthProfile: HealthProfile } = payload;
-        const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+        const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('LOVABLE_API_KEY');
 
         let data: HealthAnalysisResponse;
 
-        if (!LOVABLE_API_KEY) {
-            console.warn('LOVABLE_API_KEY not found, using algorithmic fallback');
+        if (!GEMINI_API_KEY) {
+            console.warn('GEMINI_API_KEY not found, using algorithmic fallback');
             data = generateMockHealthAnalysis(climateData, healthProfile);
         } else {
             try {
@@ -95,30 +95,33 @@ Deno.serve(async (req) => {
                     "O3: " + climateData.airQuality.o3 + "\n" +
                     "Profile: Age " + healthProfile.age + ", Asthma: " + healthProfile.hasAsthma + ", Heart: " + healthProfile.hasHeartCondition;
 
-                const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': 'Bearer ' + LOVABLE_API_KEY,
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        model: 'google/gemini-2.0-flash',
-                        messages: [
-                            { role: 'system', content: systemPrompt },
-                            { role: 'user', content: userPrompt }
-                        ],
-                        temperature: 0.2
+                        contents: [{
+                            parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.2,
+                            topP: 0.95,
+                            topK: 40,
+                            maxOutputTokens: 2048,
+                            responseMimeType: "application/json",
+                        }
                     }),
                 });
 
-                if (!response.ok) throw new Error('AI Gateway Error');
+                if (!response.ok) throw new Error('Gemini API Error');
 
                 const aiData = await response.json();
-                let content = aiData.choices[0].message.content;
-                content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                const content = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!content) throw new Error('No content from Gemini');
                 data = JSON.parse(content);
             } catch (e) {
-                console.error('AI call failed, falling back:', (e as Error).message);
+                console.error('Gemini call failed, falling back:', (e as Error).message);
                 data = generateMockHealthAnalysis(climateData, healthProfile);
             }
         }

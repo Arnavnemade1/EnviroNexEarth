@@ -25,38 +25,44 @@ Deno.serve(async (req) => {
     try {
         const payload = await req.json();
         const { disasters = [], locationData = {} } = payload;
-        const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+        const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('LOVABLE_API_KEY');
 
         let data;
 
-        if (!LOVABLE_API_KEY) {
-            console.warn('LOVABLE_API_KEY not found, using algorithmic fallback');
+        if (!GEMINI_API_KEY) {
+            console.warn('GEMINI_API_KEY not found, using algorithmic fallback');
             data = generateMockPredictions(disasters, locationData);
         } else {
             try {
                 const systemPrompt = "You are the AuraEarth Global Tactical Disaster Prediction Engine.\nAnalyze current natural disasters and regional atmospheric data to predict potential UPCOMING events or escalations.\n\nReturn ONLY valid JSON.\n\nInputs:\n- Current Events: " + JSON.stringify(disasters.slice(0, 5)) + "\n- Analysis Target: " + (locationData?.cityName || 'Global') + " (" + (locationData?.lat || 0) + ", " + (locationData?.lon || 0) + ")\n\nJSON Schema:\n{\n  \"summary\": \"Summary\",\n  \"predictions\": [\n    {\n      \"id\": \"pred-1\",\n      \"type\": \"wildfire|flood|storm|earthquake|volcano\",\n      \"title\": \"Title\",\n      \"location\": \"Region\",\n      \"likelihood\": 0-100,\n      \"timeframe\": \"Next 24h\",\n      \"severity\": \"low|medium|high|extreme\",\n      \"description\": \"Reasoning\",\n      \"recommendation\": \"Action\"\n    }\n  ],\n  \"regionalRiskLevel\": \"low|medium|high|extreme\",\n  \"globalStatus\": \"Elevated|Nominal|Critical\"\n}";
 
-                const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        model: 'google/gemini-2.0-flash',
-                        messages: [{ role: 'system', content: systemPrompt }],
-                        temperature: 0.4
+                        contents: [{
+                            parts: [{ text: systemPrompt }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.4,
+                            topP: 0.95,
+                            topK: 40,
+                            maxOutputTokens: 2048,
+                            responseMimeType: "application/json",
+                        }
                     }),
                 });
 
-                if (!response.ok) throw new Error('AI Gateway Error');
+                if (!response.ok) throw new Error('Gemini API Error');
 
                 const aiData = await response.json();
-                let content = aiData.choices[0].message.content;
-                content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                const content = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!content) throw new Error('No content from Gemini');
                 data = JSON.parse(content);
             } catch (e) {
-                console.error('AI call failed, falling back:', e.message);
+                console.error('Gemini call failed, falling back:', (e as Error).message);
                 data = generateMockPredictions(disasters, locationData);
             }
         }
