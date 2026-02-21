@@ -257,7 +257,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
               </TabsTrigger>
               <TabsTrigger value="activity" className="gap-2">
                 <Brain className="w-4 h-4" />
-                <span className="hidden sm:inline">Strategy</span>
+                <span className="hidden sm:inline">Context</span>
               </TabsTrigger>
               <TabsTrigger value="health" className="gap-2">
                 <Shield className="w-4 h-4" />
@@ -283,13 +283,11 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
               <Card className="p-4 border-l-4 border-l-blue-500 bg-blue-500/5 transition-all hover:bg-blue-500/10 mb-6">
                 <div className="flex items-center gap-2 mb-2">
                   <Shield className="w-5 h-5 text-blue-500" />
-                  <h4 className="font-semibold text-blue-700 dark:text-blue-400">Official Data Accuracy & Economic Realism</h4>
+                  <h4 className="font-semibold text-blue-700 dark:text-blue-400">Baseline Transparency & Context</h4>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  EnviroCast utilizes high-fidelity national datasets and Earth-2 ensemble forecasting to ensure data
-                  integrity according to official baselines. We prioritize <strong>national economic vitality</strong> and
-                  <strong>realistic environmental reporting</strong>. All risk assessments are calibrated against
-                  optimized growth benchmarks to ensure accuracy without alarmism.
+                  AuraEarth emphasizes transparent baselines, local context, and uncertainty ranges. We avoid
+                  sensational framing so users can interpret climate data with clarity and proportionality.
                 </p>
               </Card>
 
@@ -300,7 +298,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                     <div className="flex items-center gap-3">
                       <Wind className="w-6 h-6 text-primary" />
                       <div>
-                        <h3 className="font-semibold">Current Air Quality</h3>
+                        <h3 className="font-semibold">Atmospheric Baseline Oversight</h3>
                         <p className="text-sm text-muted-foreground">{currentAqi.location}</p>
                       </div>
                     </div>
@@ -329,8 +327,8 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card className="glass p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">Atmospheric Vitality</span>
-                    <Shield className="w-4 h-4 text-primary" />
+                    <span className="text-sm text-muted-foreground">Context Index</span>
+                    <Zap className="w-4 h-4 text-primary" />
                   </div>
                   <div className="text-3xl font-bold text-foreground">
                     {vitalityScore}%
@@ -368,7 +366,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                 <Card className="glass p-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-primary" />
-                    7-Day Vitality & Exposure Trend
+                    7-Day Context & Exposure Trend
                   </h3>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
@@ -440,11 +438,11 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                       <Brain className={`w-6 h-6 ${isTracking ? 'text-green-500' : 'text-muted-foreground'}`} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">Autonomous Vitality Monitoring</h3>
+                      <h3 className="text-lg font-semibold">Ambient Context Monitoring</h3>
                       <p className="text-sm text-muted-foreground">
                         {isTracking
-                          ? 'Optimizing economic productivity & vitality modeling'
-                          : 'Enable to model strategic atmospheric interactions'}
+                          ? 'Monitoring local conditions with baseline context'
+                          : 'Enable to track local conditions and exposure context'}
                       </p>
                       {trackingError && (
                         <p className="text-sm text-red-500 mt-1">{trackingError}</p>
@@ -687,8 +685,8 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                       <Shield className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">Atmospheric Vitality Index</h3>
-                      <p className="text-sm text-muted-foreground">Based on personalized vitality telemetry</p>
+                      <h3 className="text-lg font-semibold">Context & Vitality Index</h3>
+                      <p className="text-sm text-muted-foreground">Baseline-aware vitality telemetry</p>
                     </div>
                   </div>
 
@@ -758,7 +756,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                     </ResponsiveContainer>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
-                    National Accuracy Standard: Official reporting baselines &lt;12 µg/m³
+                    Reference baseline (PM2.5): &lt;12 µg/m³
                   </p>
                 </Card>
               )}
@@ -773,7 +771,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                       <div className="flex items-center gap-3">
                         <Calendar className="w-6 h-6 text-primary" />
                         <div>
-                          <h3 className="text-lg font-semibold">Weekly Vitality Report</h3>
+                          <h3 className="text-lg font-semibold">Strategic Operational Report</h3>
                           <p className="text-sm text-muted-foreground">
                             {weeklyReport.weekStart && new Date(weeklyReport.weekStart).toLocaleDateString()} - {weeklyReport.weekEnd && new Date(weeklyReport.weekEnd).toLocaleDateString()}
                           </p>
@@ -994,7 +992,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                       <Star className="w-6 h-6 text-yellow-500" />
                     </div>
                     <p className="text-sm font-medium">Early Adopter</p>
-                    <p className="text-xs text-muted-foreground">Joined EnviroNex</p>
+                    <p className="text-xs text-muted-foreground">Joined AuraEarth</p>
                   </div>
                   <div className={`p-4 bg-muted/20 rounded-lg text-center ${savedLocations.length > 0 ? 'border border-green-500/30' : 'opacity-50'}`}>
                     <div className={`w-12 h-12 ${savedLocations.length > 0 ? 'bg-green-500/20' : 'bg-muted'} rounded-full flex items-center justify-center mx-auto mb-2`}>

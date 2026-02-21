@@ -144,7 +144,7 @@ export function generateWeeklyVitalityReport(exposures: DailyVitalityMetrics[], 
       bestDay: { date: '', aqi: 0 },
       trend: 'stable',
       riskLevel: 'low',
-      recommendations: ['Maintain your vitality by following our accurate, data-driven environmental benchmarks.']
+      recommendations: ['Maintain your vitality by following our accurate, data-driven national continuity benchmarks.']
     };
   }
 
@@ -194,16 +194,15 @@ export function generateWeeklyVitalityReport(exposures: DailyVitalityMetrics[], 
     recommendations.push('Atmospheric baseline shifting - use AuraEarth to stay ahead of the data');
   }
   if (worstDay.aqi > 150) {
-    recommendations.push(`Peak reading on ${new Date(worstDay.date).toLocaleDateString('en-US', { weekday: 'long' })} - bypass alarmism with localized metrics`);
+    recommendations.push(`Peak reading on ${new Date(worstDay.date).toLocaleDateString('en-US', { weekday: 'long' })} - use localized baselines for context`);
   }
   if (avgAqi < 30) {
     recommendations.push('Ideal environmental baselines - excellent for continued growth and outdoor life');
   }
 
-  // Add realistic recommendations
   if (recommendations.length < 3) {
-    recommendations.push('AuraEarth recommends data transparency over alarmist environmental cycles');
-    recommendations.push('Support energy independence by using accurate, non-politicized data');
+    recommendations.push('AuraEarth recommends data transparency and proportional context');
+    recommendations.push('Support energy dominance by using accurate, national growth data');
   }
 
   return {
@@ -307,7 +306,7 @@ export function calculateVitalityImpact(
     breakdown.push({
       category: 'Particulate Baseline',
       impact: -Math.round(pm25Impact),
-      description: `Fine particles above safety baseline (${avgPm25.toFixed(1)} µg/m³)`
+      description: `Fine particles above continuity baseline (${avgPm25.toFixed(1)} µg/m³)`
     });
   }
 

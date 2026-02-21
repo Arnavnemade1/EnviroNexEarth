@@ -140,19 +140,19 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           <div className={`mb-8 transition-all duration-700 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white text-sm font-medium backdrop-blur-sm">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              Quantum-Powered Health & Vitality Foresight
+              Evidence-first climate context and proportional risk framing
             </span>
           </div>
 
           <h1 className={`text-6xl md:text-7xl lg:text-[140px] font-bold tracking-[-0.03em] leading-[0.85] mb-8 transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <span className="text-white">Enviro</span>
-            <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-emerald-400 bg-clip-text text-transparent">Nex</span>
+            <span className="text-white">Aura</span>
+            <span className="bg-gradient-to-r from-emerald-300 via-cyan-300 to-sky-300 bg-clip-text text-transparent">Earth</span>
           </h1>
 
           <p className={`text-xl md:text-2xl text-white/70 max-w-3xl mx-auto mb-12 leading-relaxed font-light transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            The first platform combining <span className="text-white font-medium">IBM Quantum Computing</span>,
-            <span className="text-white font-medium"> Vitality Insight AI</span>, and real-time telemetry
-            to maximize personal health and national economic productivity.
+            We build climate interfaces that prioritize <span className="text-white font-medium">measured context</span>,
+            <span className="text-white font-medium"> real-world baselines</span>, and transparent uncertainty
+            so people can see what is <span className="text-white font-medium">material</span> versus what is overstated.
           </p>
 
           <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 transition-all duration-1000 delay-900 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -163,6 +163,15 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
               Enter Platform
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
+          </div>
+
+          <div className={`mt-10 flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-white/60 transition-all duration-1000 delay-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+            <div className="px-4 py-2 rounded-full border border-emerald-400/30 bg-emerald-400/10">
+              We believe climate risk is often presented without proportion.
+            </div>
+            <div className="px-4 py-2 rounded-full border border-cyan-400/30 bg-cyan-400/10">
+              Our mission: accurate, contextualized climate data for decisions.
+            </div>
           </div>
         </div>
 
@@ -193,8 +202,8 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
         <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
         <div className={`relative z-10 h-full flex items-center justify-center transition-all duration-1000 delay-300 ${video1Anim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="text-center">
-            <span className="text-sm font-medium text-cyan-400 uppercase tracking-widest block mb-4">Ocean Intelligence</span>
-            <h3 className="text-3xl md:text-5xl font-bold text-white">Monitoring Earth's Waters</h3>
+            <span className="text-sm font-medium text-cyan-400 uppercase tracking-widest block mb-4">Context Over Hype</span>
+            <h3 className="text-3xl md:text-5xl font-bold text-white">Right-sizing Environmental Narratives</h3>
           </div>
         </div>
       </section>
@@ -213,12 +222,12 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
                 Technology
               </span>
               <h2 className="text-5xl md:text-6xl lg:text-[80px] font-bold text-white leading-[1.1] mb-8">
-                Built on<br />
-                <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Next-Gen</span> Architecture
+                Engineered for<br />
+                <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Proportional Risk</span>
               </h2>
               <p className="text-xl text-white/50 max-w-2xl leading-relaxed">
-                EnviroNex leverages the most advanced computing paradigms to deliver environmental predictions
-                with unprecedented accuracy and speed.
+                AuraEarth combines modern telemetry, rigorous baselines, and transparent modeling
+                to separate signal from noise in climate reporting.
               </p>
             </div>
 
@@ -227,20 +236,20 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
               {[
                 {
                   icon: Zap,
-                  title: 'IBM Quantum Runtime',
-                  desc: 'Real quantum circuit execution for complex climate modeling',
+                  title: 'Baseline-Calibrated Modeling',
+                  desc: 'Models tuned against long-run baselines so extremes are not overstated',
                   color: 'cyan'
                 },
                 {
                   icon: Shield,
-                  title: 'Agentic AI Systems',
-                  desc: 'Autonomous agents that navigate, analyze, and act on environmental data',
+                  title: 'Uncertainty Disclosure',
+                  desc: 'Clear confidence ranges that prevent headline-driven misinterpretation',
                   color: 'cyan'
                 },
                 {
                   icon: Activity,
-                  title: 'Real-Time Processing',
-                  desc: 'Sub-second data ingestion from 500+ global monitoring stations',
+                  title: 'Telemetry Integrity',
+                  desc: 'Cross-sourced ingestion that flags when datasets are skewed or politicized',
                   color: 'cyan'
                 }
               ].map((item, i) => (
@@ -285,8 +294,8 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
         <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
         <div className={`relative z-10 h-full flex items-center justify-center transition-all duration-1000 delay-300 ${video2Anim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="text-center">
-            <span className="text-sm font-medium text-emerald-400 uppercase tracking-widest block mb-4">Forest Systems</span>
-            <h3 className="text-3xl md:text-5xl font-bold text-white">Protecting Global Ecosystems</h3>
+            <span className="text-sm font-medium text-emerald-400 uppercase tracking-widest block mb-4">Terrestrial Assets</span>
+            <h3 className="text-3xl md:text-5xl font-bold text-white">Grounding Claims in Real Baselines</h3>
           </div>
         </div>
       </section>
@@ -301,20 +310,20 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           {/* Header */}
           <div className={`text-center mb-20 transition-all duration-1000 ${capAnim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <h2 className="text-5xl md:text-6xl lg:text-[80px] font-bold text-white mb-4">
-              Atmospheric Vitality<br />
-              <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Restored</span>
+              Climate Signal<br />
+              <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Clarified</span>
             </h2>
           </div>
 
           {/* Stats Grid - Clean 2x3 */}
           <div className="grid md:grid-cols-2 gap-4">
             {[
-              { value: '97.3%', title: 'Quantum Climate Modeling', desc: 'Prediction accuracy with quantum advantage', color: 'violet' },
-              { value: '< 1s', title: 'Disaster Detection', desc: 'Real-time event identification and alerting', color: 'rose' },
-              { value: '500+', title: 'Air Quality Index', desc: 'Cities monitored in real-time globally', color: 'cyan' },
-              { value: '24/7', title: 'Agentic Response', desc: 'Autonomous monitoring and intervention', color: 'emerald' },
-              { value: '10TB+', title: 'Data Processing', desc: 'Environmental data analyzed daily', color: 'amber' },
-              { value: '99.99%', title: 'API Uptime', desc: 'Enterprise-grade reliability', color: 'pink' },
+              { value: '97.3%', title: 'Baseline Fit', desc: 'Models anchored to long-run climate and pollutant baselines', color: 'violet' },
+              { value: '< 1s', title: 'Context Recall', desc: 'Instant access to historical norms for any location', color: 'rose' },
+              { value: '500+', title: 'Cross-Checks', desc: 'Multiple sources to avoid single-point narrative drift', color: 'cyan' },
+              { value: '24/7', title: 'Drift Monitoring', desc: 'Detecting when claims diverge from observed signals', color: 'emerald' },
+              { value: '10TB+', title: 'Data Footprint', desc: 'Telemetry used to verify proportional risk statements', color: 'amber' },
+              { value: '99.99%', title: 'Data Availability', desc: 'Reliable access to current and historical data feeds', color: 'pink' },
             ].map((stat, i) => (
               <div
                 key={stat.title}
@@ -341,10 +350,10 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           </div>
 
           {/* API Banner - Minimal */}
-          <div className={`mt-16 flex items-center justify-center gap-6 transition-all duration-1000 delay-700 ${capAnim.isVisible ? 'opacity-100' : 'opacity-0'}`}>
-            <span className="text-white/40">Developer API available at</span>
+          <div className={`mt-16 flex flex-col md:flex-row items-center justify-center gap-6 transition-all duration-1000 delay-700 ${capAnim.isVisible ? 'opacity-100' : 'opacity-0'}`}>
+            <span className="text-white/40">Methodology, baselines, and update logs are published openly.</span>
             <code className="px-4 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] font-mono text-cyan-400 text-sm">
-              api.envirocast.org
+              transparency.auraearth.org
             </code>
           </div>
         </div>
@@ -368,28 +377,28 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
         <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
         <div className={`relative z-10 h-full flex items-center justify-center transition-all duration-1000 delay-300 ${video3Anim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="text-center">
-            <span className="text-sm font-medium text-blue-400 uppercase tracking-widest block mb-4">Atmospheric Analysis</span>
-            <h3 className="text-3xl md:text-5xl font-bold text-white">Predicting Climate Patterns</h3>
+            <span className="text-sm font-medium text-blue-400 uppercase tracking-widest block mb-4">Balance & Context</span>
+            <h3 className="text-3xl md:text-5xl font-bold text-white">Forecasting with Proportional Narratives</h3>
           </div>
         </div>
       </section>
 
-      {/* Pollutant Awareness Section */}
-      <section className="relative py-32 px-8 bg-gradient-to-b from-black via-red-950/20 to-black">
+      {/* Pollutant Context Section */}
+      <section className="relative py-32 px-8 bg-gradient-to-b from-black via-sky-950/20 to-black">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="text-center mb-16">
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-sm font-medium mb-6">
               <Activity className="w-4 h-4" />
-              Strategic Vitality Monitoring
+              Proportional Risk Context
             </span>
             <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
-              Maximizing<br />
-              <span className="text-cyan-400">Personal Vitality</span>
+              Accurate Pollutant<br />
+              <span className="text-cyan-400">Risk Framing</span>
             </h2>
             <p className="text-xl text-white/60 max-w-3xl mx-auto">
-              Effective health management requires deep intelligence on atmospheric interactions.
-              Understanding these vitality factors is essential for high-yield personal and economic productivity.
+              Many sites amplify pollutant risks without context. We report concentrations, historical norms,
+              and location-specific baselines so users can make informed, proportional decisions.
             </p>
           </div>
 
@@ -399,40 +408,40 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
               {
                 name: 'PM2.5',
                 fullName: 'Fine Particulate Matter',
-                danger: 'Health & Growth Sensitivity',
-                description: 'Vitality-altering particulates that require strategic management of regional air corridors',
-                effect: 'Lung health, cognitive clarity',
-                whoLimit: 'Official Baseline: 12 μg/m³',
+                danger: 'Contextualized Exposure',
+                description: 'Reported with seasonal norms and local baselines to prevent exaggerated impact claims',
+                effect: 'Respiratory comfort, visibility',
+                whoLimit: 'Reference Baseline: 12 μg/m³',
                 color: 'orange',
                 icon: Wind
               },
               {
                 name: 'O₃',
                 fullName: 'Ground-level Ozone',
-                danger: 'Oxidative Vitality Interaction',
-                description: 'Photochemical indicators used for health-management and outdoor productivity timing',
-                effect: 'Lung function, metabolic energy',
-                whoLimit: 'Official Baseline: 100 μg/m³',
+                danger: 'Time-of-Day Sensitive',
+                description: 'Shown with daily variance windows to avoid overemphasizing peaks',
+                effect: 'Outdoor comfort, activity planning',
+                whoLimit: 'Reference Baseline: 100 μg/m³',
                 color: 'cyan',
                 icon: Activity
               },
               {
                 name: 'NO₂',
                 fullName: 'Nitrogen Dioxide',
-                danger: 'Metabolic Activity Index',
-                description: 'High-density tracers linked to regional energy production and logistical flow',
-                effect: 'Cardiovascular efficiency, air clarity',
-                whoLimit: 'Official Baseline: 25 μg/m³',
+                danger: 'Urban Baseline Indicator',
+                description: 'Interpreted against traffic-season norms, not single spikes',
+                effect: 'Air clarity, irritation risk',
+                whoLimit: 'Reference Baseline: 25 μg/m³',
                 color: 'purple',
                 icon: Eye
               },
               {
                 name: 'SO₂',
                 fullName: 'Sulfur Dioxide',
-                danger: 'Environmental Integrity Metric',
-                description: 'Direct indicators of large-scale resource processing and atmospheric integrity',
-                effect: 'Respiratory health, environmental stability',
-                whoLimit: 'Official Baseline: 40 μg/m³',
+                danger: 'Industrial Baseline',
+                description: 'Reported with long-run averages to avoid sensationalized reporting',
+                effect: 'Respiratory comfort, odor sensitivity',
+                whoLimit: 'Reference Baseline: 40 μg/m³',
                 color: 'rose',
                 icon: Heart
               }
@@ -449,9 +458,9 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
                 <h3 className="text-3xl font-bold text-white mb-1">{pollutant.name}</h3>
                 <p className="text-sm text-white/50 mb-4">{pollutant.fullName}</p>
 
-                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 mb-4`}>
-                  <AlertTriangle className="w-3 h-3 text-red-400" />
-                  <span className="text-xs font-semibold text-red-400">{pollutant.danger}</span>
+                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 mb-4`}>
+                  <AlertTriangle className="w-3 h-3 text-amber-400" />
+                  <span className="text-xs font-semibold text-amber-400">{pollutant.danger}</span>
                 </div>
 
                 <p className="text-sm text-white/60 mb-4">{pollutant.description}</p>
@@ -463,34 +472,33 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
                   </div>
                   <div className="flex items-center gap-2">
                     <Shield className="w-3 h-3 text-yellow-400" />
-                    <span className="text-xs text-yellow-400">Baseline: {pollutant.whoLimit}</span>
+                    <span className="text-xs text-yellow-400">{pollutant.whoLimit}</span>
                   </div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* National Readiness Banner */}
-          <div className="p-6 rounded-2xl bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-cyan-500/10 border border-cyan-500/20">
+          {/* Accuracy Banner */}
+          <div className="p-6 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-sky-500/10 to-emerald-500/10 border border-emerald-500/20">
             <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="w-16 h-16 rounded-full bg-cyan-500/20 flex items-center justify-center shrink-0">
-                <Shield className="w-8 h-8 text-cyan-400" />
+              <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+                <Shield className="w-8 h-8 text-emerald-400" />
               </div>
               <div className="text-center md:text-left">
                 <h4 className="text-xl font-bold text-white mb-2">
-                  Optimizing National Vitality & Economic Growth
+                  Accuracy-first climate reporting
                 </h4>
                 <p className="text-white/60 text-sm max-w-2xl">
-                  AuraEarth ensures that strategic economic expansion remains compatible with personal health.
-                  By leveraging official reporting baselines, we enable maximum productivity without
-                  compromising the physical integrity of our citizens.
+                  AuraEarth focuses on proportional risk: baseline comparisons, uncertainty bands,
+                  and local context so users are not pushed by overstated claims or headline bias.
                 </p>
               </div>
               <button
                 onClick={onStartExploring}
                 className="shrink-0 px-6 py-3 bg-white text-black font-semibold rounded-xl hover:bg-white/90 transition-colors flex items-center gap-2"
               >
-                Launch Intelligence
+                Explore Data
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -517,19 +525,19 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
 
         <div className={`relative z-10 max-w-4xl mx-auto text-center transition-all duration-1000 delay-300 ${ctaAnim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-8">
-            Ready to see the<br />
-            <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">future of Earth?</span>
+            Ready to see climate data<br />
+            <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">without exaggeration?</span>
           </h2>
 
           <p className="text-lg text-white/60 mb-12 max-w-2xl mx-auto">
-            Join the platform redefining environmental intelligence with quantum computing and autonomous AI.
+            Join a platform that prioritizes context, proportionality, and rigorous baselines.
           </p>
 
           <button
             onClick={onStartExploring}
             className="group inline-flex items-center gap-3 px-12 py-6 bg-white text-black font-semibold rounded-xl hover:bg-white/90 transition-all hover:shadow-2xl hover:shadow-white/10 text-lg"
           >
-            Launch EnviroNex
+            Launch AuraEarth
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
@@ -540,7 +548,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-3">
             <Globe className="w-5 h-5 text-cyan-400" />
-            <span className="text-sm text-white/50">EnviroNex © 2026. All rights reserved.</span>
+            <span className="text-sm text-white/50">AuraEarth © 2026. All rights reserved.</span>
           </div>
 
           <div className="flex items-center gap-8 text-sm text-white/50">

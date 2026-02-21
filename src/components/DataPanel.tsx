@@ -182,7 +182,7 @@ export const DataPanel = ({
 
   return (
     <>
-      {/* Enviro AI Impact Summary Dialog */}
+      {/* AuraEarth Context Summary Dialog */}
       <Dialog open={showImpactDialog} onOpenChange={setShowImpactDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh] glass bg-gradient-to-br from-background/95 via-primary/5 to-background/90 backdrop-blur-xl border-primary/20 animate-scale-in">
           <DialogHeader className="animate-fade-in">
@@ -193,18 +193,18 @@ export const DataPanel = ({
                   <Sparkles className="w-8 h-8 text-primary" />
                 </div>
               </div>
-              AuraEarth Impact Analysis
+              AuraEarth Context Summary
             </DialogTitle>
             <DialogDescription className="text-base text-muted-foreground mt-2">
               <div className="flex items-center gap-2 flex-wrap animate-fade-in" style={{ animationDelay: '0.1s' }}>
                 <Badge variant="outline" className="border-primary/30 text-primary bg-primary/10 animate-fade-in hover-scale">
-                  🤖 Gemini 2.0 Flash
+                  Model-assisted summary
                 </Badge>
                 <Badge variant="outline" className="border-secondary/30 text-secondary bg-secondary/10 animate-fade-in hover-scale" style={{ animationDelay: '0.05s' }}>
-                  📊 Regional Telemetry
+                  Regional telemetry
                 </Badge>
                 <Badge variant="outline" className="border-accent/30 text-accent bg-accent/10 animate-fade-in hover-scale" style={{ animationDelay: '0.1s' }}>
-                  ⚛️ Quantum Optimized
+                  Baseline context
                 </Badge>
                 <span className="text-sm">•</span>
                 <span className="font-medium text-foreground">{cityName}</span>
@@ -224,20 +224,20 @@ export const DataPanel = ({
                   </div>
                 </div>
                 <div className="text-center space-y-4">
-                  <p className="text-2xl font-bold text-foreground animate-pulse">AuraEarth AI Processing...</p>
-                  <p className="text-sm text-muted-foreground">Analyzing regional telemetry with advanced performance engines</p>
+                  <p className="text-2xl font-bold text-foreground animate-pulse">Compiling context...</p>
+                  <p className="text-sm text-muted-foreground">Summarizing telemetry with baseline comparisons</p>
                   <div className="grid grid-cols-3 gap-4 mt-8 max-w-2xl">
                     <Card className="glass p-4 animate-fade-in" style={{ animationDelay: '0s' }}>
                       <Atom className="w-8 h-8 text-primary mx-auto mb-2 animate-spin" />
-                      <p className="text-xs text-center text-muted-foreground">Quantum Forecasts</p>
+                      <p className="text-xs text-center text-muted-foreground">Forecast context</p>
                     </Card>
                     <Card className="glass p-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
                       <Wind className="w-8 h-8 text-secondary mx-auto mb-2 animate-pulse" />
-                      <p className="text-xs text-center text-muted-foreground">Pollutant Analysis</p>
+                      <p className="text-xs text-center text-muted-foreground">Pollutant baselines</p>
                     </Card>
                     <Card className="glass p-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
                       <Zap className="w-8 h-8 text-accent mx-auto mb-2 animate-pulse" />
-                      <p className="text-xs text-center text-muted-foreground">Resource Efficiency</p>
+                      <p className="text-xs text-center text-muted-foreground">Signal clarity</p>
                     </Card>
                   </div>
                 </div>
@@ -345,7 +345,7 @@ export const DataPanel = ({
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Air Quality</span>
+                  <span>Air Quality (contextual)</span>
                   <span className={getAQIColor(airQuality.aqi)}>
                     {getAQICategory(airQuality.aqi)}
                   </span>
@@ -381,7 +381,7 @@ export const DataPanel = ({
                           <AlertTriangle className={`w-4 h-4 ${severity.color}`} />
                           <div className="flex-1 min-w-0">
                             <p className={`text-xs font-semibold ${severity.color}`}>
-                              {SAFETY_BASELINES[worstPollutant.type].name} {exceedance - 100}% above baseline
+                              {SAFETY_BASELINES[worstPollutant.type].name} {exceedance - 100}% above reference baseline
                             </p>
                             <p className="text-[10px] text-muted-foreground truncate">
                               {severity.recommendation.split(' ').slice(0, 8).join(' ')}...
@@ -403,17 +403,17 @@ export const DataPanel = ({
                 </div>
               </div>
 
-              {/* Enviro AI Impact Summary Button */}
+              {/* AuraEarth Context Summary Button */}
               <Button
                 onClick={handleGenerateImpactSummary}
                 className="w-full mt-4 bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-secondary/40 group"
                 size="lg"
               >
                 <Sparkles className="w-5 h-5 mr-2 group-hover:animate-spin" />
-                <span className="font-semibold">AuraEarth Impact Analysis</span>
+                <span className="font-semibold">AuraEarth Context Summary</span>
               </Button>
 
-              {/* ClimatePredict AI Button */}
+              {/* ClimatePredict Context Button */}
               {onShowClimatePredictions && (
                 <Button
                   onClick={onShowClimatePredictions}
@@ -424,7 +424,7 @@ export const DataPanel = ({
                     <span className="text-[9px] font-bold bg-accent/90 text-accent-foreground px-1.5 py-0.5 rounded">BETA</span>
                   </div>
                   <TrendingUp className="w-5 h-5 mr-2 group-hover:animate-bounce" />
-                  <span className="font-semibold">ClimatePredict AI</span>
+                  <span className="font-semibold">ClimatePredict Context</span>
                 </Button>
               )}
 
@@ -476,7 +476,7 @@ export const DataPanel = ({
           </Card>
         )}
 
-        {/* Quantum 24h Forecast */}
+        {/* 24h Forecast Context */}
         {quantumForecast && (
           <Card className="glass bg-transparent border-white/10 animate-fade-in-up border-2 border-primary/30">
             <div className="p-4 space-y-3">
@@ -484,15 +484,15 @@ export const DataPanel = ({
                 <div className="flex items-center gap-2">
                   <Atom className="w-5 h-5 text-primary animate-spin" />
                   <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                    Quantum 24h Forecast
+                    24h Forecast Context
                   </h3>
                 </div>
                 <Badge variant="outline" className="border-primary text-primary">
-                  IBM Quantum Circuits
+                  Model-assisted
                 </Badge>
               </div>
               <div className="text-xs text-muted-foreground bg-primary/5 p-2 rounded">
-                Powered by IBM Quantum Computing - leveraging quantum superposition for enhanced predictions.
+                Forecasts include baseline comparisons and uncertainty-aware context.
               </div>
               <div className="text-sm text-muted-foreground">
                 Next hour AQI: <span className={getAQIColor(quantumForecast.hourly[0]?.aqi || 0)}>

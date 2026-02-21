@@ -557,7 +557,7 @@ export const QuantumAnalytics = ({ quantumForecast, cityName, currentAQI, onBack
                   <ul className="space-y-2">
                     <li className="flex items-start gap-2 text-xs text-slate-400">
                       <ChevronRight className="w-3 h-3 text-primary mt-0.5" />
-                      Our ability to predict risks is <span className="text-white">better than anything else</span> on the market.
+                      Our projections prioritize <span className="text-white">baseline context</span> and uncertainty ranges.
                     </li>
                     <li className="flex items-start gap-2 text-xs text-slate-400">
                       <ChevronRight className="w-3 h-3 text-primary mt-0.5" />
@@ -587,14 +587,14 @@ export const QuantumAnalytics = ({ quantumForecast, cityName, currentAQI, onBack
 
               <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
                 <div className="flex-1 space-y-4 text-center md:text-left">
-                  <h3 className="text-2xl font-bold text-white">Why our Hybrid Model is Absolute.</h3>
+                  <h3 className="text-2xl font-bold text-white">Why our Hybrid Model is Contextual.</h3>
                   <p className="text-slate-400 max-w-2xl leading-relaxed">
-                    Traditional sensors only tell you what's happening <span className="text-white">now</span>. Our Quantum Hybrid Model predicts what's happening <span className="text-white">next</span> with an accuracy threshold that makes standard environmental modeling obsolete. We see the pollution risks before the air even moves.
+                    Traditional sensors tell you what's happening <span className="text-white">now</span>. Our hybrid model adds forward-looking projections with clear confidence ranges, helping users interpret signals without overstatement.
                   </p>
                   <div className="flex flex-wrap gap-4 pt-4 justify-center md:justify-start">
                     <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5 px-4 py-2 text-sm">VQE Optimized</Badge>
                     <Badge variant="outline" className="text-blue-400 border-blue-400/20 bg-blue-500/5 px-4 py-2 text-sm">Neural-Quantum Loop</Badge>
-                    <Badge variant="outline" className="text-emerald-400 border-emerald-500/20 bg-emerald-500/5 px-4 py-2 text-sm">Risk Dominance</Badge>
+                    <Badge variant="outline" className="text-emerald-400 border-emerald-500/20 bg-emerald-500/5 px-4 py-2 text-sm">Risk Context</Badge>
                   </div>
                 </div>
 

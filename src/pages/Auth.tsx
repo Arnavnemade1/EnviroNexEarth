@@ -107,7 +107,7 @@ const Auth = () => {
         }
       } else {
         toast({
-          title: "Welcome to EnviroNex!",
+          title: "Welcome to AuraEarth!",
           description: "Check your email to confirm your account.",
         });
         setTimeout(() => navigate('/'), 2000);
@@ -150,7 +150,7 @@ const Auth = () => {
       } else {
         toast({
           title: "Welcome back!",
-          description: "You're now signed in to EnviroNex.",
+          description: "You're now signed in to AuraEarth.",
         });
         navigate('/');
       }
@@ -202,7 +202,7 @@ const Auth = () => {
             </div>
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                EnviroNex
+                AuraEarth
               </h1>
               <p className="text-muted-foreground">Quantum Air Quality Platform</p>
             </div>
@@ -265,7 +265,7 @@ const Auth = () => {
                 <Globe className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                EnviroNex
+                AuraEarth
               </h1>
             </div>
           </div>

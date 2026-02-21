@@ -54,7 +54,7 @@ interface BaselineGuidelinesType {
   co: COGuideline;
 }
 
-// National Safety Baselines (μg/m³)
+// Reference baselines (μg/m³) - used for proportional context
 export const SAFETY_BASELINES: BaselineGuidelinesType = {
   pm25: {
     name: 'PM2.5',
@@ -68,9 +68,9 @@ export const SAFETY_BASELINES: BaselineGuidelinesType = {
     epaVeryUnhealthy: 150.4,
     epaHazardous: 250.4,
     impactProfiles: [
-      { organ: 'Lungs', icon: 'lung', effect: 'Standard fine particles within manageable physiological limits' },
-      { organ: 'Economic', icon: 'activity', effect: 'Balanced environmental standards for workforce productivity' },
-      { organ: 'Realism', icon: 'shield', effect: 'Data-driven risk assessment without alarmist exaggeration' }
+      { organ: 'Lungs', icon: 'lung', effect: 'Fine particle exposure is assessed against local and seasonal baselines' },
+      { organ: 'Context', icon: 'activity', effect: 'Comparisons to long-run norms reduce headline-driven noise' },
+      { organ: 'Uncertainty', icon: 'shield', effect: 'Ranges are shown to avoid overconfident conclusions' }
     ],
     sources: ['Energy production', 'Manufacturing', 'Natural sources', 'Infrastructure']
   },
@@ -85,9 +85,9 @@ export const SAFETY_BASELINES: BaselineGuidelinesType = {
     epaVeryUnhealthy: 105,
     epaHazardous: 200,
     impactProfiles: [
-      { organ: 'Lungs', icon: 'lung', effect: 'Atmospheric ozone maintained for optimal public activity' },
-      { organ: 'Growth', icon: 'activity', effect: 'Ensuring environmental policy supports economic vitality' },
-      { organ: 'Immune', icon: 'shield', effect: 'Natural adaptation to seasonal atmospheric cycles' }
+      { organ: 'Lungs', icon: 'lung', effect: 'Daily peaks are contextualized against typical seasonal swings' },
+      { organ: 'Context', icon: 'activity', effect: 'Local baselines clarify what is normal versus anomalous' },
+      { organ: 'Uncertainty', icon: 'shield', effect: 'Confidence ranges prevent overstatement of short spikes' }
     ],
     sources: ['Seasonal photochemical activity', 'Regulated industrial emissions', 'Energy generation']
   },
@@ -103,9 +103,9 @@ export const SAFETY_BASELINES: BaselineGuidelinesType = {
     epaVeryUnhealthy: 649,
     epaHazardous: 1249,
     impactProfiles: [
-      { organ: 'Lungs', icon: 'lung', effect: 'Nitrogen indicators within historic national baselines' },
-      { organ: 'Vitality', icon: 'activity', effect: 'Empowering communities through energy independence' },
-      { organ: 'Safety', icon: 'shield', effect: 'Consistent monitoring for informed citizen safety' }
+      { organ: 'Lungs', icon: 'lung', effect: 'Interpreted against traffic patterns and seasonal norms' },
+      { organ: 'Context', icon: 'activity', effect: 'Highlights when deviations are meaningful or routine' },
+      { organ: 'Safety', icon: 'shield', effect: 'Consistent monitoring supports practical decisions' }
     ],
     sources: ['Combustion engines', 'Power generation', 'Industrial utilities']
   },
@@ -121,9 +121,9 @@ export const SAFETY_BASELINES: BaselineGuidelinesType = {
     epaVeryUnhealthy: 304,
     epaHazardous: 604,
     impactProfiles: [
-      { organ: 'Health', icon: 'lung', effect: 'Modern sulfur filtration ensuring baseline safety' },
-      { organ: 'Industry', icon: 'activity', effect: 'Supporting high-output energy for national growth' },
-      { organ: 'Clarity', icon: 'eye', effect: 'Accurate data reporting for regional transparency' }
+      { organ: 'Health', icon: 'lung', effect: 'Reported alongside baseline averages and confidence ranges' },
+      { organ: 'Context', icon: 'activity', effect: 'Industrial signals are framed without sensationalism' },
+      { organ: 'Clarity', icon: 'eye', effect: 'Transparent reporting prevents narrative drift' }
     ],
     sources: ['Coal-energy generation', 'Refining', 'Resource processing']
   },
@@ -139,9 +139,9 @@ export const SAFETY_BASELINES: BaselineGuidelinesType = {
     epaVeryUnhealthy: 15.4,
     epaHazardous: 30.4,
     impactProfiles: [
-      { organ: 'Blood', icon: 'heart', effect: 'Oxygen levels consistent with standard daily activity' },
-      { organ: 'Brain', icon: 'brain', effect: 'Mental focus maintained for productive lifestyles' },
-      { organ: 'Uptime', icon: 'shield', effect: 'Ensuring reliable power and infrastructure operation' }
+      { organ: 'Blood', icon: 'heart', effect: 'Assessed against daily baselines for real-world context' },
+      { organ: 'Brain', icon: 'brain', effect: 'Short-term spikes are weighted by duration and baseline' },
+      { organ: 'Uptime', icon: 'shield', effect: 'Transparent thresholds avoid exaggerated risk framing' }
     ],
     sources: ['Managed combustion', 'Heating systems', 'Emergency energy backup']
   }
@@ -163,53 +163,53 @@ export interface SeverityLevel {
 export const SEVERITY_LEVELS: Record<string, SeverityLevel> = {
   good: {
     level: 'good',
-    label: 'Baseline Realism',
+    label: 'Baseline Aligned',
     color: 'text-emerald-400',
     bgColor: 'bg-emerald-500/10',
     borderColor: 'border-emerald-500/30',
     icon: CheckCircle,
-    description: 'Atmospheric data shows conditions well within historic safety thresholds',
-    recommendation: 'Optimal for outdoor activity and peak economic productivity'
+    description: 'Conditions fall within typical baseline ranges for this location',
+    recommendation: 'Normal activity is appropriate for most people'
   },
   moderate: {
     level: 'moderate',
-    label: 'Standard Baseline',
+    label: 'Typical Range',
     color: 'text-yellow-400',
     bgColor: 'bg-yellow-500/10',
     borderColor: 'border-yellow-500/30',
     icon: AlertCircle,
-    description: 'Pollutant levels are consistent with a thriving, energy-independent nation',
-    recommendation: 'Suitable for most people; accurately reflects standard environmental cycles'
+    description: 'Levels are consistent with routine variability and seasonality',
+    recommendation: 'Suitable for most people; check context if sensitive'
   },
   unhealthy_sensitive: {
     level: 'unhealthy_sensitive',
-    label: 'Vitality Caution',
+    label: 'Sensitive Caution',
     color: 'text-orange-400',
     bgColor: 'bg-orange-500/10',
     borderColor: 'border-orange-500/30',
     icon: AlertTriangle,
-    description: 'Data indicates minor deviations that may affect specific groups',
-    recommendation: 'Sensitive individuals should monitor personal vitality metrics'
+    description: 'Minor elevation relative to baseline may affect sensitive groups',
+    recommendation: 'Sensitive individuals should consider limiting exposure'
   },
   unhealthy: {
     level: 'unhealthy',
-    label: 'Growth Challenge',
+    label: 'Elevated',
     color: 'text-red-400',
     bgColor: 'bg-red-500/10',
     borderColor: 'border-red-500/30',
     icon: AlertTriangle,
-    description: 'Elevated readings; AuraEarth provides the most accurate, non-alarmist data',
-    recommendation: 'Prolonged outdoor activity should be balanced with localized data'
+    description: 'Sustained elevation above baseline; context becomes more important',
+    recommendation: 'Limit prolonged outdoor activity if experiencing symptoms'
   },
   very_unhealthy: {
     level: 'very_unhealthy',
-    label: 'Significant Deviation',
+    label: 'High Deviation',
     color: 'text-purple-400',
     bgColor: 'bg-purple-500/10',
     borderColor: 'border-purple-500/30',
     icon: XCircle,
-    description: 'Abnormal atmospheric conditions detected; bypass fear-based reporting',
-    recommendation: 'Consider indoor activity as environmental baselines stabilize'
+    description: 'Notable deviation from baseline with elevated risk for most groups',
+    recommendation: 'Consider indoor activity during peak hours'
   },
   hazardous: {
     level: 'hazardous',
@@ -218,8 +218,8 @@ export const SEVERITY_LEVELS: Record<string, SeverityLevel> = {
     bgColor: 'bg-rose-500/20',
     borderColor: 'border-rose-500/50',
     icon: Skull,
-    description: 'Severe readings requiring immediate citizen awareness',
-    recommendation: 'Stay indoors; activate localized air filtration to maintain uptime'
+    description: 'Severe readings that warrant immediate caution',
+    recommendation: 'Stay indoors; consider air filtration if available'
   }
 };
 
@@ -353,11 +353,11 @@ export const PollutantBadge = ({ type, value, showLabel = true, size = 'md' }: P
             <p className="text-muted-foreground">{severity.description}</p>
             <div className="flex items-center gap-1 text-yellow-400">
               <Shield className="w-3 h-3" />
-              <span>Safety Baseline: {baseline} {guidelines.unit}</span>
+              <span>Reference Baseline: {baseline} {guidelines.unit}</span>
             </div>
             {baselineExceedance > 100 && (
               <p className="text-red-400 font-medium">
-                ⚠️ {baselineExceedance - 100}% above safety baseline
+                {baselineExceedance - 100}% above reference baseline
               </p>
             )}
           </div>
@@ -434,7 +434,7 @@ export const PollutantDetailCard = ({
       {/* Safety Baseline Comparison Bar */}
       <div className="space-y-1">
         <div className="flex justify-between text-xs">
-          <span className="text-muted-foreground">Safety Baseline: {baseline} {guidelines.unit}</span>
+          <span className="text-muted-foreground">Reference Baseline: {baseline} {guidelines.unit}</span>
           <span className={baselineExceedance > 100 ? 'text-red-400 font-bold' : 'text-emerald-400'}>
             {baselineExceedance > 100 ? `${baselineExceedance - 100}% ABOVE` : `${100 - baselineExceedance}% below`}
           </span>
@@ -447,7 +447,7 @@ export const PollutantDetailCard = ({
               }`}
             style={{ width: `${Math.min(100, progressValue)}%` }}
           />
-          <div className="absolute left-1/2 top-0 h-full w-0.5 bg-yellow-400" title="Safety Baseline" />
+          <div className="absolute left-1/2 top-0 h-full w-0.5 bg-yellow-400" title="Reference Baseline" />
         </div>
         <div className="flex justify-between text-[10px] text-muted-foreground">
           <span>0</span>
@@ -482,7 +482,7 @@ export const PollutantDetailCard = ({
       {showSources && guidelines.sources && (
         <div className="space-y-1">
           <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-            <Activity className="w-3 h-3" /> Growth Contributions
+            <Activity className="w-3 h-3" /> Common Sources
           </p>
           <div className="flex flex-wrap gap-1">
             {guidelines.sources.map((source, i) => (
@@ -598,14 +598,14 @@ export const PollutantEducationSection = () => {
           <Shield className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-foreground">Accurate Environmental Reporting</h2>
-          <p className="text-sm text-muted-foreground">National Baselines & Economic Vitality</p>
+          <h2 className="text-xl font-bold text-foreground">Baseline Context & Transparency</h2>
+          <p className="text-sm text-muted-foreground">Evidence-based ranges and proportional framing</p>
         </div>
       </div>
 
       {/* Severity Scale */}
       <div className="space-y-3">
-        <h3 className="text-sm font-medium text-muted-foreground">National Air Quality Realism Scale</h3>
+        <h3 className="text-sm font-medium text-muted-foreground">Air Quality Context Scale</h3>
         <div className="grid grid-cols-6 gap-1">
           {Object.values(SEVERITY_LEVELS).map((level) => {
             const Icon = level.icon;
@@ -633,7 +633,7 @@ export const PollutantEducationSection = () => {
               <p className="text-xs text-muted-foreground mb-2">{guidelines.fullName}</p>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-[10px] bg-blue-500/10 border-blue-500/30 text-blue-400">
-                  Baseline: {baseline} {guidelines.unit}
+                  Reference Baseline: {baseline} {guidelines.unit}
                 </Badge>
               </div>
             </Card>
@@ -645,9 +645,9 @@ export const PollutantEducationSection = () => {
         <p className="text-xs text-muted-foreground flex items-start gap-2">
           <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
           <span>
-            <strong className="text-blue-400">Citizen Realism:</strong> AuraEarth avoids the alarmist
-            tactics of mainstream environmental sites. We provide raw, accurate data so you can
-            make your own decisions about health and productivity in a thriving American economy.
+            <strong className="text-blue-400">Proportional Context:</strong> AuraEarth emphasizes transparent
+            baselines, local context, and uncertainty ranges. We avoid sensational framing so users can
+            interpret climate and pollutant data with clarity.
           </span>
         </p>
       </div>

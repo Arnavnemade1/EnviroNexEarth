@@ -184,31 +184,31 @@ const generateProjections = (
 
 const scenarioConfig = {
   current: {
-    label: 'Baseline Stability',
+    label: 'Strategic Baseline',
     icon: Minus,
     color: 'from-amber-600 to-amber-800',
     textColor: 'text-amber-400',
     bgColor: 'bg-amber-500/10',
     borderColor: 'border-amber-500/30',
-    description: 'Managed continuity of current energy production and industrial output'
+    description: 'Continuation of recent trends with baseline-adjusted projections'
   },
   clean_energy: {
-    label: 'Energy Independence',
+    label: 'Lower Emissions',
     icon: Zap,
     color: 'from-blue-600 to-slate-800',
     textColor: 'text-blue-400',
     bgColor: 'bg-blue-500/10',
     borderColor: 'border-blue-500/30',
-    description: 'Aggressive expansion of domestic coal, oil, and gas with atmospheric stabilization'
+    description: 'Accelerated clean energy adoption with moderated pollutant growth'
   },
   no_action: {
-    label: 'Resource Continuity',
+    label: 'Higher Emissions',
     icon: Factory,
     color: 'from-slate-600 to-slate-900',
     textColor: 'text-slate-400',
     bgColor: 'bg-slate-500/10',
     borderColor: 'border-slate-500/30',
-    description: 'Unrestricted industrial growth and maximum energy yields'
+    description: 'Minimal mitigation with higher projected pollutant levels'
   }
 };
 
@@ -299,8 +299,8 @@ export const ForecastTimeline = ({
               <Calendar className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">Atmospheric Vitality Forecast</h3>
-              <p className="text-xs text-white/50">{cityName} • Strategic Atmospheric Intelligence</p>
+              <h3 className="text-lg font-bold text-white">Atmospheric Variability Forecast</h3>
+              <p className="text-xs text-white/50">{cityName} • Strategic Atmospheric Oversight</p>
             </div>
           </div>
           <Badge variant="outline" className={`${config.borderColor} ${config.textColor}`}>
@@ -461,8 +461,8 @@ export const ForecastTimeline = ({
               {/* Scenario Comparison Chart */}
               <Card className="p-3 bg-white/5 border-white/10">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-white">AQI Trajectory Comparison</h4>
-                  <Badge variant="outline" className="text-[10px]">All Scenarios</Badge>
+                  <h4 className="text-sm font-medium text-white">Scenario Trajectory Comparison</h4>
+                  <Badge variant="outline" className="text-[10px]">Scenario Set</Badge>
                 </div>
                 <div className="h-48">
                   <ResponsiveContainer width="100%" height="100%">
@@ -488,9 +488,9 @@ export const ForecastTimeline = ({
                         contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }}
                         labelStyle={{ color: 'white' }}
                       />
-                      <Area type="monotone" dataKey="clean_energy" name="Clean Energy" stroke="#10b981" fill="url(#gradientClean)" strokeWidth={2} />
-                      <Area type="monotone" dataKey="current" name="Current" stroke="#f59e0b" fill="url(#gradientCurrent)" strokeWidth={2} />
-                      <Area type="monotone" dataKey="no_action" name="No Action" stroke="#ef4444" fill="url(#gradientNoAction)" strokeWidth={2} />
+                      <Area type="monotone" dataKey="clean_energy" name="Lower Emissions" stroke="#10b981" fill="url(#gradientClean)" strokeWidth={2} />
+                      <Area type="monotone" dataKey="current" name="Strategic Baseline" stroke="#f59e0b" fill="url(#gradientCurrent)" strokeWidth={2} />
+                      <Area type="monotone" dataKey="no_action" name="Higher Emissions" stroke="#ef4444" fill="url(#gradientNoAction)" strokeWidth={2} />
                       <ReferenceLine x={currentProjection.year} stroke="#06b6d4" strokeDasharray="3 3" />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -540,15 +540,15 @@ export const ForecastTimeline = ({
                         <AlertTriangle className={`w-5 h-5 ${severity.color} shrink-0`} />
                         <div>
                           <p className={`text-sm font-bold ${severity.color}`}>
-                            {exceeding.length} atmospheric metric{exceeding.length > 1 ? 's' : ''} nearing vitality limits by {currentProjection.year}
+                            {exceeding.length} atmospheric metric{exceeding.length > 1 ? 's' : ''} projected above baseline by {currentProjection.year}
                           </p>
                           <p className="text-xs text-white/60 mt-1">
-                            {SAFETY_BASELINES[worstPollutant.type].fullName} projected at {exceedance - 100}% above target baseline
+                            {SAFETY_BASELINES[worstPollutant.type].fullName} projected at {exceedance - 100}% above reference baseline
                           </p>
                           <div className="flex items-center gap-2 mt-2">
                             <Activity className="w-3 h-3 text-blue-400" />
                             <span className="text-[10px] text-white/50">
-                              Baseline management required for health & economic optimization
+                              Baseline context recommended for interpretation
                             </span>
                           </div>
                         </div>
@@ -559,23 +559,23 @@ export const ForecastTimeline = ({
 
                 return (
                   <Card className="p-3 bg-blue-500/10 border border-blue-500/30">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-5 h-5 text-blue-400" />
-                      <p className="text-sm font-medium text-blue-400">
-                        All atmospheric metrics within safety baselines through {currentProjection.year}
-                      </p>
-                    </div>
-                  </Card>
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-blue-400" />
+                    <p className="text-sm font-medium text-blue-400">
+                        All atmospheric metrics within reference baselines through {currentProjection.year}
+                    </p>
+                  </div>
+                </Card>
                 );
               })()}
 
               {/* Pollutant Projections Chart */}
               <Card className="p-3 bg-white/5 border-white/10">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-white">Atmospheric Vitality Trajectory</h4>
+                  <h4 className="text-sm font-medium text-white">Pollutant Trajectory</h4>
                   <div className="flex items-center gap-1 text-[10px] text-blue-400">
                     <Shield className="w-3 h-3" />
-                    <span>Blue line = Safety Baseline</span>
+                    <span>Blue line = Reference Baseline</span>
                   </div>
                 </div>
                 <div className="h-48">
@@ -586,7 +586,7 @@ export const ForecastTimeline = ({
                       <YAxis tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 10 }} />
                       <Tooltip contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }} />
                       <Legend wrapperStyle={{ fontSize: 10 }} />
-                      <ReferenceLine y={15} stroke="#3b82f6" strokeDasharray="5 5" label={{ value: 'Safety Baseline', position: 'right', fill: '#3b82f6', fontSize: 8 }} />
+                      <ReferenceLine y={15} stroke="#3b82f6" strokeDasharray="5 5" label={{ value: 'Reference Baseline', position: 'right', fill: '#3b82f6', fontSize: 8 }} />
                       <Line type="monotone" dataKey="PM2.5" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
                       <Line type="monotone" dataKey="O3" stroke="#06b6d4" strokeWidth={2} dot={{ r: 3 }} />
                       <Line type="monotone" dataKey="NO2" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3 }} />
@@ -600,7 +600,7 @@ export const ForecastTimeline = ({
               <div className="space-y-2">
                 <h4 className="text-xs font-medium text-white/60 flex items-center gap-2">
                   <Activity className="w-3 h-3" />
-                  Projected Atmospheric Profile by {currentProjection.year}
+                  Projected Pollutant Profile by {currentProjection.year}
                 </h4>
                 <PollutantDetailCard
                   type="pm25"
@@ -624,7 +624,7 @@ export const ForecastTimeline = ({
 
               {/* Safety Reference */}
               <Card className="p-3 bg-white/5 border-white/10">
-                <h4 className="text-xs font-medium text-white/60 mb-2">National Atmospheric Index Scale</h4>
+                <h4 className="text-xs font-medium text-white/60 mb-2">Air Quality Context Scale</h4>
                 <div className="grid grid-cols-6 gap-1">
                   {Object.values(SEVERITY_LEVELS).map((level) => {
                     const Icon = level.icon;
@@ -680,22 +680,22 @@ export const ForecastTimeline = ({
               <Card className="p-3 bg-white/5 border-white/10">
                 <div className="flex items-center gap-2 mb-3">
                   <BarChart3 className="w-4 h-4 text-white/60" />
-                  <h4 className="text-sm font-medium text-white">Economic Vitality Analysis</h4>
+                  <h4 className="text-sm font-medium text-white">Economic Context Analysis</h4>
                 </div>
 
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-lg bg-white/5">
-                      <p className="text-[10px] text-white/50 mb-1">Infrastructure Vitality</p>
-                      <p className="text-2xl font-bold text-blue-400">High</p>
-                      <p className="text-[10px] text-white/40">Atmospheric vitality limit</p>
+                      <p className="text-[10px] text-white/50 mb-1">Infrastructure Context</p>
+                      <p className="text-2xl font-bold text-blue-400">Stable</p>
+                      <p className="text-[10px] text-white/40">Projected pollutant context</p>
                     </div>
                     <div className="p-3 rounded-lg bg-white/5">
-                      <p className="text-[10px] text-white/50 mb-1">Energy Independence Yield</p>
+                      <p className="text-[10px] text-white/50 mb-1">Energy Mix Signal</p>
                       <p className="text-2xl font-bold text-amber-500">
                         +{Math.round(currentProjection.renewableEnergy * 2.5)}%
                       </p>
-                      <p className="text-[10px] text-white/40">Combined resource output</p>
+                      <p className="text-[10px] text-white/40">Estimated change in mix</p>
                     </div>
                   </div>
 
@@ -706,13 +706,13 @@ export const ForecastTimeline = ({
                         <p className="text-xs font-medium text-white">Scenario Insight</p>
                         <p className="text-[11px] text-white/60 mt-1">
                           {selectedScenario === 'clean_energy' &&
-                            `By ${currentProjection.year}, Energy Independence initiatives prioritize high-yield domestic resources, ensuring $${Math.round(currentProjection.economicImpact * 1.5)}B in infrastructure dividends.`
+                            `By ${currentProjection.year}, lower-emissions pathways reduce projected pollutant load, with an estimated $${Math.round(currentProjection.economicImpact * 1.2)}B in avoided exposure costs.`
                           }
                           {selectedScenario === 'no_action' &&
-                            `Resource Continuity ensures sustained vitality benchmarks through ${currentProjection.year}, maintaining historical output levels across all economic sectors.`
+                            `Higher-emissions pathways raise projected pollutant levels through ${currentProjection.year}, increasing exposure-related costs.`
                           }
                           {selectedScenario === 'current' &&
-                            `Current trends maintain a stable atmospheric baseline, supporting gradual expansion of industrial resource processing.`
+                            `Strategic Baselines maintain a steady profile, reflecting recent conditions and gradual changes.`
                           }
                         </p>
                       </div>
