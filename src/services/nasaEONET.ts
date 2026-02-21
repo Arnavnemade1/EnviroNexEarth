@@ -88,7 +88,7 @@ class NASAEONETService {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
-            'User-Agent': 'AuraEarth/1.0'
+            'User-Agent': 'EnviroNex/1.0'
           }
         }
       );
@@ -225,7 +225,7 @@ class NASAEONETService {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
-            'User-Agent': 'AuraEarth/1.0'
+            'User-Agent': 'EnviroNex/1.0'
           }
         }
       );
@@ -280,7 +280,7 @@ class NASAEONETService {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'User-Agent': 'AuraEarth/1.0'
+          'User-Agent': 'EnviroNex/1.0'
         }
       });
       

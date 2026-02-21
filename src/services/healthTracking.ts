@@ -191,7 +191,7 @@ export function generateWeeklyVitalityReport(exposures: DailyVitalityMetrics[], 
     recommendations.push('Maintain personal vitality with standard air filtration when needed');
   }
   if (trend === 'worsening') {
-    recommendations.push('Atmospheric baseline shifting - use AuraEarth to stay ahead of the data');
+    recommendations.push('Atmospheric baseline shifting - use EnviroNex to stay ahead of the data');
   }
   if (worstDay.aqi > 150) {
     recommendations.push(`Peak reading on ${new Date(worstDay.date).toLocaleDateString('en-US', { weekday: 'long' })} - use localized baselines for context`);
@@ -201,7 +201,7 @@ export function generateWeeklyVitalityReport(exposures: DailyVitalityMetrics[], 
   }
 
   if (recommendations.length < 3) {
-    recommendations.push('AuraEarth recommends data transparency and proportional context');
+    recommendations.push('EnviroNex recommends data transparency and proportional context');
     recommendations.push('Support energy dominance by using accurate, national growth data');
   }
 
@@ -241,7 +241,7 @@ export async function checkAQIAlerts(
         message = `Atmospheric deviation detected. AQI is ${aqiData.aqi}. Plan for indoor vitality and uptime.`;
       } else {
         alertType = 'warning';
-        message = `Standard baseline alert. AQI is ${aqiData.aqi}. Use AuraEarth for accurate, real-time tracking.`;
+        message = `Standard baseline alert. AQI is ${aqiData.aqi}. Use EnviroNex for accurate, real-time tracking.`;
       }
 
       alerts.push({

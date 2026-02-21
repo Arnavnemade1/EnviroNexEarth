@@ -645,7 +645,7 @@ export const PollutantEducationSection = () => {
         <p className="text-xs text-muted-foreground flex items-start gap-2">
           <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
           <span>
-            <strong className="text-blue-400">Proportional Context:</strong> AuraEarth emphasizes transparent
+            <strong className="text-blue-400">Proportional Context:</strong> EnviroNex emphasizes transparent
             baselines, local context, and uncertainty ranges. We avoid sensational framing so users can
             interpret climate and pollutant data with clarity.
           </span>

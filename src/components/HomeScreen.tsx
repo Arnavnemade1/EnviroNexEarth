@@ -83,7 +83,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center">
               <Globe className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-semibold text-white tracking-tight">AuraEarth</span>
+            <span className="text-xl font-semibold text-white tracking-tight">EnviroNex</span>
           </div>
 
           <div className="hidden md:flex items-center gap-10">
@@ -140,19 +140,19 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           <div className={`mb-8 transition-all duration-700 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white text-sm font-medium backdrop-blur-sm">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              Evidence-first climate context and proportional risk framing
+              Evidence-first forecasting and proportional risk framing
             </span>
           </div>
 
           <h1 className={`text-6xl md:text-7xl lg:text-[140px] font-bold tracking-[-0.03em] leading-[0.85] mb-8 transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <span className="text-white">Aura</span>
-            <span className="bg-gradient-to-r from-emerald-300 via-cyan-300 to-sky-300 bg-clip-text text-transparent">Earth</span>
+            <span className="text-white">Enviro</span>
+            <span className="bg-gradient-to-r from-emerald-300 via-cyan-300 to-sky-300 bg-clip-text text-transparent">Nex</span>
           </h1>
 
           <p className={`text-xl md:text-2xl text-white/70 max-w-3xl mx-auto mb-12 leading-relaxed font-light transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            We build climate interfaces that prioritize <span className="text-white font-medium">measured context</span>,
-            <span className="text-white font-medium"> real-world baselines</span>, and transparent uncertainty
-            so people can see what is <span className="text-white font-medium">material</span> versus what is overstated.
+            Our mission is to ensure climate is <span className="text-white font-medium">accurately forecasted</span> with
+            <span className="text-white font-medium"> real-world baselines</span> and transparent uncertainty, because many
+            sources <span className="text-white font-medium">overblow pollutant effects</span> without proper context.
           </p>
 
           <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 transition-all duration-1000 delay-900 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -170,7 +170,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
               We believe climate risk is often presented without proportion.
             </div>
             <div className="px-4 py-2 rounded-full border border-cyan-400/30 bg-cyan-400/10">
-              Our mission: accurate, contextualized climate data for decisions.
+              Our mission: accurate, contextualized climate forecasting.
             </div>
           </div>
         </div>
@@ -226,7 +226,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
                 <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Proportional Risk</span>
               </h2>
               <p className="text-xl text-white/50 max-w-2xl leading-relaxed">
-                AuraEarth combines modern telemetry, rigorous baselines, and transparent modeling
+                EnviroNex combines modern telemetry, rigorous baselines, and transparent modeling
                 to separate signal from noise in climate reporting.
               </p>
             </div>
@@ -490,7 +490,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
                   Accuracy-first climate reporting
                 </h4>
                 <p className="text-white/60 text-sm max-w-2xl">
-                  AuraEarth focuses on proportional risk: baseline comparisons, uncertainty bands,
+                  EnviroNex focuses on proportional risk: baseline comparisons, uncertainty bands,
                   and local context so users are not pushed by overstated claims or headline bias.
                 </p>
               </div>
@@ -537,7 +537,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
             onClick={onStartExploring}
             className="group inline-flex items-center gap-3 px-12 py-6 bg-white text-black font-semibold rounded-xl hover:bg-white/90 transition-all hover:shadow-2xl hover:shadow-white/10 text-lg"
           >
-            Launch AuraEarth
+            Launch EnviroNex
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
@@ -548,7 +548,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-3">
             <Globe className="w-5 h-5 text-cyan-400" />
-            <span className="text-sm text-white/50">AuraEarth © 2026. All rights reserved.</span>
+            <span className="text-sm text-white/50">EnviroNex © 2026. All rights reserved.</span>
           </div>
 
           <div className="flex items-center gap-8 text-sm text-white/50">

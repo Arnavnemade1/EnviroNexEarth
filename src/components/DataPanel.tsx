@@ -182,7 +182,7 @@ export const DataPanel = ({
 
   return (
     <>
-      {/* AuraEarth Context Summary Dialog */}
+      {/* EnviroNex Context Summary Dialog */}
       <Dialog open={showImpactDialog} onOpenChange={setShowImpactDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh] glass bg-gradient-to-br from-background/95 via-primary/5 to-background/90 backdrop-blur-xl border-primary/20 animate-scale-in">
           <DialogHeader className="animate-fade-in">
@@ -193,7 +193,7 @@ export const DataPanel = ({
                   <Sparkles className="w-8 h-8 text-primary" />
                 </div>
               </div>
-              AuraEarth Context Summary
+              EnviroNex Context Summary
             </DialogTitle>
             <DialogDescription className="text-base text-muted-foreground mt-2">
               <div className="flex items-center gap-2 flex-wrap animate-fade-in" style={{ animationDelay: '0.1s' }}>
@@ -403,14 +403,14 @@ export const DataPanel = ({
                 </div>
               </div>
 
-              {/* AuraEarth Context Summary Button */}
+              {/* EnviroNex Context Summary Button */}
               <Button
                 onClick={handleGenerateImpactSummary}
                 className="w-full mt-4 bg-gradient-to-r from-primary via-secondary to-accent hover:opacity-90 transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-secondary/40 group"
                 size="lg"
               >
                 <Sparkles className="w-5 h-5 mr-2 group-hover:animate-spin" />
-                <span className="font-semibold">AuraEarth Context Summary</span>
+                <span className="font-semibold">EnviroNex Context Summary</span>
               </Button>
 
               {/* ClimatePredict Context Button */}

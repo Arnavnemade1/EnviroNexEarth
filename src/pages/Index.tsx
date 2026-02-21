@@ -353,10 +353,10 @@ const Index = () => {
         <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in-up">
           <div className="text-center max-w-2xl px-6">
             <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-earth bg-clip-text text-transparent animate-pulse-glow">
-              Climate Context
+              Accurate Climate Forecasting
             </h1>
             <p className="text-xl md:text-2xl text-foreground/80 mb-8">
-              Proportional, data-grounded climate signals. Live telemetry with clear baselines and uncertainty.
+              Proportional, data-grounded climate signals. Live telemetry with clear baselines, because many sources overblow pollutant effects.
             </p>
             <div className="animate-bounce">
               <div className="w-8 h-8 bg-primary rounded-full mx-auto glow"></div>

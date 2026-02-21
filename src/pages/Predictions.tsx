@@ -674,7 +674,7 @@ export default function Predictions() {
               <div className="h-5 w-px bg-white/10" />
               <div>
                 <h1 className="text-lg font-semibold tracking-tight">Predictive Analytics</h1>
-                <p className="text-[11px] text-white/40 font-mono">Powered by AuraEarth Intelligence Engine</p>
+                <p className="text-[11px] text-white/40 font-mono">Powered by EnviroNex Intelligence Engine</p>
               </div>
             </div>
             <div className="flex items-center gap-6">

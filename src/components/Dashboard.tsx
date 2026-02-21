@@ -286,7 +286,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                   <h4 className="font-semibold text-blue-700 dark:text-blue-400">Baseline Transparency & Context</h4>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  AuraEarth emphasizes transparent baselines, local context, and uncertainty ranges. We avoid
+                  EnviroNex emphasizes transparent baselines, local context, and uncertainty ranges. We avoid
                   sensational framing so users can interpret climate data with clarity and proportionality.
                 </p>
               </Card>
@@ -992,7 +992,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                       <Star className="w-6 h-6 text-yellow-500" />
                     </div>
                     <p className="text-sm font-medium">Early Adopter</p>
-                    <p className="text-xs text-muted-foreground">Joined AuraEarth</p>
+                    <p className="text-xs text-muted-foreground">Joined EnviroNex</p>
                   </div>
                   <div className={`p-4 bg-muted/20 rounded-lg text-center ${savedLocations.length > 0 ? 'border border-green-500/30' : 'opacity-50'}`}>
                     <div className={`w-12 h-12 ${savedLocations.length > 0 ? 'bg-green-500/20' : 'bg-muted'} rounded-full flex items-center justify-center mx-auto mb-2`}>
