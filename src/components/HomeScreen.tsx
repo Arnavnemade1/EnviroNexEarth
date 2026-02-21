@@ -83,7 +83,7 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center">
               <Globe className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-semibold text-white tracking-tight">EnviroCast</span>
+            <span className="text-xl font-semibold text-white tracking-tight">AuraEarth</span>
           </div>
 
           <div className="hidden md:flex items-center gap-10">
@@ -151,8 +151,8 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
 
           <p className={`text-xl md:text-2xl text-white/70 max-w-3xl mx-auto mb-12 leading-relaxed font-light transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
             The first platform combining <span className="text-white font-medium">IBM Quantum Computing</span>,
-            <span className="text-white font-medium"> Agentic AI</span>, and real-time environmental data
-            to predict and protect our planet's future.
+            <span className="text-white font-medium"> Industrial Intel AI</span>, and real-time telemetry
+            to optimize and secure our nation's atmospheric resilience.
           </p>
 
           <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 transition-all duration-1000 delay-900 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -301,8 +301,8 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
           {/* Header */}
           <div className={`text-center mb-20 transition-all duration-1000 ${capAnim.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <h2 className="text-5xl md:text-6xl lg:text-[80px] font-bold text-white mb-4">
-              Environmental Defense<br />
-              <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Reimagined</span>
+              Industrial Resilience<br />
+              <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">Optimized</span>
             </h2>
           </div>
 
@@ -326,11 +326,11 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
                 }}
               >
                 <div className={`text-5xl md:text-6xl font-bold mb-4 ${stat.color === 'violet' ? 'text-violet-400' :
-                    stat.color === 'rose' ? 'text-rose-400' :
-                      stat.color === 'cyan' ? 'text-cyan-400' :
-                        stat.color === 'emerald' ? 'text-emerald-400' :
-                          stat.color === 'amber' ? 'text-amber-400' :
-                            'text-pink-400'
+                  stat.color === 'rose' ? 'text-rose-400' :
+                    stat.color === 'cyan' ? 'text-cyan-400' :
+                      stat.color === 'emerald' ? 'text-emerald-400' :
+                        stat.color === 'amber' ? 'text-amber-400' :
+                          'text-pink-400'
                   }`}>
                   {stat.value}
                 </div>
@@ -379,17 +379,17 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="text-center mb-16">
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-medium mb-6">
-              <AlertTriangle className="w-4 h-4" />
-              Critical Health Information
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-sm font-medium mb-6">
+              <Activity className="w-4 h-4" />
+              Strategic Load Monitoring
             </span>
             <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
-              The Silent<br />
-              <span className="text-red-400">Killers</span> in Our Air
+              Optimizing<br />
+              <span className="text-cyan-400">Atmospheric Capacity</span>
             </h2>
             <p className="text-xl text-white/60 max-w-3xl mx-auto">
-              Millions die each year from air pollution. Understanding these pollutants
-              is the first step to protecting yourself and your family.
+              Effective industrial management requires deep intelligence on atmospheric displacement.
+              Understanding these load factors is essential for high-yield operational continuity.
             </p>
           </div>
 
@@ -399,40 +399,40 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
               {
                 name: 'PM2.5',
                 fullName: 'Fine Particulate Matter',
-                danger: '7 million deaths annually',
-                description: 'Particles 30x smaller than human hair that penetrate deep into lungs and bloodstream',
-                effect: 'Cardiovascular disease, lung cancer, stroke',
-                whoLimit: '15 μg/m³',
+                danger: 'Industrial Displacement Priority',
+                description: 'Operational particulates that require strategic management of regional air corridors',
+                effect: 'Equipment performance, atmospheric visibility',
+                whoLimit: 'National Baseline: 12 μg/m³',
                 color: 'orange',
                 icon: Wind
               },
               {
                 name: 'O₃',
                 fullName: 'Ground-level Ozone',
-                danger: 'Triggers 1M asthma attacks daily',
-                description: 'Invisible gas formed when pollutants react with sunlight',
-                effect: 'Asthma attacks, reduced lung function, chest pain',
-                whoLimit: '100 μg/m³',
+                danger: 'Thermal Yield Interaction',
+                description: 'Photochemical indicators used for heat-management and production timing',
+                effect: 'Cooling efficiency, atmospheric stability',
+                whoLimit: 'Baseline: 100 μg/m³',
                 color: 'cyan',
                 icon: Activity
               },
               {
                 name: 'NO₂',
                 fullName: 'Nitrogen Dioxide',
-                danger: '40% higher asthma risk',
-                description: 'Toxic gas from vehicles and power plants that irritates airways',
-                effect: 'Respiratory infections, reduced lung development in children',
-                whoLimit: '25 μg/m³',
+                danger: 'Combustion Performance Index',
+                description: 'High-density tracers of sustained industrial power generation and logistics movement',
+                effect: 'Energy output, regional logistics flow',
+                whoLimit: 'Baseline: 25 μg/m³',
                 color: 'purple',
                 icon: Eye
               },
               {
                 name: 'SO₂',
                 fullName: 'Sulfur Dioxide',
-                danger: 'Effects in 10 minutes',
-                description: 'Acidic gas from fossil fuels that causes immediate respiratory distress',
-                effect: 'Bronchoconstriction, eye irritation, worsens heart conditions',
-                whoLimit: '40 μg/m³',
+                danger: 'Resource Intensity Metric',
+                description: 'Direct indicators of large-scale resource extraction and high-capacity processing',
+                effect: 'Industrial throughput, grid reliability',
+                whoLimit: 'Baseline: 40 μg/m³',
                 color: 'rose',
                 icon: Heart
               }
@@ -463,34 +463,34 @@ export const HomeScreen = ({ onStartExploring }: HomeScreenProps) => {
                   </div>
                   <div className="flex items-center gap-2">
                     <Shield className="w-3 h-3 text-yellow-400" />
-                    <span className="text-xs text-yellow-400">WHO Limit: {pollutant.whoLimit}</span>
+                    <span className="text-xs text-yellow-400">Baseline: {pollutant.whoLimit}</span>
                   </div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* WHO Warning Banner */}
-          <div className="p-6 rounded-2xl bg-gradient-to-r from-red-500/10 via-orange-500/10 to-red-500/10 border border-red-500/20">
+          {/* National Readiness Banner */}
+          <div className="p-6 rounded-2xl bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-cyan-500/10 border border-cyan-500/20">
             <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
-                <AlertTriangle className="w-8 h-8 text-red-400" />
+              <div className="w-16 h-16 rounded-full bg-cyan-500/20 flex items-center justify-center shrink-0">
+                <Shield className="w-8 h-8 text-cyan-400" />
               </div>
               <div className="text-center md:text-left">
                 <h4 className="text-xl font-bold text-white mb-2">
-                  99% of the world breathes unsafe air
+                  Optimizing National Production Capacity
                 </h4>
                 <p className="text-white/60 text-sm max-w-2xl">
-                  According to the World Health Organization, nearly all of humanity is exposed to
-                  air pollution levels that exceed safe guidelines. EnviroNex helps you understand
-                  your exposure and take action to protect your health.
+                  AuraEarth ensures that strategic industrial expansion remains compatible with atmospheric
+                  stability. By leveraging national safety baselines, we enable maximum resource output
+                  without compromising the technical integrity of regional ecosystems.
                 </p>
               </div>
               <button
                 onClick={onStartExploring}
-                className="shrink-0 px-6 py-3 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-400 transition-colors flex items-center gap-2"
+                className="shrink-0 px-6 py-3 bg-white text-black font-semibold rounded-xl hover:bg-white/90 transition-colors flex items-center gap-2"
               >
-                Check Your Air
+                Launch Intelligence
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

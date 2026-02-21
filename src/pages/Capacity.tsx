@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Heart, Activity, Shield } from 'lucide-react';
-import { QuantumHealthAnalysisComponent } from '@/components/QuantumHealthAnalysis';
+import { ArrowLeft, Shield } from 'lucide-react';
+import { IndustrialCapacityAnalysis } from '@/components/IndustrialCapacityAnalysis';
 import { toast } from 'sonner';
 
 interface LocationState {
@@ -20,7 +20,7 @@ interface LocationState {
   forecast?: Array<{ aqi: number; pm25: number; confidence: number }>;
 }
 
-const Health = () => {
+const Capacity = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -30,7 +30,7 @@ const Health = () => {
   useEffect(() => {
     // Check if we have the required data
     if (!state?.cityName || !state?.airQuality) {
-      toast.error("Health analysis requires air quality data. Redirecting to home...");
+      toast.error("Capacity analysis requires atmospheric load data. Redirecting to home...");
       setTimeout(() => navigate('/'), 2000);
     }
   }, [state, navigate]);
@@ -45,13 +45,13 @@ const Health = () => {
       <div className="min-h-screen bg-[#020617] flex items-center justify-center">
         <Card className="glass p-8 text-center max-w-md animate-scale-in border-white/10">
           <Shield className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2 text-white">No Health Data Available</h2>
+          <h2 className="text-xl font-semibold mb-2 text-white">No Capacity Data Available</h2>
           <p className="text-slate-400 mb-4">
-            Please select a city first to view health analysis.
+            Please select a target city first to view industrial resilience analysis.
           </p>
-          <Button onClick={() => navigate('/')} className="w-full bg-blue-600 hover:bg-blue-700">
+          <Button onClick={() => navigate('/')} className="w-full bg-indigo-600 hover:bg-indigo-700">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
+            Back to Hub
           </Button>
         </Card>
       </div>
@@ -59,9 +59,8 @@ const Health = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white selection:bg-emerald-500/30">
-      {/* Main Health Analysis Component takes full space */}
-      <QuantumHealthAnalysisComponent
+    <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30">
+      <IndustrialCapacityAnalysis
         cityName={state.cityName}
         currentAQI={state.airQuality.aqi}
         airQuality={state.airQuality}
@@ -72,4 +71,4 @@ const Health = () => {
   );
 };
 
-export default Health;
+export default Capacity;

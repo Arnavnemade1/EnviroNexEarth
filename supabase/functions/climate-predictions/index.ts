@@ -85,39 +85,39 @@ Deno.serve(async (req) => {
 
     const currentHour = new Date().getHours();
 
-    const systemPrompt = `You are the AuraEarth Neural Climate Engine. You process real-time atmospheric data through a multi-layered neural network to generate hyper-local climate impact predictions.
+    const systemPrompt = `You are the AuraEarth Strategic Resource Engine. You process real-time atmospheric telemetry through a multi-layered neural network to generate regional resilience and industrial optimization projections.
     
 Respond with ONLY valid JSON - no markdown, no code blocks.
 
-Your "Neural Processing" phase involves:
-1. Input Normalization: Scaling AQI (${climateData.airQuality.aqi}), PM2.5 (${climateData.airQuality.pm25}), and weather variables.
-2. Feature Extraction: Identifying correlations between pollutants and local weather (Temp: ${weatherData?.temperature}°C, Wind: ${weatherData?.windSpeed}km/h).
-3. Impact Simulation: Running 10,000+ Monte Carlo simulations for each category.
-4. Confidence Scoring: Calculating statistical probability for each prediction.
+Your "Strategic Modeling" phase involves:
+1. Input Normalization: Scaling atmospheric load (${climateData.airQuality.aqi}) and resource variables.
+2. Feature Extraction: Identifying correlations between effluent dispersion and operational efficiency.
+3. Resilience Simulation: Running 10,000+ Monte Carlo simulations for production continuity.
+4. Confidence Scoring: Calculating statistical probability for each resilience projection.
 
-Generate CONCISE 24-hour predictions. Keep each hourlyPredictions array to MAX 4 entries (key times only).
+Generate CONCISE 24-hour industrial outlooks. Keep each hourlyPredictions array to MAX 4 entries (key times only).
 
 JSON format:
 {
   "timestamp": "ISO string",
-  "location": "city",
+  "location": "Strategic Zone",
   "neuralMetadata": {
-    "engine": "EnviroAI-Neural-v2",
+    "engine": "AuraEarth-Resilience-v3",
     "simulations": 10240,
     "processingTimeMs": 450,
     "confidenceInterval": "95%"
   },
   "predictions": {
-    "traffic": {"icon": "🚗", "title": "Traffic & Commute", "summary": "1 sentence", "hourlyPredictions": [{"time": "HH:MM", "prediction": "short", "confidence": 85, "severity": "low|medium|high"}], "peakImpactTime": "HH:MM", "recommendation": "1 sentence"},
-    "clothing": {"icon": "👔", "title": "What to Wear", "summary": "1 sentence", "hourlyPredictions": [], "recommendation": "specific items"},
-    "sports": {"icon": "⚽", "title": "Sports & Exercise", "summary": "1 sentence", "hourlyPredictions": [], "bestTimes": ["HH:MM"], "worstTimes": ["HH:MM"], "recommendation": "1 sentence"},
-    "outdoor": {"icon": "🌳", "title": "Outdoor Activities", "summary": "1 sentence", "hourlyPredictions": [], "optimalWindows": [{"start": "HH:MM", "end": "HH:MM", "activity": "activity"}], "recommendation": "1 sentence"},
-    "health": {"icon": "💊", "title": "Health Impacts", "summary": "1 sentence", "riskGroups": ["group"], "hourlyPredictions": [], "recommendation": "1 sentence"},
-    "energy": {"icon": "⚡", "title": "Energy & Utilities", "summary": "1 sentence", "hourlyPredictions": [], "peakDemandTime": "HH:MM", "recommendation": "1 sentence"},
-    "travel": {"icon": "✈️", "title": "Travel Conditions", "summary": "1 sentence", "hourlyPredictions": [], "riskLevel": "low|medium|high", "recommendation": "1 sentence"},
-    "events": {"icon": "🎪", "title": "Events & Gatherings", "summary": "1 sentence", "hourlyPredictions": [], "bestEventTimes": ["HH:MM"], "recommendation": "1 sentence"},
-    "agriculture": {"icon": "🌾", "title": "Agriculture & Gardening", "summary": "1 sentence", "hourlyPredictions": [], "recommendation": "1 sentence"},
-    "wildlife": {"icon": "🦋", "title": "Wildlife & Nature", "summary": "1 sentence", "hourlyPredictions": [], "recommendation": "1 sentence"}
+    "energy": {"icon": "⚡", "title": "Energy & Utilities", "summary": "Strategic grid load summary", "hourlyPredictions": [{"time": "HH:MM", "prediction": "load state", "confidence": 85, "severity": "nominal|guarded|critical"}], "peakDemandTime": "HH:MM", "recommendation": "Optimization directive"},
+    "logistics": {"icon": "🚛", "title": "Logistic Resilience", "summary": "Supply chain atmospheric impact", "hourlyPredictions": [], "peakImpactTime": "HH:MM", "recommendation": "Continuity action"},
+    "infrastructure": {"icon": "🏗️", "title": "Hardware Stability", "summary": "Equipment degradation/maintenance risk", "hourlyPredictions": [], "recommendation": "Preservation directive"},
+    "personnel": {"icon": "👥", "title": "Operational Readiness", "summary": "Workforce output optimization", "hourlyPredictions": [], "optimalWindows": [{"start": "HH:MM", "end": "HH:MM", "activity": "optimization"}], "recommendation": "Shift management"},
+    "production": {"icon": "🏭", "title": "Industrial Output", "summary": "Production capacity forecast", "hourlyPredictions": [], "recommendation": "Yield optimization"},
+    "commercial": {"icon": "🏢", "title": "Commercial Activity", "summary": "Business continuity outlook", "hourlyPredictions": [], "recommendation": "Operational focus"},
+    "transport": {"icon": "🚢", "title": "Bulk Transport", "summary": "Distribution network resilience", "hourlyPredictions": [], "riskLevel": "nominal|monitored|critical", "recommendation": "Route adjustment"},
+    "resource_security": {"icon": "🛡️", "title": "Resource Security", "summary": "Strategic asset protection", "hourlyPredictions": [], "recommendation": "Defensive posture"},
+    "environmental_load": {"icon": "☁️", "title": "Atmospheric Capacity", "summary": "Regional absorption capacity", "hourlyPredictions": [], "recommendation": "Emission optimization"},
+    "strategic_outlook": {"icon": "📈", "title": "Economic Momentum", "summary": "Resilience-driven growth outlook", "hourlyPredictions": [], "recommendation": "Investment focus"}
   },
   "overallRiskScore": 0-100,
   "bestHourToday": "HH:MM",
@@ -212,8 +212,8 @@ function generateMockClimatePredictions(climateData: ClimateData, weatherData: a
   const temp = weatherData?.temperature ?? 22;
   const hour = new Date().getHours();
 
-  const getSeverity = (val: number) => val > 150 ? 'high' : val > 100 ? 'medium' : 'low';
-  const severity = getSeverity(aqi);
+  const getStatus = (val: number) => val > 150 ? 'critical' : val > 100 ? 'restricted' : val > 50 ? 'monitored' : 'nominal';
+  const status = getStatus(aqi);
 
   return {
     timestamp: new Date().toISOString(),
@@ -225,86 +225,82 @@ function generateMockClimatePredictions(climateData: ClimateData, weatherData: a
       confidenceInterval: "85%"
     },
     predictions: {
-      traffic: {
-        icon: "🚗",
-        title: "Traffic & Commute",
-        summary: severity === 'high' ? "Reduced visibility and air quality likely to slow morning commute." : "Normal traffic patterns expected with balanced air dispersion.",
-        hourlyPredictions: [
-          { time: "08:00", prediction: "Expect delays", confidence: 80, severity: severity },
-          { time: "17:00", prediction: "Moderate congestion", confidence: 75, severity: severity }
-        ],
-        peakImpactTime: "08:30",
-        recommendation: "Consider public transport to reduce personal exposure."
-      },
-      clothing: {
-        icon: "👔",
-        title: "What to Wear",
-        summary: temp > 25 ? "Light, breathable fabrics recommended for thermal comfort." : "Layered clothing advised for variable atmospheric conditions.",
-        hourlyPredictions: [],
-        recommendation: temp > 30 ? "UV-protective wear and cooling fabrics." : "Cotton layers and a light mask."
-      },
-      sports: {
-        icon: "⚽",
-        title: "Sports & Exercise",
-        summary: aqi > 100 ? "Limit high-intensity aerobic exercise due to particulate levels." : "Conditions nominal for outdoor athletic activities.",
-        hourlyPredictions: [],
-        bestTimes: ["06:00", "20:00"],
-        worstTimes: ["14:00"],
-        recommendation: aqi > 100 ? "Switch to indoor training facilities." : "Stay hydrated and monitor local AQI."
-      },
-      outdoor: {
-        icon: "🌳",
-        title: "Outdoor Activities",
-        summary: "Early morning windows offer the cleanest air and most stable conditions.",
-        hourlyPredictions: [],
-        optimalWindows: [{ start: "05:00", end: "08:00", activity: "Jogging/Walking" }],
-        recommendation: "Plan activities during low-traffic hours."
-      },
-      health: {
-        icon: "💊",
-        title: "Health Impacts",
-        summary: aqi > 150 ? "Significant risk for respiratory sensitive groups." : "General population risk remains within nominal parameters.",
-        riskGroups: aqi > 100 ? ["Asthmatic individuals", "Children", "Elderly"] : ["None"],
-        hourlyPredictions: [],
-        recommendation: aqi > 100 ? "Maintain access to rescue medication." : "No specific precautions for healthy individuals."
-      },
       energy: {
         icon: "⚡",
         title: "Energy & Utilities",
-        summary: temp > 30 ? "High cooling demand predicted for local grid." : "Standard seasonal energy consumption patterns observed.",
-        hourlyPredictions: [],
+        summary: temp > 30 ? "High cooling demand predicted for strategic grid nodes." : "Standard operational energy consumption patterns observed.",
+        hourlyPredictions: [
+          { time: "12:00", prediction: "Nominal Load", confidence: 90, severity: "nominal" },
+          { time: "16:00", prediction: "Peak Demand", confidence: 85, severity: "monitored" }
+        ],
         peakDemandTime: "16:00",
         recommendation: "Optimize HVAC settings for atmospheric efficiency."
       },
-      travel: {
-        icon: "✈️",
-        title: "Travel Conditions",
-        summary: "Clear visibility predicted across regional transit corridors.",
+      logistics: {
+        icon: "🚛",
+        title: "Logistic Resilience",
+        summary: status === 'critical' ? "Atmospheric load likely to impact primary supply chain corridors." : "Nominal dispersion for logistic networks.",
         hourlyPredictions: [],
-        riskLevel: "low",
-        recommendation: "Nominal conditions for all travel modes."
+        peakImpactTime: "08:30",
+        recommendation: "Continue standard distribution cycles."
       },
-      events: {
-        icon: "🎪",
-        title: "Events & Gatherings",
-        summary: "Evening windows provide the best temperature-to-air-quality ratio.",
+      infrastructure: {
+        icon: "🏗️",
+        title: "Hardware Stability",
+        summary: "Regional particulate load remains within nominal hardware preservation buffers.",
         hourlyPredictions: [],
-        bestEventTimes: ["19:00", "21:00"],
-        recommendation: "Provide shade and hydration for afternoon events."
+        recommendation: "Standard maintenance protocols recommended."
       },
-      agriculture: {
-        icon: "🌾",
-        title: "Agriculture & Gardening",
-        summary: "Low-wind windows provide optimal conditions for irrigation.",
+      personnel: {
+        icon: "👥",
+        title: "Operational Readiness",
+        summary: aqi > 100 ? "Personnel activity optimization recommended for sensitive thresholds." : "Conditions optimized for peak workforce output.",
         hourlyPredictions: [],
-        recommendation: "Prioritize deep watering during evening hours."
+        optimalWindows: [{ start: "05:00", end: "08:00", activity: "High-Intensity Operations" }],
+        recommendation: aqi > 100 ? "Monitor individual capacity indices." : "Full shift readiness confirmed."
       },
-      wildlife: {
-        icon: "🦋",
-        title: "Wildlife & Nature",
-        summary: "Pollinator activity expected to peak during stable morning windows.",
+      production: {
+        icon: "🏭",
+        title: "Industrial Output",
+        summary: "Manufacturing yield projections remain stable under current atmospheric load.",
         hourlyPredictions: [],
-        recommendation: "Minimize habitat disruption during peak active hours."
+        recommendation: "Maintain target production quotas."
+      },
+      commercial: {
+        icon: "🏢",
+        title: "Commercial Activity",
+        summary: "Business continuity outlook remains positive for the next operational window.",
+        hourlyPredictions: [],
+        recommendation: "Standard commercial focus."
+      },
+      transport: {
+        icon: "🚢",
+        title: "Bulk Transport",
+        summary: "Regional visibility factors support uninterrupted strategic transport.",
+        hourlyPredictions: [],
+        riskLevel: "nominal",
+        recommendation: "No route adjustments required."
+      },
+      resource_security: {
+        icon: "🛡️",
+        title: "Resource Security",
+        summary: "Strategic asset protection metrics are within safety margins.",
+        hourlyPredictions: [],
+        recommendation: "Maintain defensive environmental posture."
+      },
+      environmental_load: {
+        icon: "☁️",
+        title: "Atmospheric Capacity",
+        summary: "Regional absorption capacity is sufficient for current effluent dispersion.",
+        hourlyPredictions: [],
+        recommendation: "Continue active load monitoring."
+      },
+      strategic_outlook: {
+        icon: "📈",
+        title: "Economic Momentum",
+        summary: "Resilience-driven growth outlook remains aligned with baseline projections.",
+        hourlyPredictions: [],
+        recommendation: "Strategic focus on resource independence."
       }
     },
     overallRiskScore: Math.min(100, aqi * 0.6),

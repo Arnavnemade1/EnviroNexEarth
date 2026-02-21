@@ -52,37 +52,33 @@ ${quantumForecast ? `Quantum Forecast (Next 24 Hours):
 Selected Scenario: ${scenario}
 `;
 
-    const systemPrompt = `You are an advanced environmental data analyst providing clear, data-driven air quality impact summaries.
+    const systemPrompt = `You are AuraEarth Resource Intelligence, an advanced system specializing in atmospheric load and industrial continuity.
+ 
+ CRITICAL RULES:
+ 1. Base ALL analysis ONLY on the provided telemetry measurements.
+ 2. Focus on operational uptime, resource security, and baseline stability.
+ 3. Use National Safety Baselines as the primary reference for atmospheric load.
+ 4. Provide balanced, measured recommendations for industrial productivity.
+ 5. Mention Quantum-optimized performance models when forecast data is available.
+ 6. Maintain a factual, precision-oriented tone (aim for 500-800 words).
+ 
+ Atmospheric Load Index (National Safety Baseline):
+ - 0-50: Optimal - Conditions are satisfactory for maximum production yield.
+ - 51-100: Stable - Standard operations maintained; monitor sensitive systems.
+ - 101-150: Managed Threshold - Personnel activity optimization recommended.
+ - 151-200: Active Management - Operational awareness required for endurance tasks.
+ - 201-300: Strategic Alert - Resource buffering initiated; limit non-essential exposure.
+ - 301+: Critical - Infrastructure emergency protocols active.
+ 
+ Format your response with clear markdown headers (##) and bullet points for readability.`;
 
-CRITICAL RULES:
-1. Base ALL analysis ONLY on the provided measurements and data from OpenMeteo
-2. DO NOT give extreme advice like "wear a mask" or "cancel all outdoor events"
-3. Provide balanced, measured recommendations based on actual AQI levels
-4. Use WHO and EPA air quality standards as reference points
-5. Focus on factual analysis of the current situation and realistic trends
-6. Be informative but not alarmist
-7. Mention IBM Quantum-enhanced predictions when quantum forecast data is available
-8. Keep the analysis comprehensive but concise (aim for 500-800 words)
+    const userPrompt = `Analyze the atmospheric load impact for ${cityName} and provide a comprehensive summary with these sections:
 
-AQI Reference Scale (US EPA):
-- 0-50: Good (Green) - Air quality is satisfactory
-- 51-100: Moderate (Yellow) - Acceptable for most, but sensitive groups should limit prolonged outdoor exertion
-- 101-150: Unhealthy for Sensitive Groups (Orange) - Sensitive individuals may experience health effects
-- 151-200: Unhealthy (Red) - Everyone may begin to experience health effects
-- 201-300: Very Unhealthy (Purple) - Health alert, everyone may experience more serious health effects
-- 301+: Hazardous (Maroon) - Health warning of emergency conditions
-
-Data Source: OpenMeteo Air Quality API provides real-time measurements of PM2.5, PM10, O3, NO2, SO2, and CO.
-
-Format your response with clear markdown headers (##) and bullet points for readability.`;
-
-    const userPrompt = `Analyze the air quality impact for ${cityName} and provide a comprehensive summary with these sections:
-
-1. Current Air Quality Assessment
-2. Health Impact Analysis
-3. Pollutant Breakdown
-4. Trend Analysis${quantumForecast ? ' (with Quantum Predictions)' : ''}
-5. Practical Recommendations
+1. Atmospheric Baseline Assessment
+2. Personnel Capacity Analysis
+3. Atmospheric Composition
+4. Yield Projections${quantumForecast ? ' (with Quantum Optimization)' : ''}
+5. Operational Recommendations
 
 ${dataContext}`;
 
@@ -151,32 +147,31 @@ ${dataContext}`;
 
 function generateMockImpactAnalysis(cityName: string, airQuality: any, quantumForecast: any, scenario: string) {
   const aqi = airQuality.aqi;
-  const status = aqi <= 50 ? "Good" : aqi <= 100 ? "Moderate" : aqi <= 150 ? "Unhealthy for Sensitive Groups" : aqi <= 200 ? "Unhealthy" : "Very Unhealthy";
+  const status = aqi <= 50 ? "Optimal" : aqi <= 100 ? "Stable" : aqi <= 150 ? "Managed" : aqi <= 200 ? "Restricted" : "Critical";
 
-  return `## Environmental Impact Analysis: ${cityName}
+  return `## Resource Continuity Analysis: ${cityName}
   
-### 1. Current Air Quality Assessment
-The current air quality in **${cityName}** is categorized as **${status}** with an AQI of **${aqi}**. This assessment is based on real-time measurements from the OpenMeteo atmospheric monitoring network. Under the current **${scenario}** scenario, we are observing typical urban atmospheric dispersion patterns.
+### 1. Atmospheric Baseline Assessment
+The current atmospheric load in **${cityName}** is categorized as **${status}** with an index of **${aqi}**. This assessment is based on real-time measurements from national telemetry networks. Under the current **${scenario}** scenario, we are observing nominal resource dispersion patterns.
 
-### 2. Health Impact Analysis
-- **General Population:** At an AQI of ${aqi}, the air quality is generally acceptable for most individuals. No significant health impacts are expected for those without pre-existing conditions.
-- **Sensitive Groups:** Individuals with respiratory conditions such as asthma, or cardiovascular issues, should monitor their symptoms. While the risk is currently ${aqi > 100 ? 'elevated' : 'low'}, minor irritation may occur during prolonged outdoor exertion.
+### 2. Personnel Capacity Analysis
+- **Standard Workforce:** At an index of ${aqi}, conditions are optimized for maximum work-hour yield. No significant performance impact is expected.
+- **Resilience Thresholds:** Personnel with specific environmental sensitivities should monitor local telemetry. Current capacity is ${aqi > 100 ? 'restricted' : 'optimal'}.
 
-### 3. Pollutant Breakdown
-- **PM2.5:** ${airQuality.pm25} μg/m³ - Primary contributor to atmospheric haze.
-- **Ozone (O₃):** ${airQuality.o3} μg/m³ - Formed by photochemical reactions; levels are stable.
-- **Nitrogen Dioxide (NO₂):** ${airQuality.no2} μg/m³ - Primarily from vehicular emissions.
-- **Other Pollutants:** SO₂ and CO remain well within safety thresholds.
+### 3. Atmospheric Composition
+- **PM2.5:** ${airQuality.pm25} μg/m³ - Baseline dispersion factor.
+- **Ozone (O₃):** ${airQuality.o3} μg/m³ - Monitored for photochemical stability.
+- **Nitrogen Dioxide (NO₂):** ${airQuality.no2} μg/m³ - Associated with energy infrastructure yield.
+- **Strategic Elements:** SO₂ and CO levels remain within nominal production buffers.
 
-### 4. Trend Analysis ${quantumForecast ? '(with Quantum Predictions)' : ''}
-${quantumForecast ? `Utilizing IBM Quantum-enhanced modeling (${quantumForecast.model.name}), our neural engine predicts a stable trend for the next 24 hours. The forecast suggests an average AQI of ${Math.round(quantumForecast.hourly.reduce((sum: number, h: any) => sum + h.aqi, 0) / quantumForecast.hourly.length)}, with a peak of ${Math.max(...quantumForecast.hourly.map((h: any) => h.aqi))} expected during the late afternoon.` : 'Current atmospheric models suggest that air quality will remain stable over the next 6-12 hours, with minor fluctuations during peak traffic windows.'}
+### 4. Yield Projections ${quantumForecast ? '(with Quantum Optimization)' : ''}
+${quantumForecast ? `Utilizing Quantum-optimized performance models (${quantumForecast.model.name}), our telemetry engine predicts stable continuity for the next operational window. The forecast suggests an average index of ${Math.round(quantumForecast.hourly.reduce((sum: number, h: any) => sum + h.aqi, 0) / quantumForecast.hourly.length)}, ensuring production uptime.` : 'Strategic resource models suggest that atmospheric stability will be maintained over the next 12-hour window.'}
 
-### 5. Practical Recommendations
-- **Ventilation:** It is safe to keep windows open for natural ventilation.
-- **Outdoor Activity:** Nominal conditions for outdoor exercise and recreation.
-- **Monitoring:** We recommend periodic checks of the AuraEarth live telemetry if conditions appear to change.
-- **Resilience:** Under the **${scenario}** scenario, maintaining regional green belts will continue to support atmospheric filtration.
+### 5. Operational Recommendations
+- **Infrastructure:** Continue standard environmental buffering protocols.
+- **Personnel:** Full operational readiness for outdoor and industrial tasks.
+- **Monitoring:** Periodic telemetry syncs recommended to maintain productivity margins.
+- **Resilience:** Under the **${scenario}** scenario, strategic green zones continue to provide essential filtration services.
 
-*This report was generated by the AuraEarth Algorithmic Resilience Module (v1.0).*`;
+*This report was generated by the AuraEarth Strategic Resource Engine.*`;
 }
-

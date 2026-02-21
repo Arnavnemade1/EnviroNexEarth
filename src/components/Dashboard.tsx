@@ -6,10 +6,10 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/hooks/useAuth';
-import { useHealthTracking } from '@/hooks/useHealthTracking';
+import { useOperationalTracking } from '@/hooks/useOperationalTracking';
 import { useActivityTracking } from '@/hooks/useActivityTracking';
 import { useToast } from '@/hooks/use-toast';
-import { HealthProfileSetup } from '@/components/HealthProfileSetup';
+import { OperationalProfileSetup } from '@/components/OperationalProfileSetup';
 import { Earth2ForecastCard } from '@/components/Earth2ForecastCard';
 import {
   Activity,
@@ -69,7 +69,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [showHealthProfileSetup, setShowHealthProfileSetup] = useState(false);
+  const [showOperationalProfileSetup, setShowOperationalProfileSetup] = useState(false);
 
   const {
     isTracking,
@@ -83,20 +83,20 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
     stopTracking,
     fetchOptimalTimes
   } = useActivityTracking();
-  
+
   const {
     exposures,
     weeklyReport,
     alerts,
-    healthScore,
-    healthBreakdown,
+    resilienceScore,
+    resilienceBreakdown,
     currentAqi,
     savedLocations,
     isLoading,
     lastUpdated,
     refreshData,
     dismissAlert
-  } = useHealthTracking();
+  } = useOperationalTracking();
 
   // Fetch optimal activity times when we have a saved location
   useEffect(() => {
@@ -123,9 +123,9 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
   };
 
   const handleRefresh = async () => {
-    toast({ title: "Refreshing data...", description: "Fetching latest air quality data." });
+    toast({ title: "Refreshing data...", description: "Fetching latest atmospheric load data." });
     await refreshData();
-    toast({ title: "Data updated", description: "Your health tracking data has been refreshed." });
+    toast({ title: "Data updated", description: "Your operational tracking data has been refreshed." });
   };
 
   const getRiskColor = (risk: string) => {
@@ -165,8 +165,9 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
     return exposures.map(e => ({
       day: new Date(e.date).toLocaleDateString('en-US', { weekday: 'short' }),
       fullDate: new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      date: e.date,
       aqi: e.aqi,
-      health: e.healthScore,
+      resilience: e.resilienceIndex,
       pm25: e.pm25
     }));
   };
@@ -176,7 +177,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
         <Card className="glass p-8">
           <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
-          <p className="text-muted-foreground mt-4">Loading your health data...</p>
+          <p className="text-muted-foreground mt-4">Loading industrial capacity data...</p>
         </Card>
       </div>
     );
@@ -219,20 +220,18 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
             {alerts.length > 0 && (
               <div className="mt-4 space-y-2">
                 {alerts.map(alert => (
-                  <div 
+                  <div
                     key={alert.id}
-                    className={`flex items-center justify-between p-3 rounded-lg ${
-                      alert.alertType === 'critical' ? 'bg-red-500/20 border border-red-500/50' :
+                    className={`flex items-center justify-between p-3 rounded-lg ${alert.alertType === 'critical' ? 'bg-red-500/20 border border-red-500/50' :
                       alert.alertType === 'danger' ? 'bg-orange-500/20 border border-orange-500/50' :
-                      'bg-yellow-500/20 border border-yellow-500/50'
-                    }`}
+                        'bg-yellow-500/20 border border-yellow-500/50'
+                      }`}
                   >
                     <div className="flex items-center gap-3">
-                      <AlertTriangle className={`w-5 h-5 ${
-                        alert.alertType === 'critical' ? 'text-red-500' :
+                      <AlertTriangle className={`w-5 h-5 ${alert.alertType === 'critical' ? 'text-red-500' :
                         alert.alertType === 'danger' ? 'text-orange-500' :
-                        'text-yellow-500'
-                      }`} />
+                          'text-yellow-500'
+                        }`} />
                       <div>
                         <p className="font-medium text-sm">{alert.locationName}: AQI {alert.currentAqi}</p>
                         <p className="text-xs text-muted-foreground">{alert.message}</p>
@@ -256,15 +255,15 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
               </TabsTrigger>
               <TabsTrigger value="activity" className="gap-2">
                 <Brain className="w-4 h-4" />
-                <span className="hidden sm:inline">Activity</span>
+                <span className="hidden sm:inline">Strategy</span>
               </TabsTrigger>
               <TabsTrigger value="health" className="gap-2">
-                <Heart className="w-4 h-4" />
-                <span className="hidden sm:inline">Health</span>
+                <Shield className="w-4 h-4" />
+                <span className="hidden sm:inline">Capacity</span>
               </TabsTrigger>
               <TabsTrigger value="report" className="gap-2">
                 <FileText className="w-4 h-4" />
-                <span className="hidden sm:inline">Report</span>
+                <span className="hidden sm:inline">Efficiency</span>
               </TabsTrigger>
               <TabsTrigger value="locations" className="gap-2">
                 <MapPin className="w-4 h-4" />
@@ -314,13 +313,13 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card className="glass p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">Health Score</span>
-                    <Heart className="w-4 h-4 text-red-500" />
+                    <span className="text-sm text-muted-foreground">Industrial Resilience</span>
+                    <Shield className="w-4 h-4 text-primary" />
                   </div>
                   <div className="text-3xl font-bold text-foreground">
-                    {healthScore}%
+                    {resilienceScore}%
                   </div>
-                  <Progress value={healthScore} className="mt-2" />
+                  <Progress value={resilienceScore} className="mt-2" />
                 </Card>
 
                 <Card className="glass p-4">
@@ -353,21 +352,21 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                 <Card className="glass p-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-primary" />
-                    7-Day Health & Exposure Trend
+                    7-Day Resilience & Load Trend
                   </h3>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={formatChartData()}>
                         <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                        <XAxis dataKey="day" />
+                        <XAxis dataKey="date" tickFormatter={(tick) => new Date(tick).toLocaleDateString('en-US', { weekday: 'short' })} />
                         <YAxis />
                         <Tooltip
                           content={({ active, payload, label }) => {
                             if (active && payload && payload.length) {
                               return (
                                 <div className="glass p-3 rounded-lg border border-border">
-                                  <p className="font-medium">{payload[0]?.payload?.fullDate}</p>
-                                  <p className="text-green-500">Health: {payload[0]?.value}%</p>
+                                  <p className="font-medium">{new Date(payload[0]?.payload?.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                                  <p className="text-green-500">Resilience: {payload[0]?.value}%</p>
                                   <p className="text-orange-500">AQI: {payload[1]?.value}</p>
                                 </div>
                               );
@@ -377,7 +376,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                         />
                         <Area
                           type="monotone"
-                          dataKey="health"
+                          dataKey="resilience"
                           stroke="hsl(var(--primary))"
                           fill="hsl(var(--primary))"
                           fillOpacity={0.3}
@@ -407,12 +406,11 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
               {/* No data message */}
               {exposures.length === 0 && (
                 <Card className="glass p-8 text-center">
-                  <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <h4 className="font-medium mb-2">No tracking data yet</h4>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Save a location to start tracking your air quality exposure and health metrics.
+                    Save a strategic location to start tracking atmospheric load and resilience metrics.
                   </p>
-                  <Button onClick={onClose}>Explore Globe & Save Location</Button>
+                  <Button onClick={onClose}>Explore Hub & Save Location</Button>
                 </Card>
               )}
             </TabsContent>
@@ -427,11 +425,11 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                       <Brain className={`w-6 h-6 ${isTracking ? 'text-green-500' : 'text-muted-foreground'}`} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">Passive Activity Tracking</h3>
+                      <h3 className="text-lg font-semibold">Autonomous Load Monitoring</h3>
                       <p className="text-sm text-muted-foreground">
-                        {isTracking 
-                          ? 'Tracking your location & learning your habits' 
-                          : 'Enable to learn your outdoor activity patterns'}
+                        {isTracking
+                          ? 'Optimizing resource allocation & habit modeling'
+                          : 'Enable to model strategic atmospheric interactions'}
                       </p>
                       {trackingError && (
                         <p className="text-sm text-red-500 mt-1">{trackingError}</p>
@@ -442,7 +440,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                     {permissionStatus === 'denied' && (
                       <Badge variant="destructive">Location Denied</Badge>
                     )}
-                    <Button 
+                    <Button
                       onClick={isTracking ? stopTracking : startTracking}
                       variant={isTracking ? 'outline' : 'default'}
                       disabled={permissionStatus === 'denied'}
@@ -474,7 +472,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                     </div>
                     <div>
                       <p className="text-2xl font-bold text-yellow-500">
-                        {activities.length > 0 
+                        {activities.length > 0
                           ? Math.round(activities.reduce((sum, a) => sum + a.aqi, 0) / activities.length)
                           : 0}
                       </p>
@@ -499,7 +497,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
 
                   <div className="space-y-4">
                     {learnedHabits.map((habit) => (
-                      <div 
+                      <div
                         key={habit.id}
                         className="p-4 bg-muted/20 rounded-lg border border-border/50"
                       >
@@ -516,8 +514,8 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                               </p>
                             </div>
                           </div>
-                          <Badge 
-                            variant="outline" 
+                          <Badge
+                            variant="outline"
                             className={habit.confidence > 80 ? 'border-green-500/50 text-green-500' : 'border-yellow-500/50 text-yellow-500'}
                           >
                             {habit.confidence}% confidence
@@ -606,25 +604,23 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                     <Clock className="w-5 h-5 text-primary" />
                     Today's Optimal Activity Windows
                   </h3>
-                  
+
                   <div className="grid grid-cols-6 md:grid-cols-12 gap-2">
                     {optimalTimes.slice(6, 22).map((time) => (
-                      <div 
+                      <div
                         key={time.hour}
-                        className={`p-2 rounded-lg text-center ${
-                          time.recommendation === 'excellent' ? 'bg-green-500/20 border border-green-500/50' :
+                        className={`p-2 rounded-lg text-center ${time.recommendation === 'excellent' ? 'bg-green-500/20 border border-green-500/50' :
                           time.recommendation === 'good' ? 'bg-blue-500/20 border border-blue-500/50' :
-                          time.recommendation === 'moderate' ? 'bg-yellow-500/20 border border-yellow-500/50' :
-                          'bg-red-500/20 border border-red-500/50'
-                        }`}
+                            time.recommendation === 'moderate' ? 'bg-yellow-500/20 border border-yellow-500/50' :
+                              'bg-red-500/20 border border-red-500/50'
+                          }`}
                       >
                         <p className="text-xs font-medium">{time.hour}:00</p>
-                        <p className={`text-lg font-bold ${
-                          time.recommendation === 'excellent' ? 'text-green-500' :
+                        <p className={`text-lg font-bold ${time.recommendation === 'excellent' ? 'text-green-500' :
                           time.recommendation === 'good' ? 'text-blue-500' :
-                          time.recommendation === 'moderate' ? 'text-yellow-500' :
-                          'text-red-500'
-                        }`}>{time.aqi}</p>
+                            time.recommendation === 'moderate' ? 'text-yellow-500' :
+                              'text-red-500'
+                          }`}>{time.aqi}</p>
                       </div>
                     ))}
                   </div>
@@ -669,29 +665,29 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
             {/* Health Tab */}
             <TabsContent value="health" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Health Score Breakdown */}
+                {/* Resilience Score Breakdown */}
                 <Card className="glass p-6">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 bg-red-500/20 rounded-full">
-                      <Heart className="w-6 h-6 text-red-500" />
+                    <div className="p-3 bg-primary/20 rounded-full">
+                      <Shield className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">Health Score Breakdown</h3>
-                      <p className="text-sm text-muted-foreground">Based on real exposure data</p>
+                      <h3 className="text-lg font-semibold">Industrial Resilience Index</h3>
+                      <p className="text-sm text-muted-foreground">Based on operational load telemetry</p>
                     </div>
-                  </div>
-                  
-                  <div className="text-center py-6">
-                    <div className="text-6xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                      {healthScore}
-                    </div>
-                    <p className="text-muted-foreground mt-2">out of 100</p>
-                    <Progress value={healthScore} className="mt-4 h-3" />
                   </div>
 
-                  {healthBreakdown.length > 0 && (
+                  <div className="text-center py-6">
+                    <div className="text-6xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                      {resilienceScore}%
+                    </div>
+                    <p className="text-muted-foreground mt-2">out of 100</p>
+                    <Progress value={resilienceScore} className="mt-4 h-3" />
+                  </div>
+
+                  {resilienceBreakdown.length > 0 && (
                     <div className="space-y-3 mt-6 pt-6 border-t border-border/50">
-                      {healthBreakdown.map((item, i) => (
+                      {resilienceBreakdown.map((item, i) => (
                         <div key={i} className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">{item.category}</span>
                           <div className="flex items-center gap-2">
@@ -712,8 +708,8 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                       <Sparkles className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">Personalized Recommendations</h3>
-                      <p className="text-sm text-muted-foreground">Based on your weekly data</p>
+                      <h3 className="text-lg font-semibold">Operational Recommendations</h3>
+                      <p className="text-sm text-muted-foreground">Strategic optimizations for efficiency</p>
                     </div>
                   </div>
 
@@ -747,7 +743,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                     </ResponsiveContainer>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
-                    WHO guideline: &lt;12 µg/m³ annual average
+                    National Safety Baseline: Optimal industrial compliance &lt;12 µg/m³
                   </p>
                 </Card>
               )}
@@ -762,7 +758,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                       <div className="flex items-center gap-3">
                         <Calendar className="w-6 h-6 text-primary" />
                         <div>
-                          <h3 className="text-lg font-semibold">Weekly Health Report</h3>
+                          <h3 className="text-lg font-semibold">Weekly Efficiency Report</h3>
                           <p className="text-sm text-muted-foreground">
                             {weeklyReport.weekStart && new Date(weeklyReport.weekStart).toLocaleDateString()} - {weeklyReport.weekEnd && new Date(weeklyReport.weekEnd).toLocaleDateString()}
                           </p>
@@ -778,13 +774,13 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                         <p className={`text-3xl font-bold ${getAqiColor(weeklyReport.averageAqi)}`}>
                           {weeklyReport.averageAqi}
                         </p>
-                        <p className="text-sm text-muted-foreground">Avg AQI</p>
+                        <p className="text-sm text-muted-foreground">Avg Resilience</p>
                       </div>
                       <div className="text-center p-4 bg-muted/20 rounded-lg">
                         <p className="text-3xl font-bold text-primary">
-                          {weeklyReport.averageHealthScore}%
+                          {weeklyReport.averageResilienceIndex}%
                         </p>
-                        <p className="text-sm text-muted-foreground">Avg Health</p>
+                        <p className="text-sm text-muted-foreground">Avg Resilience</p>
                       </div>
                       <div className="text-center p-4 bg-muted/20 rounded-lg">
                         <p className="text-3xl font-bold text-green-500">
@@ -806,11 +802,11 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                       <div>
                         <p className="font-medium capitalize">Air Quality is {weeklyReport.trend}</p>
                         <p className="text-sm text-muted-foreground">
-                          {weeklyReport.trend === 'improving' 
+                          {weeklyReport.trend === 'improving'
                             ? 'Great news! Air quality has been getting better this week.'
                             : weeklyReport.trend === 'worsening'
-                            ? 'Air quality has declined. Consider spending more time indoors.'
-                            : 'Air quality has remained relatively stable this week.'}
+                              ? 'Air quality has declined. Consider spending more time indoors.'
+                              : 'Air quality has remained relatively stable this week.'}
                         </p>
                       </div>
                     </div>
@@ -823,11 +819,10 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                       {exposures.map((exposure, i) => (
                         <div key={i} className="flex items-center justify-between p-3 bg-muted/10 rounded-lg">
                           <div className="flex items-center gap-3">
-                            <div className={`w-2 h-8 rounded ${
-                              exposure.aqi <= 50 ? 'bg-green-500' :
+                            <div className={`w-2 h-8 rounded ${exposure.aqi <= 50 ? 'bg-green-500' :
                               exposure.aqi <= 100 ? 'bg-yellow-500' :
-                              exposure.aqi <= 150 ? 'bg-orange-500' : 'bg-red-500'
-                            }`} />
+                                exposure.aqi <= 150 ? 'bg-orange-500' : 'bg-red-500'
+                              }`} />
                             <div>
                               <p className="font-medium">
                                 {new Date(exposure.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
@@ -855,7 +850,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                   <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <h4 className="font-medium mb-2">No report available</h4>
                   <p className="text-sm text-muted-foreground">
-                    Save a location to generate your weekly health report.
+                    Save a location to generate your weekly operational efficiency report.
                   </p>
                 </Card>
               )}
@@ -920,20 +915,20 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                       <Heart className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">Health Profile</h3>
-                      <p className="text-sm text-muted-foreground">Your personalized settings</p>
+                      <h3 className="text-lg font-semibold">Operational Profile</h3>
+                      <p className="text-sm text-muted-foreground">Your strategic configuration</p>
                     </div>
                   </div>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
-                    onClick={() => setShowHealthProfileSetup(true)}
+                    onClick={() => setShowOperationalProfileSetup(true)}
                   >
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Profile
                   </Button>
                 </div>
-                
+
                 {userProfile?.health_profile?.age_range ? (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="p-3 bg-background/50 rounded-lg text-center">
@@ -960,11 +955,11 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                 ) : (
                   <div className="text-center py-6">
                     <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <h4 className="font-medium mb-2">Complete Your Health Profile</h4>
+                    <h4 className="font-medium mb-2">Complete Your Operational Profile</h4>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Get personalized health recommendations based on your profile
+                      Get strategic recommendations based on your operational context
                     </p>
-                    <Button onClick={() => setShowHealthProfileSetup(true)}>
+                    <Button onClick={() => setShowOperationalProfileSetup(true)}>
                       <Zap className="w-4 h-4 mr-2" />
                       Setup Profile
                     </Button>
@@ -997,8 +992,8 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                     <div className={`w-12 h-12 ${userProfile?.health_profile?.age_range ? 'bg-blue-500/20' : 'bg-muted'} rounded-full flex items-center justify-center mx-auto mb-2`}>
                       <Heart className={`w-6 h-6 ${userProfile?.health_profile?.age_range ? 'text-blue-500' : 'text-muted-foreground'}`} />
                     </div>
-                    <p className="text-sm font-medium">Health Conscious</p>
-                    <p className="text-xs text-muted-foreground">Setup health profile</p>
+                    <p className="text-sm font-medium">Resilience Conscious</p>
+                    <p className="text-xs text-muted-foreground">Setup operational profile</p>
                   </div>
                   <div className={`p-4 bg-muted/20 rounded-lg text-center ${exposures.length >= 7 ? 'border border-purple-500/30' : 'opacity-50'}`}>
                     <div className={`w-12 h-12 ${exposures.length >= 7 ? 'bg-purple-500/20' : 'bg-muted'} rounded-full flex items-center justify-center mx-auto mb-2`}>
@@ -1022,15 +1017,15 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                   <Bell className="w-5 h-5" />
                   Notification Settings
                 </h3>
-                
+
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-muted/20 rounded-lg">
                     <div>
                       <p className="font-medium">AQI Alerts</p>
                       <p className="text-sm text-muted-foreground">Get notified when AQI exceeds 100</p>
                     </div>
-                    <Switch 
-                      checked={notificationsEnabled} 
+                    <Switch
+                      checked={notificationsEnabled}
                       onCheckedChange={setNotificationsEnabled}
                     />
                   </div>
@@ -1038,15 +1033,15 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                   <div className="flex items-center justify-between p-4 bg-muted/20 rounded-lg">
                     <div>
                       <p className="font-medium">Weekly Reports</p>
-                      <p className="text-sm text-muted-foreground">Receive weekly health summary</p>
+                      <p className="text-sm text-muted-foreground">Receive weekly efficiency summary</p>
                     </div>
                     <Switch checked={true} />
                   </div>
 
                   <div className="flex items-center justify-between p-4 bg-muted/20 rounded-lg">
                     <div>
-                      <p className="font-medium">Health Score Updates</p>
-                      <p className="text-sm text-muted-foreground">Daily health score notifications</p>
+                      <p className="font-medium">Resilience Index Updates</p>
+                      <p className="text-sm text-muted-foreground">Daily resilience index notifications</p>
                     </div>
                     <Switch checked={false} />
                   </div>
@@ -1058,7 +1053,7 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
                   <Settings className="w-5 h-5" />
                   Account
                 </h3>
-                
+
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-muted/20 rounded-lg">
                     <div>
@@ -1088,11 +1083,11 @@ export const Dashboard = ({ onClose, onSelectCity }: DashboardProps) => {
             </TabsContent>
           </Tabs>
 
-          {/* Health Profile Setup Modal */}
-          {showHealthProfileSetup && (
-            <HealthProfileSetup
-              onComplete={() => setShowHealthProfileSetup(false)}
-              onSkip={() => setShowHealthProfileSetup(false)}
+          {/* Operational Profile Setup Modal */}
+          {showOperationalProfileSetup && (
+            <OperationalProfileSetup
+              onComplete={() => setShowOperationalProfileSetup(false)}
+              onSkip={() => setShowOperationalProfileSetup(false)}
             />
           )}
         </Card>

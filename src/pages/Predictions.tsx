@@ -167,14 +167,12 @@ interface AnomalyResponse {
 
 // Prediction categories
 const PREDICTION_CATEGORIES = [
-  { id: 'health', name: 'Health', icon: Heart, color: 'rose', factors: ['Respiratory Risk', 'Cardiovascular Stress', 'Allergy Index', 'UV Exposure', 'Heat Stress'], model: 'vqe-aqi-predictor' },
-  { id: 'transport', name: 'Transport', icon: Car, color: 'blue', factors: ['Traffic Congestion', 'EV Range Impact', 'Flight Delays', 'Road Conditions', 'Visibility'], model: 'xgboost-ensemble' },
-  { id: 'outdoor', name: 'Outdoor', icon: Dumbbell, color: 'emerald', factors: ['Running Conditions', 'Cycling Safety', 'Hiking Weather', 'Water Sports', 'Golf/Tennis'], model: 'climatetransformer' },
-  { id: 'agriculture', name: 'Agriculture', icon: Wheat, color: 'amber', factors: ['Crop Growth', 'Irrigation Need', 'Pest Risk', 'Harvest Window', 'Soil Moisture'], model: 'qcnn-disaster' },
-  { id: 'energy', name: 'Energy', icon: Energy, color: 'violet', factors: ['Solar Output', 'Wind Generation', 'Grid Demand', 'Heating/Cooling', 'Battery Efficiency'], model: 'qaoa-optimizer' },
-  { id: 'environment', name: 'Environment', icon: TreePine, color: 'green', factors: ['Air Quality Trend', 'Pollen Count', 'Wildfire Risk', 'Flooding Potential', 'Drought Index'], model: 'anomaly-vae' },
-  { id: 'satellite', name: 'Satellite Comms', icon: Satellite, color: 'indigo', factors: ['Signal Attenuation', 'Ionospheric Scintillation', 'Orbital Debris Risk', 'Uplink Stability', 'Solar Interference'], model: 'q-sat-link' },
-  { id: 'impact', name: 'Impact Analysis', icon: FileText, color: 'slate', factors: ['Economic Impact', 'Healthcare Strain', 'Infrastructure Stress', 'Supply Chain Risk', 'Insurance Risk'], model: 'impact-llm' }
+  { id: 'personnel', name: 'Personnel', icon: Activity, color: 'blue', factors: ['Atmospheric Load Index', 'Personnel Endurance', 'Resource Requirement', 'Thermal Strain', 'Recovery Window'], model: 'vqe-aqi-predictor' },
+  { id: 'energy', name: 'Energy', icon: Energy, color: 'violet', factors: ['Solar Yield', 'Wind Production', 'Grid Demand', 'Storage State', 'Infrastructure Heat'], model: 'qaoa-optimizer' },
+  { id: 'transport', name: 'Logistics', icon: Car, color: 'emerald', factors: ['Supply Chain Flow', 'Fleet Efficiency', 'Route Optimization', 'Wait Times', 'Visibility'], model: 'xgboost-ensemble' },
+  { id: 'agriculture', name: 'Strategic Crops', icon: Wheat, color: 'amber', factors: ['Yield Forecast', 'Irrigation Load', 'Soil Stability', 'Atmospheric Carbon', 'Growth Window'], model: 'qcnn-disaster' },
+  { id: 'satellite', name: 'Satellite Uplink', icon: Satellite, color: 'indigo', factors: ['Signal Integrity', 'Uplink Stability', 'Orbital Safety', 'Solar Load', 'Bandwidth Cap'], model: 'q-sat-link' },
+  { id: 'impact', name: 'Resource Analysis', icon: FileText, color: 'slate', factors: ['Economic Output', 'Infrastructure Load', 'Energy Cost', 'Resource Security', 'Continuity Risk'], model: 'impact-llm' }
 ];
 
 interface AccuracyRecord {
@@ -208,16 +206,16 @@ const generatePredictions = (envData: any, category: typeof PREDICTION_CATEGORIE
     let trend: 'up' | 'down' | 'stable' = 'stable';
 
     switch (category.id) {
-      case 'health':
-        if (factor === 'Respiratory Risk') {
+      case 'personnel':
+        if (factor === 'Atmospheric Load Index') {
           const effectivePM = pm25 * (humidity > 75 ? 1.25 : 1.0);
           value = (aqi * 0.45) + (effectivePM * 0.55) + (100 - stabilityIndex) * 0.15;
-        } else if (factor === 'Cardiovascular Stress') {
+        } else if (factor === 'Personnel Endurance') {
           const heatIndex = temperature + 0.55 * (humidity / 100) * (temperature - 14.5);
           value = (heatIndex > 30 ? 70 : 30) + (aqi * 0.35);
-        } else if (factor === 'Allergy Index') {
+        } else if (factor === 'Resource Requirement') {
           value = (humidity * 0.45) + (windSpeed * 0.25) + (temperature > 18 ? 30 : 5);
-        } else if (factor === 'UV Exposure') {
+        } else if (factor === 'Thermal Strain') {
           value = (uvIndex || 0) * 10;
         } else {
           value = Math.max(0, temperature - 22) * 4.5 + (humidity * 0.35);
@@ -306,13 +304,13 @@ const generatePredictions = (envData: any, category: typeof PREDICTION_CATEGORIE
         break;
       case 'impact':
         // Impact analysis logic - returns high values for high risk
-        if (factor === 'Economic Impact') {
+        if (factor === 'Economic Output') {
           value = (aqi > 100 ? 60 : 20) + (temperature > 30 ? 30 : 0);
-        } else if (factor === 'Healthcare Strain') {
+        } else if (factor === 'Infrastructure Load') {
           value = (aqi * 0.5) + (pm25 * 0.3) + (temperature > 32 ? 20 : 0);
-        } else if (factor === 'Infrastructure Stress') {
+        } else if (factor === 'Energy Cost') {
           value = (windSpeed * 0.8) + (temperature > 35 ? 40 : 10);
-        } else if (factor === 'Supply Chain Risk') {
+        } else if (factor === 'Resource Security') {
           value = (windSpeed > 25 ? 50 : 10) + (humidity > 80 ? 30 : 0);
         } else {
           value = (windSpeed * 0.4) + (aqi * 0.3) + 10;
@@ -676,7 +674,7 @@ export default function Predictions() {
               <div className="h-5 w-px bg-white/10" />
               <div>
                 <h1 className="text-lg font-semibold tracking-tight">Predictive Analytics</h1>
-                <p className="text-[11px] text-white/40 font-mono">Powered by EnviroAI Neural Engine</p>
+                <p className="text-[11px] text-white/40 font-mono">Powered by AuraEarth Intelligence Engine</p>
               </div>
             </div>
             <div className="flex items-center gap-6">

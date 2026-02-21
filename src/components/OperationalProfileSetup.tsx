@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import {
-  Heart,
+  Shield,
   Activity,
   Wind,
   User,
@@ -13,13 +13,14 @@ import {
   Sparkles,
   AlertTriangle,
   Loader2,
-  X
+  X,
+  Target
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-interface HealthProfileSetupProps {
+interface OperationalProfileSetupProps {
   onComplete: () => void;
   onSkip: () => void;
 }
@@ -34,36 +35,36 @@ const ageRanges = [
 ];
 
 const activityLevels = [
-  { value: 'sedentary', label: 'Sedentary', desc: 'Little to no exercise' },
-  { value: 'light', label: 'Lightly Active', desc: 'Light exercise 1-3 days/week' },
-  { value: 'moderate', label: 'Moderately Active', desc: 'Moderate exercise 3-5 days/week' },
-  { value: 'active', label: 'Very Active', desc: 'Hard exercise 6-7 days/week' },
-  { value: 'athlete', label: 'Athlete', desc: 'Very intense exercise daily' },
+  { value: 'sedentary', label: 'Low Intensity', desc: 'Minimal physical exertion' },
+  { value: 'light', label: 'Standard load', desc: 'Standard operational cycles' },
+  { value: 'moderate', label: 'Active Deployment', desc: 'Sustained industrial activity' },
+  { value: 'active', label: 'High Performance', desc: 'Intense operational demands' },
+  { value: 'athlete', label: 'Peak Capacity', desc: 'Extreme physical output requirements' },
 ];
 
 const smokingStatuses = [
-  { value: 'never', label: 'Never Smoked' },
-  { value: 'former', label: 'Former Smoker' },
-  { value: 'current', label: 'Current Smoker' },
+  { value: 'never', label: 'Filtered Environment' },
+  { value: 'former', label: 'Legacy Exposure' },
+  { value: 'current', label: 'Active Load' },
 ];
 
 const sensitivities = [
-  { value: 'low', label: 'Low', desc: 'I rarely notice air quality changes' },
-  { value: 'normal', label: 'Normal', desc: 'I notice when air quality is particularly bad' },
-  { value: 'high', label: 'High', desc: 'I\'m sensitive to air quality changes' },
-  { value: 'very_high', label: 'Very High', desc: 'I have respiratory conditions affected by air quality' },
+  { value: 'low', label: 'Resilient', desc: 'High tolerance to atmospheric load' },
+  { value: 'normal', label: 'Standard', desc: 'Baseline atmospheric interaction' },
+  { value: 'high', label: 'Sensitive', desc: 'Noticeable impact from load spikes' },
+  { value: 'very_high', label: 'Critical', desc: 'Strategic requirements for load management' },
 ];
 
-const healthConditions = [
-  { value: 'asthma', label: 'Asthma' },
-  { value: 'copd', label: 'COPD' },
-  { value: 'heart_disease', label: 'Heart Disease' },
-  { value: 'allergies', label: 'Allergies' },
-  { value: 'diabetes', label: 'Diabetes' },
-  { value: 'none', label: 'None of the above' },
+const operationalConditions = [
+  { value: 'asthma', label: 'Resp. Sensitivity' },
+  { value: 'copd', label: 'Load Limitation' },
+  { value: 'heart_disease', label: 'CV Intensity' },
+  { value: 'allergies', label: 'Particulate Reaction' },
+  { value: 'diabetes', label: 'Metabolic Focus' },
+  { value: 'none', label: 'Nominal Profile' },
 ];
 
-export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupProps) => {
+export const OperationalProfileSetup = ({ onComplete, onSkip }: OperationalProfileSetupProps) => {
   const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [step, setStep] = useState(1);
@@ -75,7 +76,7 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
     activity_level: '',
     smoking_status: 'never',
     air_sensitivity: 'normal',
-    health_conditions: [] as string[],
+    operational_conditions: [] as string[],
   });
 
   const totalSteps = 5;
@@ -92,22 +93,22 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('health_profile')
+          .select('operational_profile')
           .eq('user_id', user.id)
           .single();
 
         if (error) {
-          console.error('Error loading health profile:', error);
-        } else if (data?.health_profile) {
-          const existingProfile = data.health_profile as any;
+          console.error('Error loading operational profile:', error);
+        } else if (data?.operational_profile) {
+          const existingProfile = data.operational_profile as any;
           setProfile({
             age_range: existingProfile.age_range || '',
             activity_level: existingProfile.activity_level || '',
             smoking_status: existingProfile.smoking_status || 'never',
             air_sensitivity: existingProfile.air_sensitivity || 'normal',
-            health_conditions: existingProfile.health_conditions || [],
+            operational_conditions: existingProfile.operational_conditions || [],
           });
-          console.log('Loaded existing health profile:', existingProfile);
+          console.log('Loaded existing operational profile:', existingProfile);
         }
       } catch (error) {
         console.error('Error loading profile:', error);
@@ -121,13 +122,13 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
 
   const handleConditionToggle = (condition: string) => {
     if (condition === 'none') {
-      setProfile(p => ({ ...p, health_conditions: ['none'] }));
+      setProfile(p => ({ ...p, operational_conditions: ['none'] }));
     } else {
       setProfile(p => ({
         ...p,
-        health_conditions: p.health_conditions.includes(condition)
-          ? p.health_conditions.filter(c => c !== condition)
-          : [...p.health_conditions.filter(c => c !== 'none'), condition]
+        operational_conditions: p.operational_conditions.includes(condition)
+          ? p.operational_conditions.filter(c => c !== condition)
+          : [...p.operational_conditions.filter(c => c !== 'none'), condition]
       }));
     }
   };
@@ -138,7 +139,7 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
       case 2: return !!profile.activity_level;
       case 3: return !!profile.smoking_status;
       case 4: return !!profile.air_sensitivity;
-      case 5: return profile.health_conditions.length > 0;
+      case 5: return profile.operational_conditions.length > 0;
       default: return false;
     }
   };
@@ -147,7 +148,7 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
     if (!user) {
       toast({
         title: "Error",
-        description: "You must be logged in to save your health profile.",
+        description: "You must be logged in to save your operational profile.",
         variant: "destructive"
       });
       return;
@@ -155,12 +156,12 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
 
     setIsSubmitting(true);
     try {
-      console.log('Saving health profile:', profile);
+      console.log('Saving operational profile:', profile);
 
       const { data, error } = await supabase
         .from('profiles')
         .update({
-          health_profile: profile,
+          operational_profile: profile,
           updated_at: new Date().toISOString()
         })
         .eq('user_id', user.id)
@@ -175,16 +176,16 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
       await refreshProfile();
 
       toast({
-        title: "✅ Health Profile Saved!",
-        description: `Your personalized health tracking is now active. Age: ${profile.age_range}, Activity: ${profile.activity_level}`,
+        title: "✅ Operational Profile Active!",
+        description: `Deployment parameters configured. Age: ${profile.age_range}, Load: ${profile.activity_level}`,
       });
 
       onComplete();
     } catch (error: any) {
-      console.error('Error saving health profile:', error);
+      console.error('Error saving operational profile:', error);
       toast({
-        title: "❌ Save Failed",
-        description: error.message || "Failed to save health profile. Please try again.",
+        title: "❌ Config Failed",
+        description: error.message || "Failed to save operational profile. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -197,7 +198,7 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
       <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 z-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-indigo-400 mx-auto mb-4" />
-          <p className="text-white/60">Loading your health profile...</p>
+          <p className="text-white/60">Loading operational profile...</p>
         </div>
       </div>
     );
@@ -205,23 +206,21 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      {/* Background Ambience */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-20%] left-[-10%] w-[1200px] h-[1200px] bg-indigo-500/10 rounded-full blur-[180px] animate-pulse-slow" />
         <div className="absolute bottom-[-20%] right-[-10%] w-[1200px] h-[1200px] bg-rose-500/5 rounded-full blur-[180px] animate-pulse-slow delay-1000" />
       </div>
 
       <Card className="relative max-w-2xl w-full bg-white/5 backdrop-blur-2xl border border-white/10 shadow-2xl">
-        {/* Header */}
         <div className="p-8 border-b border-white/10">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-rose-500 to-indigo-500 rounded-2xl shadow-lg shadow-rose-500/20">
-                <Heart className="w-6 h-6 text-white" />
+              <div className="p-3 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl shadow-lg shadow-indigo-500/20">
+                <Target className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white tracking-tight">Health Profile</h2>
-                <p className="text-sm text-slate-400 font-medium">Personalize your health insights</p>
+                <h2 className="text-2xl font-bold text-white tracking-tight">Operational Profile</h2>
+                <p className="text-sm text-slate-400 font-medium">Configure deployment metrics</p>
               </div>
             </div>
             <Button
@@ -234,12 +233,11 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
             </Button>
           </div>
 
-          {/* Step Indicators */}
           <div className="flex items-center justify-between mb-4">
             {[1, 2, 3, 4, 5].map((s) => (
               <div key={s} className="flex items-center flex-1">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${s < step ? 'bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30' :
-                  s === step ? 'bg-gradient-to-br from-rose-500 to-indigo-500 text-white shadow-lg shadow-rose-500/30 scale-110' :
+                  s === step ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/30 scale-110' :
                     'bg-white/5 text-slate-500 border border-white/10'
                   }`}>
                   {s < step ? <Check className="w-5 h-5" /> : s}
@@ -255,17 +253,15 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
           <Progress value={progress} className="h-2 bg-white/5" />
         </div>
 
-        {/* Content */}
         <div className="p-8 min-h-[400px]">
-          {/* Step 1: Age Range */}
           {step === 1 && (
             <div className="space-y-6 animate-in fade-in duration-500">
               <div className="text-center mb-8">
                 <div className="inline-block p-4 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-3xl mb-4">
                   <User className="w-16 h-16 text-indigo-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">What's your age range?</h3>
-                <p className="text-slate-400">This helps us personalize health recommendations</p>
+                <h3 className="text-2xl font-bold text-white mb-2">Age Range</h3>
+                <p className="text-slate-400">Baseline demographics for resilience assessment</p>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {ageRanges.map(age => (
@@ -273,7 +269,7 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
                     key={age.value}
                     variant={profile.age_range === age.value ? 'default' : 'outline'}
                     className={`h-16 text-lg font-semibold transition-all duration-300 ${profile.age_range === age.value
-                      ? 'bg-gradient-to-br from-rose-500 to-indigo-500 border-0 shadow-lg shadow-rose-500/30 scale-105'
+                      ? 'bg-gradient-to-br from-indigo-500 to-indigo-700 border-0 shadow-lg shadow-indigo-500/30 scale-105'
                       : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 hover:scale-105'
                       }`}
                     onClick={() => setProfile(p => ({ ...p, age_range: age.value }))}
@@ -285,15 +281,14 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
             </div>
           )}
 
-          {/* Step 2: Activity Level */}
           {step === 2 && (
             <div className="space-y-6 animate-in fade-in duration-500">
               <div className="text-center mb-8">
                 <div className="inline-block p-4 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-3xl mb-4">
                   <Activity className="w-16 h-16 text-emerald-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">How active are you?</h3>
-                <p className="text-slate-400">Your activity level affects air quality exposure</p>
+                <h3 className="text-2xl font-bold text-white mb-2">Operational Intensity</h3>
+                <p className="text-slate-400">Cycle complexity affects atmospheric interaction</p>
               </div>
               <div className="space-y-3">
                 {activityLevels.map(level => (
@@ -320,15 +315,14 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
             </div>
           )}
 
-          {/* Step 3: Smoking Status */}
           {step === 3 && (
             <div className="space-y-6 animate-in fade-in duration-500">
               <div className="text-center mb-8">
                 <div className="inline-block p-4 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-3xl mb-4">
                   <Wind className="w-16 h-16 text-blue-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Smoking status?</h3>
-                <p className="text-slate-400">Important for respiratory health assessment</p>
+                <h3 className="text-2xl font-bold text-white mb-2">Inhalation Environment</h3>
+                <p className="text-slate-400">Strategic respiratory load assessment</p>
               </div>
               <div className="space-y-3">
                 {smokingStatuses.map(status => (
@@ -352,15 +346,14 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
             </div>
           )}
 
-          {/* Step 4: Air Quality Sensitivity */}
           {step === 4 && (
             <div className="space-y-6 animate-in fade-in duration-500">
               <div className="text-center mb-8">
                 <div className="inline-block p-4 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-3xl mb-4">
                   <AlertTriangle className="w-16 h-16 text-amber-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Air quality sensitivity?</h3>
-                <p className="text-slate-400">How much does air quality affect you?</p>
+                <h3 className="text-2xl font-bold text-white mb-2">Load Sensitivity</h3>
+                <p className="text-slate-400">Industrial tolerance to atmospheric variance</p>
               </div>
               <div className="space-y-3">
                 {sensitivities.map(sens => (
@@ -387,21 +380,20 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
             </div>
           )}
 
-          {/* Step 5: Health Conditions */}
           {step === 5 && (
             <div className="space-y-6 animate-in fade-in duration-500">
               <div className="text-center mb-8">
                 <div className="inline-block p-4 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-3xl mb-4">
                   <Sparkles className="w-16 h-16 text-purple-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Any health conditions?</h3>
-                <p className="text-slate-400">Select all that apply</p>
+                <h3 className="text-2xl font-bold text-white mb-2">Operational Limitations</h3>
+                <p className="text-slate-400">Select all that apply to specific resilience profiling</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                {healthConditions.map(condition => (
+                {operationalConditions.map(condition => (
                   <button
                     key={condition.value}
-                    className={`p-5 rounded-2xl border text-center transition-all duration-300 ${profile.health_conditions.includes(condition.value)
+                    className={`p-5 rounded-2xl border text-center transition-all duration-300 ${profile.operational_conditions.includes(condition.value)
                       ? 'border-purple-500/50 bg-gradient-to-br from-purple-500/20 to-pink-500/20 shadow-lg shadow-purple-500/20 scale-[1.02]'
                       : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02]'
                       }`}
@@ -409,7 +401,7 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
                   >
                     <div className="flex flex-col items-center gap-2">
                       <span className="font-bold text-white text-sm">{condition.label}</span>
-                      {profile.health_conditions.includes(condition.value) && (
+                      {profile.operational_conditions.includes(condition.value) && (
                         <Check className="w-5 h-5 text-purple-400" />
                       )}
                     </div>
@@ -420,7 +412,6 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
           )}
         </div>
 
-        {/* Footer */}
         <div className="p-6 border-t border-white/10 flex items-center justify-between bg-white/5">
           {step > 1 ? (
             <Button
@@ -439,7 +430,7 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
             <Button
               onClick={() => setStep(s => s + 1)}
               disabled={!canProceed()}
-              className="bg-gradient-to-r from-rose-500 to-indigo-500 hover:opacity-90 shadow-lg shadow-rose-500/30 disabled:opacity-50 disabled:shadow-none"
+              className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:opacity-90 shadow-lg shadow-indigo-500/30 disabled:opacity-50 disabled:shadow-none"
             >
               Next
               <ArrowRight className="w-4 h-4 ml-2" />
@@ -458,7 +449,7 @@ export const HealthProfileSetup = ({ onComplete, onSkip }: HealthProfileSetupPro
               ) : (
                 <>
                   <Check className="w-4 h-4 mr-2" />
-                  Complete Setup
+                  Finalize Config
                 </>
               )}
             </Button>

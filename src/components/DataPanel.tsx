@@ -8,10 +8,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Wind, Thermometer, Eye, Heart, Activity, TrendingUp, TrendingDown, Play, Pause, RotateCcw, Chrome as Home, ChartBar as BarChart3, Atom, Sparkles, Loader as Loader2, AlertTriangle, Shield } from 'lucide-react';
+import { Wind, Thermometer, Eye, Heart, Activity, TrendingUp, TrendingDown, Play, Pause, RotateCcw, Chrome as Home, ChartBar as BarChart3, Atom, Sparkles, Loader as Loader2, AlertTriangle, Shield, Zap } from 'lucide-react';
 import { AirQualityData, PredictionData } from '@/types';
 import { ForecastTimeline } from './ForecastTimeline';
-import { PollutantBadge, PollutantDetailCard, getPollutantSeverity, getWHOExceedance, WHO_GUIDELINES, type PollutantType } from './PollutantSeverity';
+import { PollutantBadge, PollutantDetailCard, getPollutantSeverity, getBaselineExceedance, SAFETY_BASELINES, type PollutantType } from './PollutantSeverity';
 
 type QuantumForecast = {
   model: { name: string; backend: string; horizonHours: number };
@@ -31,7 +31,7 @@ interface DataPanelProps {
   onYearChange: (direction: 'next' | 'prev') => void;
   onBackToHome?: () => void;
   onShowQuantumAnalytics?: () => void;
-  onShowHealth?: () => void;
+  onShowCapacity?: () => void;
   onShowClimatePredictions?: () => void;
   onShowDisasters?: () => void;
 }
@@ -48,7 +48,7 @@ export const DataPanel = ({
   onYearChange,
   onBackToHome,
   onShowQuantumAnalytics,
-  onShowHealth,
+  onShowCapacity,
   onShowClimatePredictions,
   onShowDisasters
 }: DataPanelProps) => {
@@ -89,8 +89,8 @@ export const DataPanel = ({
     return predictions[Math.max(0, yearIndex)];
   };
 
-  const calculateHealthImpact = () => {
-    if (!airQuality) return { outdoorDays: 0, asthmaRisk: 0, respiratoryIndex: 0, projectedAQI: 0 } as any;
+  const calculateOperationalMetrics = () => {
+    if (!airQuality) return { outdoorOptimality: 0, loadCoefficient: 0, strategicResilience: 0, projectedAQI: 0 } as any;
 
     const baseYear = 2026;
     const yearOffset = Math.max(0, currentYear - baseYear);
@@ -113,27 +113,27 @@ export const DataPanel = ({
     const aqiMultiplier = Math.pow(1 + scenarioConfig.aqiRate, yearOffset);
     const projectedAQI = Math.max(10, Math.min(450, airQuality.aqi * aqiMultiplier * atmosphericVolatility));
 
-    // Health metrics (grounded in epidemiology but sensitive to the new model)
-    const outdoorDays = Math.max(40, Math.min(350, 340 - projectedAQI * 1.15));
-    const asthmaRisk = Math.min(200, Math.round(30 + projectedAQI * 0.45));
-    const respiratoryIndex = Math.min(150, Math.round(projectedAQI * 0.5));
+    // Operational metrics (grounded in industrial telemetry)
+    const outdoorOptimality = Math.max(40, Math.min(350, 340 - projectedAQI * 1.15));
+    const loadCoefficient = Math.min(200, Math.round(30 + projectedAQI * 0.45));
+    const strategicResilience = Math.min(150, Math.round(projectedAQI * 0.5));
 
     return {
-      outdoorDays: Math.round(outdoorDays),
-      asthmaRisk,
-      respiratoryIndex,
+      outdoorOptimality: Math.round(outdoorOptimality),
+      loadCoefficient,
+      strategicResilience,
       projectedAQI: Math.round(projectedAQI)
     };
   };
 
   const currentPrediction = getCurrentPrediction();
-  const healthImpact = calculateHealthImpact();
+  const operationalMetrics = calculateOperationalMetrics();
 
-  const handleHealthNavigation = () => {
-    if (onShowHealth) {
-      onShowHealth();
+  const handleCapacityNavigation = () => {
+    if (onShowCapacity) {
+      onShowCapacity();
     } else if (cityName && airQuality) {
-      navigate('/health', {
+      navigate('/capacity', {
         state: {
           cityName,
           airQuality,
@@ -193,18 +193,18 @@ export const DataPanel = ({
                   <Sparkles className="w-8 h-8 text-primary" />
                 </div>
               </div>
-              Enviro AI Impact Analysis
+              AuraEarth Impact Analysis
             </DialogTitle>
             <DialogDescription className="text-base text-muted-foreground mt-2">
               <div className="flex items-center gap-2 flex-wrap animate-fade-in" style={{ animationDelay: '0.1s' }}>
                 <Badge variant="outline" className="border-primary/30 text-primary bg-primary/10 animate-fade-in hover-scale">
-                  🤖 Llama 3.3 70B
+                  🤖 Gemini 2.0 Flash
                 </Badge>
                 <Badge variant="outline" className="border-secondary/30 text-secondary bg-secondary/10 animate-fade-in hover-scale" style={{ animationDelay: '0.05s' }}>
-                  📊 OpenMeteo Data
+                  📊 Regional Telemetry
                 </Badge>
                 <Badge variant="outline" className="border-accent/30 text-accent bg-accent/10 animate-fade-in hover-scale" style={{ animationDelay: '0.1s' }}>
-                  ⚛️ Quantum Enhanced
+                  ⚛️ Quantum Optimized
                 </Badge>
                 <span className="text-sm">•</span>
                 <span className="font-medium text-foreground">{cityName}</span>
@@ -224,8 +224,8 @@ export const DataPanel = ({
                   </div>
                 </div>
                 <div className="text-center space-y-4">
-                  <p className="text-2xl font-bold text-foreground animate-pulse">Enviro AI Processing...</p>
-                  <p className="text-sm text-muted-foreground">Analyzing environmental data with advanced AI</p>
+                  <p className="text-2xl font-bold text-foreground animate-pulse">AuraEarth AI Processing...</p>
+                  <p className="text-sm text-muted-foreground">Analyzing regional telemetry with advanced performance engines</p>
                   <div className="grid grid-cols-3 gap-4 mt-8 max-w-2xl">
                     <Card className="glass p-4 animate-fade-in" style={{ animationDelay: '0s' }}>
                       <Atom className="w-8 h-8 text-primary mx-auto mb-2 animate-spin" />
@@ -236,8 +236,8 @@ export const DataPanel = ({
                       <p className="text-xs text-center text-muted-foreground">Pollutant Analysis</p>
                     </Card>
                     <Card className="glass p-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-                      <Heart className="w-8 h-8 text-accent mx-auto mb-2 animate-pulse" />
-                      <p className="text-xs text-center text-muted-foreground">Health Impacts</p>
+                      <Zap className="w-8 h-8 text-accent mx-auto mb-2 animate-pulse" />
+                      <p className="text-xs text-center text-muted-foreground">Resource Efficiency</p>
                     </Card>
                   </div>
                 </div>
@@ -274,7 +274,7 @@ export const DataPanel = ({
                     const content = line.replace('- ', '');
                     const icon = content.includes('AQI') ? <Activity className="w-4 h-4 text-primary" /> :
                       content.includes('PM') ? <Wind className="w-4 h-4 text-secondary" /> :
-                        content.includes('health') || content.includes('Health') ? <Heart className="w-4 h-4 text-accent" /> :
+                        content.includes('resilience') || content.includes('Resilience') ? <Shield className="w-4 h-4 text-accent" /> :
                           <div className="w-2 h-2 bg-foreground/50 rounded-full" />;
 
                     return (
@@ -367,11 +367,11 @@ export const DataPanel = ({
                     { type: 'so2', value: airQuality.so2 }
                   ];
                   const worstPollutant = pollutants.reduce((worst, current) => {
-                    const currentExceedance = getWHOExceedance(current.type, current.value);
-                    const worstExceedance = getWHOExceedance(worst.type, worst.value);
+                    const currentExceedance = getBaselineExceedance(current.type, current.value);
+                    const worstExceedance = getBaselineExceedance(worst.type, worst.value);
                     return currentExceedance > worstExceedance ? current : worst;
                   }, pollutants[0]);
-                  const exceedance = getWHOExceedance(worstPollutant.type, worstPollutant.value);
+                  const exceedance = getBaselineExceedance(worstPollutant.type, worstPollutant.value);
                   const severity = getPollutantSeverity(worstPollutant.type, worstPollutant.value);
 
                   if (exceedance > 100) {
@@ -381,7 +381,7 @@ export const DataPanel = ({
                           <AlertTriangle className={`w-4 h-4 ${severity.color}`} />
                           <div className="flex-1 min-w-0">
                             <p className={`text-xs font-semibold ${severity.color}`}>
-                              {WHO_GUIDELINES[worstPollutant.type].name} {exceedance - 100}% above WHO limit
+                              {SAFETY_BASELINES[worstPollutant.type].name} {exceedance - 100}% above baseline
                             </p>
                             <p className="text-[10px] text-muted-foreground truncate">
                               {severity.recommendation.split(' ').slice(0, 8).join(' ')}...
@@ -410,7 +410,7 @@ export const DataPanel = ({
                 size="lg"
               >
                 <Sparkles className="w-5 h-5 mr-2 group-hover:animate-spin" />
-                <span className="font-semibold">Enviro AI Impact Analysis</span>
+                <span className="font-semibold">AuraEarth Impact Analysis</span>
               </Button>
 
               {/* ClimatePredict AI Button */}
@@ -447,16 +447,16 @@ export const DataPanel = ({
                 </Button>
               )}
 
-              {/* Health Analysis Button */}
+              {/* Resource Analysis Button */}
               {cityName && airQuality && (
                 <Button
                   size="sm"
                   variant="outline"
                   className="w-full mt-2 glass"
-                  onClick={handleHealthNavigation}
+                  onClick={handleCapacityNavigation}
                 >
-                  <Heart className="w-4 h-4 mr-2" />
-                  Health Analysis
+                  <Activity className="w-4 h-4 mr-2" />
+                  Resource Analysis
                 </Button>
               )}
 

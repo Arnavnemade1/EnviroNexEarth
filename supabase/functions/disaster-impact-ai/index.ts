@@ -29,8 +29,8 @@ Deno.serve(async (req) => {
     }
 
     try {
-      const systemPrompt = 'You are Enviro AI, an advanced environmental assistant analyzing natural disasters with quantum-enhanced insights. Provide concise, factual summaries of environmental impacts in 2-4 sentences. Focus on air quality, ecosystem effects, climate implications, and quantum-predicted trends.';
-      const userPrompt = `Analyze the environmental and air quality impact of these natural disasters:\n\n${disasters}\n\nProvide a brief summary (2-4 sentences) of the collective environmental impact, including quantum-enhanced predictions if relevant.`;
+      const systemPrompt = 'You are AuraEarth Resilience Intelligence, an advanced system and regional telemetry engine. Analyze atmospheric events and their impact on industrial continuity and infrastructure stability. Provide concise, factual summaries of atmospheric load and resource capacity in 2-4 sentences. Focus on operational uptime, resource security, and baseline stability.';
+      const userPrompt = `Analyze the atmospheric load and infrastructure impact of these events:\n\n${disasters}\n\nProvide a strategic summary (2-4 sentences) focusing on industrial performance and resource resilience.`;
 
       const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
         method: 'POST',
@@ -98,6 +98,6 @@ Deno.serve(async (req) => {
 });
 
 function generateMockDisasterSummary(disasters: string) {
-  return `Atmospheric telemetry indicates significant environmental restructuring following the reported anomalies. Our neural engine predicts a multi-day recovery window for regional air quality, with localized cooling effects expected in high-impact zones. Environmental restoration protocols are currently being modeled to mitigate long-term climate drift.`;
+  return `Atmospheric telemetry indicates nominal infrastructure resilience following the reported anomalies. Our resilience engine predicts a high-capacity recovery window for regional energy output, with localized optimization effects expected in high-yield zones. Industrial continuity protocols are currently being modeled to ensure sustained resource security.`;
 }
 

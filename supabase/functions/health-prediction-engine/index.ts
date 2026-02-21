@@ -5,7 +5,7 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface HealthProfile {
+interface OperationalProfile {
     age: number;
     hasAsthma: boolean;
     hasHeartCondition: boolean;
@@ -35,7 +35,7 @@ interface ClimateData {
     };
 }
 
-interface HealthAnalysisResponse {
+interface ResilienceAnalysisResponse {
     overallRisk: string;
     riskScore: number;
     metrics: {
@@ -62,38 +62,38 @@ Deno.serve(async (req) => {
 
     try {
         const payload = await req.json();
-        const { climateData, healthProfile }: { climateData: ClimateData, healthProfile: HealthProfile } = payload;
+        const { climateData, operationalProfile }: { climateData: ClimateData, operationalProfile: OperationalProfile } = payload;
         const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('LOVABLE_API_KEY');
 
-        let data: HealthAnalysisResponse;
+        let data: ResilienceAnalysisResponse;
 
         if (!GEMINI_API_KEY) {
             console.warn('GEMINI_API_KEY not found, using algorithmic fallback');
-            data = generateMockHealthAnalysis(climateData, healthProfile);
+            data = generateMockResilienceAnalysis(climateData, operationalProfile);
         } else {
             try {
-                const systemPrompt = "You are the AuraEarth Neural Health Engine. Analyze environmental data and personal health profiles.\n" +
+                const systemPrompt = "You are the AuraEarth Industrial Performance Engine. Analyze atmospheric load and regional resilience capacity for personnel optimization.\n" +
                     "Return ONLY valid JSON with this schema:\n" +
                     "{\n" +
-                    "  \"overallRisk\": \"low\"|\"moderate\"|\"high\"|\"extreme\",\n" +
-                    "  \"riskScore\": number (0-100),\n" +
+                    "  \"overallRisk\": \"nominal\"|\"guarded\"|\"monitored\"|\"restricted\",\n" +
+                    "  \"riskScore\": number (0-100 atmospheric load index),\n" +
                     "  \"metrics\": {\n" +
-                    "    \"aggregateRiskIncrease\": number (percentage),\n" +
-                    "    \"cardiovascularRisk\": { \"label\": \"Cardiovascular\", \"increase\": number, \"color\": \"rose\"|\"amber\"|\"emerald\" },\n" +
-                    "    \"respiratoryRisk\": { \"label\": \"Respiratory\", \"increase\": number, \"color\": \"rose\"|\"amber\"|\"emerald\" },\n" +
-                    "    \"neurologicalRisk\": { \"label\": \"Neurological\", \"increase\": number, \"color\": \"rose\"|\"amber\"|\"emerald\" }\n" +
+                    "    \"aggregateRiskIncrease\": number (load coefficient),\n" +
+                    "    \"cardiovascularRisk\": { \"label\": \"CV Load\", \"increase\": number, \"color\": \"rose\"|\"amber\"|\"emerald\" },\n" +
+                    "    \"respiratoryRisk\": { \"label\": \"Resp. Activity Index\", \"increase\": number, \"color\": \"rose\"|\"amber\"|\"emerald\" },\n" +
+                    "    \"neurologicalRisk\": { \"label\": \"Neuro-Efficiency\", \"increase\": number, \"color\": \"rose\"|\"amber\"|\"emerald\" }\n" +
                     "  },\n" +
-                    "  \"pollutantBreakdown\": [ { \"name\": \"PM2.5\"|\"O3\"|\"NO2\"|\"SO2\"|\"CO\", \"impact\": number (0-100 percentage contribution), \"color\": string } ],\n" +
-                    "  \"recommendations\": [ string (maximum 3, realistic, non-obvious) ],\n" +
+                    "  \"pollutantBreakdown\": [ { \"name\": \"PM2.5\"|\"O3\"|\"NO2\"|\"SO2\"|\"CO\", \"impact\": number (contribution percentage), \"color\": string } ],\n" +
+                    "  \"recommendations\": [ string (maximum 3, focus on operational optimization and performance continuity) ],\n" +
                     "  \"activityWindows\": [ { \"hour\": number, \"label\": \"HH:00\", \"status\": \"optimal\"|\"guarded\"|\"limited\"|\"prohibited\", \"riskScore\": number, \"riskIncreaseSteps\": number } ]\n" +
                     "}\n" +
-                    "CRITICAL: Recommendations MUST be realistic. Do NOT suggest masks unless PM2.5 > 50 or AQI > 100. Do NOT suggest staying indoors unless AQI > 150.";
+                    "CRITICAL: Recommendations MUST focus on industrial continuity. Do NOT use alarmist health warnings. Use terms like 'Baseline Compliance' and 'Operational Readiness'.";
 
                 const userPrompt = "Location: " + climateData.cityName + "\n" +
                     "AQI: " + climateData.airQuality.aqi + "\n" +
                     "PM2.5: " + climateData.airQuality.pm25 + "\n" +
                     "O3: " + climateData.airQuality.o3 + "\n" +
-                    "Profile: Age " + healthProfile.age + ", Asthma: " + healthProfile.hasAsthma + ", Heart: " + healthProfile.hasHeartCondition;
+                    "Profile: Age " + operationalProfile.age + ", Asthma: " + operationalProfile.hasAsthma + ", Heart: " + operationalProfile.hasHeartCondition;
 
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
                 data = JSON.parse(content);
             } catch (e) {
                 console.error('Gemini call failed, falling back:', (e as Error).message);
-                data = generateMockHealthAnalysis(climateData, healthProfile);
+                data = generateMockResilienceAnalysis(climateData, operationalProfile);
             }
         }
 
@@ -137,7 +137,7 @@ Deno.serve(async (req) => {
     }
 });
 
-function generateMockHealthAnalysis(climateData: ClimateData, healthProfile: HealthProfile): HealthAnalysisResponse {
+function generateMockResilienceAnalysis(climateData: ClimateData, operationalProfile: OperationalProfile): ResilienceAnalysisResponse {
     const { airQuality: aq, weather: w, cityName } = climateData;
     const aqi = aq.aqi;
 
@@ -148,26 +148,26 @@ function generateMockHealthAnalysis(climateData: ClimateData, healthProfile: Hea
 
     // 2. Base Risk Calculation
     let baseRisk = (aqi * 0.45) * windFactor * thermalAmplifier * humidityAmplifier;
-    if (healthProfile.hasAsthma) baseRisk *= 1.4;
-    if (healthProfile.hasHeartCondition) baseRisk *= 1.7;
+    if (operationalProfile.hasAsthma) baseRisk *= 1.4;
+    if (operationalProfile.hasHeartCondition) baseRisk *= 1.7;
 
     const riskScore = Math.min(100, Math.round(baseRisk));
-    const overallRisk = riskScore > 80 ? "extreme" : riskScore > 60 ? "high" : riskScore > 30 ? "moderate" : "low";
+    const overallRisk = riskScore > 80 ? "critical" : riskScore > 60 ? "restricted" : riskScore > 30 ? "monitored" : "nominal";
 
     // 3. Realistic Recommendations
     const recommendations: string[] = [];
     if (aqi > 150) {
-        recommendations.push("Atmospheric stagnation detected. Sensitive groups should remain indoors.");
-        recommendations.push("Mandatory N95 respirator usage for outdoor transit.");
+        recommendations.push("Strategic atmospheric load exceeded. Activate indoor resource protocols.");
+        recommendations.push("Mandatory filtration active for all essential personnel transit.");
     } else if (aqi > 100) {
-        recommendations.push("Prohibit aerobic exertion during peak UV/Heat hours.");
-        if (healthProfile.hasAsthma) recommendations.push("Ensure rescue medication is immediately accessible.");
+        recommendations.push("Operational threshold reached. Manage physical exertion cycles.");
+        if (operationalProfile.hasAsthma) recommendations.push("Verify operational readiness for sensitized personnel.");
     } else if (w.windSpeed < 5 && aqi > 50) {
-        recommendations.push("Low dispersion predicted. Risk will peak in high-traffic corridors.");
-        recommendations.push("Optimal outdoor window: 04:00 - 06:00.");
+        recommendations.push("Low dispersion coefficient. Performance window: 04:00 - 06:00.");
+        recommendations.push("Infrastructure load peaking in primary transport corridors.");
     } else {
-        recommendations.push("Environmental conditions are nominal for your profile.");
-        recommendations.push("No specific restrictive interventions required.");
+        recommendations.push("Atmospheric conditions nominal for all industrial operations.");
+        recommendations.push("Full capacity yield maintained for your profile.");
     }
 
     // 4. Pollutant Breakdown
@@ -205,17 +205,17 @@ function generateMockHealthAnalysis(climateData: ClimateData, healthProfile: Hea
         metrics: {
             aggregateRiskIncrease: Math.round((riskScore / 100) * 35),
             cardiovascularRisk: {
-                label: "Cardiovascular",
+                label: "CV Load",
                 increase: Math.round(riskScore * 0.38),
                 color: riskScore > 75 ? "rose" : riskScore > 45 ? "amber" : "emerald"
             },
             respiratoryRisk: {
-                label: "Respiratory",
+                label: "Resp. Activity Index",
                 increase: Math.round(riskScore * 0.52),
                 color: riskScore > 70 ? "rose" : riskScore > 40 ? "amber" : "emerald"
             },
             neurologicalRisk: {
-                label: "Neurological",
+                label: "Neuro-Efficiency",
                 increase: Math.round(riskScore * 0.15),
                 color: riskScore > 85 ? "rose" : "emerald"
             }

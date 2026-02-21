@@ -9,14 +9,14 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  Globe, 
-  Mail, 
-  Lock, 
-  User, 
-  Loader2, 
-  Eye, 
-  EyeOff, 
+import {
+  Globe,
+  Mail,
+  Lock,
+  User,
+  Loader2,
+  Eye,
+  EyeOff,
   ArrowLeft,
   Sparkles,
   Activity,
@@ -79,7 +79,7 @@ const Auth = () => {
 
     try {
       const redirectUrl = `${window.location.origin}/`;
-      
+
       const { error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -193,7 +193,7 @@ const Auth = () => {
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         </div>
-        
+
         <div className="relative z-10 flex flex-col justify-center px-12 py-8">
           {/* Logo */}
           <div className="flex items-center gap-4 mb-12">
@@ -213,12 +213,12 @@ const Auth = () => {
             <h2 className="text-2xl font-semibold text-foreground">
               Unlock Premium Features
             </h2>
-            
+
             <div className="grid gap-6">
               <FeatureCard
                 icon={<Activity className="w-6 h-6" />}
-                title="Real-time Health Analytics"
-                description="Personal health risk assessment based on air quality and your health profile"
+                title="Real-time Capacity Analytics"
+                description="Strategic resource assessment based on atmospheric load and operational profiles"
                 color="primary"
               />
               <FeatureCard
@@ -228,9 +228,9 @@ const Auth = () => {
                 color="secondary"
               />
               <FeatureCard
-                icon={<Heart className="w-6 h-6" />}
+                icon={<Shield className="w-6 h-6" />}
                 title="Personalized Insights"
-                description="AI-driven recommendations tailored to your health conditions"
+                description="AI-driven optimizations tailored to your operational requirements"
                 color="accent"
               />
               <FeatureCard
@@ -491,15 +491,15 @@ const Auth = () => {
 };
 
 // Feature Card Component
-const FeatureCard = ({ 
-  icon, 
-  title, 
-  description, 
-  color 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  description: string; 
+const FeatureCard = ({
+  icon,
+  title,
+  description,
+  color
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
   color: 'primary' | 'secondary' | 'accent';
 }) => {
   const colorClasses = {

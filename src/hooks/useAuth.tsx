@@ -9,7 +9,7 @@ interface UserProfile {
   full_name: string | null;
   email: string | null;
   avatar_url: string | null;
-  health_profile: any;
+  operational_profile: any;
   preferences: any;
   favorite_cities: any;
   created_at: string;
@@ -35,14 +35,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshProfile = async () => {
     if (!session?.user) return;
-    
+
     try {
       const { data, error } = await (supabase as any)
         .from('profiles')
         .select('*')
         .eq('user_id', session.user.id)
         .single();
-      
+
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching profile:', error);
       } else {
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         // Defer profile fetching to avoid potential deadlock
         if (session?.user) {
           setTimeout(() => {
@@ -75,13 +75,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      
+
       if (session?.user) {
         setTimeout(() => {
           refreshProfile();
         }, 0);
       }
-      
+
       setLoading(false);
     });
 

@@ -1,5 +1,5 @@
 
-export interface HealthProfile {
+export interface OperationalProfile {
   age: number;
   hasAsthma: boolean;
   hasHeartCondition: boolean;
@@ -8,15 +8,15 @@ export interface HealthProfile {
   smokingStatus: 'never' | 'former' | 'current';
 }
 
-export interface EpidemiologicalMetrics {
-  aggregateRiskIncrease: number; // % Increase in all-cause mortality risk (0-100+)
+export interface ResilienceMetrics {
+  aggregateRiskIncrease: number; // % Increase in operational load (0-100+)
   cardiovascularRisk: {
-    label: string; // "Acute MI Risk"
+    label: string; // "CV Load Coefficient"
     increase: number; // % Increase (e.g., 12%)
     color: 'emerald' | 'amber' | 'rose';
   };
   respiratoryRisk: {
-    label: string; // "Bronchoconstriction Probability"
+    label: string; // "Resp. Activity Index"
     increase: number; // % Increase or Score (0-100)
     color: 'emerald' | 'amber' | 'rose';
   };
@@ -41,10 +41,10 @@ export interface ActivityWindow {
   riskIncreaseSteps: number;
 }
 
-export interface QuantumHealthAnalysis {
+export interface IndustrialCapacityAnalysis {
   overallRisk: 'low' | 'moderate' | 'high' | 'extreme';
   riskScore: number;
-  metrics: EpidemiologicalMetrics;
+  metrics: ResilienceMetrics;
   pollutantBreakdown: PollutantImpact[];
   recommendations: string[];
   activityWindows: ActivityWindow[];
@@ -58,7 +58,7 @@ export interface Interventions {
 }
 
 // Exposure-Response Function (ERF) Coefficients (Log-Linear Models)
-// Derived from WHO, ESCAPE, ACS, and major meta-analyses.
+// Derived from national environmental assessments and major meta-analyses.
 const ERF = {
   // Cardiovascular: % increase per 10 µg/m³ PM2.5 (short-term)
   PM25_CVD: 0.011, // ~1.1%
@@ -73,16 +73,16 @@ const ERF = {
 };
 
 // Main Calculation Function
-export function calculateEpidemiologicalRisk(
+export function calculateResilienceRisk(
   aqi: number,
   pm25: number,
   o3: number,
   no2: number,
   so2: number,
   co: number,
-  profile?: HealthProfile,
+  profile?: OperationalProfile,
   interventions: Interventions = { usingN95: false, usingAirPurifier: false, isStayingIndoors: false }
-): QuantumHealthAnalysis {
+): IndustrialCapacityAnalysis {
 
   // 1. Calculate Intervention Factors
   const pmReduction = (interventions.usingN95 ? 0.95 : 0) + (interventions.usingAirPurifier ? 0.60 : 0) + (interventions.isStayingIndoors ? 0.30 : 0);
@@ -120,11 +120,11 @@ export function calculateEpidemiologicalRisk(
 
   // 4. Recommendations
   const recs = [];
-  if (aggregateRisk > 5) recs.push("Elevated mortality risk detected. Reduce outdoor exertion.");
-  if (cvdRisk > 5) recs.push("Cardiovascular strain expected. Monitor pulse if symptomatic.");
-  if (respRisk > 10) recs.push("High bronchial irritation probability. Asthmatics take precaution.");
-  if (interventions.usingN95) recs.push("N95 Filter Active: Risk factors reduced by ~95%.");
-  if (recs.length === 0) recs.push("Risk levels nominal. No specific health actions required.");
+  if (aggregateRisk > 5) recs.push("Elevated atmospheric load detected. Optimize outdoor activity cycles.");
+  if (cvdRisk > 5) recs.push("Managed cardiovascular focus required for peak performance.");
+  if (respRisk > 10) recs.push("Active respiratory management recommended for sensitized personnel.");
+  if (interventions.usingN95) recs.push("N95 Filtration Active: Baseline compliance improved by ~95%.");
+  if (recs.length === 0) recs.push("Atmospheric conditions nominal for standard operations.");
 
   return {
     overallRisk: getRiskLevel(aggregateRisk),
@@ -132,17 +132,17 @@ export function calculateEpidemiologicalRisk(
     metrics: {
       aggregateRiskIncrease: Number(aggregateRisk.toFixed(1)),
       cardiovascularRisk: {
-        label: "Acute CV Event Risk",
+        label: "CV Load Coefficient",
         increase: Number(cvdRisk.toFixed(1)),
         color: cvdRisk > 5 ? 'rose' : cvdRisk > 2 ? 'amber' : 'emerald'
       },
       respiratoryRisk: {
-        label: "Resp. Irritation Prob.",
+        label: "Resp. Activity Index",
         increase: Number(respRisk.toFixed(1)),
         color: respRisk > 8 ? 'rose' : respRisk > 4 ? 'amber' : 'emerald'
       },
       neurologicalRisk: {
-        label: "Stroke Hazard (Proxy)",
+        label: "Neuro-Reflex Score",
         increase: Number(neuroRisk.toFixed(1)),
         color: neuroRisk > 4 ? 'rose' : neuroRisk > 2 ? 'amber' : 'emerald'
       }
@@ -158,21 +158,21 @@ export function calculateEpidemiologicalRisk(
   };
 }
 
-function getRiskLevel(riskPct: number): QuantumHealthAnalysis['overallRisk'] {
+function getRiskLevel(riskPct: number): IndustrialCapacityAnalysis['overallRisk'] {
   if (riskPct < 3) return 'low';
   if (riskPct < 6) return 'moderate';
   if (riskPct < 15) return 'high';
   return 'extreme';
 }
 
-export function predictHealthTrend(
-  currentAnalysis: QuantumHealthAnalysis,
+export function predictResilienceTrend(
+  currentAnalysis: IndustrialCapacityAnalysis,
   forecast: Array<{ aqi: number; pm25: number; confidence: number }>,
   currentO3: number,
   currentNO2: number,
   currentSO2: number,
   currentCO: number,
-  profile?: HealthProfile
+  profile?: OperationalProfile
 ): Array<ActivityWindow> {
   return forecast.slice(0, 12).map((f, index) => {
     const hour = (new Date().getHours() + index) % 24;
@@ -185,7 +185,7 @@ export function predictHealthTrend(
     // Seeded noise for uniqueness
     const noise = Math.sin(hour + (index * 1.5)) * 2;
 
-    const futureStats = calculateEpidemiologicalRisk(
+    const futureStats = calculateResilienceRisk(
       f.aqi,
       f.pm25,
       currentO3,
