@@ -25,6 +25,10 @@ interface ClimateData {
     precipitation?: number;
     uvIndex?: number;
     visibility?: number;
+    hourlyTemp?: number[];
+    hourlyPrecipProb?: number[];
+    hourlyWind?: number[];
+    hourlyUV?: number[];
   };
 }
 
@@ -36,6 +40,32 @@ Deno.serve(async (req) => {
   try {
     const { climateData }: { climateData: ClimateData } = await req.json();
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('LOVABLE_API_KEY');
+
+    // Fetch weather data from Open-Meteo if not fully provided
+    let weatherData = climateData.weather;
+    try {
+      const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${climateData.lat}&longitude=${climateData.lon}&current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,uv_index,visibility&hourly=temperature_2m,precipitation_probability,wind_speed_10m,uv_index&forecast_days=1&timezone=auto`;
+      const weatherRes = await fetch(weatherUrl);
+      if (weatherRes.ok) {
+        const data = await weatherRes.json();
+        weatherData = {
+          temperature: data.current?.temperature_2m,
+          humidity: data.current?.relative_humidity_2m,
+          windSpeed: data.current?.wind_speed_10m,
+          precipitation: data.current?.precipitation,
+          uvIndex: data.current?.uv_index,
+          visibility: data.current?.visibility,
+          hourlyTemp: data.hourly?.temperature_2m,
+          hourlyPrecipProb: data.hourly?.precipitation_probability,
+          hourlyWind: data.hourly?.wind_speed_10m,
+          hourlyUV: data.hourly?.uv_index,
+          ...weatherData // Preserve any existing data
+        };
+        console.log('Weather data fetched:', weatherData);
+      }
+    } catch (e) {
+      console.log('Weather fetch failed, using defaults:', e);
+    }
 
     if (!GEMINI_API_KEY) {
       console.warn('GEMINI_API_KEY not configured, using algorithmic fallback');
