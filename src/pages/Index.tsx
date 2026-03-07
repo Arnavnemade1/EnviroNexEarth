@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import GlobeComponent from '@/components/Globe';
+import EnhancedGlobe from '@/components/EnhancedGlobe';
 import CitySearch from '@/components/CitySearch';
 import DataPanel from '@/components/DataPanel';
 import NaturalDisasters from '@/components/NaturalDisasters';
@@ -266,11 +266,14 @@ const Index = () => {
       {/* Globe Container - Only show when not on home screen */}
       {!showHomeScreen && (
         <div className="absolute inset-0">
-          <GlobeComponent
+          <EnhancedGlobe
             onCityClick={handleGlobeClick}
             selectedCity={selectedCity ? { lat: selectedCity.lat, lng: selectedCity.lng } : null}
             pollutionData={pollutionData}
             showSatellites={true}
+            timelapseMode={currentYear > 0}
+            currentYear={currentYear}
+            onYearChange={(year) => setCurrentYear(year)}
           />
           {/* Globe Hue Overlay */}
           <div
