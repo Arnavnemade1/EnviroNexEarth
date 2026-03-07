@@ -3,56 +3,12 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 200,
-      headers: corsHeaders,
-    });
-  }
+const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-  try {
-    const { cityName, airQuality, quantumForecast, scenario } = await req.json();
-
-    console.log('Analyzing impact for:', { cityName, scenario });
-
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('LOVABLE_API_KEY');
-
-    if (!GEMINI_API_KEY) {
-      console.warn('GEMINI_API_KEY not configured, using algorithmic fallback');
-      const analysis = generateMockImpactAnalysis(cityName, airQuality, quantumForecast, scenario);
-      return new Response(
-        JSON.stringify({ analysis }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const dataContext = `
-City: ${cityName}
-
-Current Air Quality Measurements:
-- AQI (Air Quality Index): ${airQuality.aqi}
-- PM2.5: ${airQuality.pm25} μg/m³
-- O₃ (Ozone): ${airQuality.o3} μg/m³
-- NO₂ (Nitrogen Dioxide): ${airQuality.no2} μg/m³
-- SO₂ (Sulfur Dioxide): ${airQuality.so2} μg/m³
-- CO (Carbon Monoxide): ${airQuality.co} μg/m³
-
-${quantumForecast ? `Quantum Forecast (Next 24 Hours):
-- Model: ${quantumForecast.model.name} (${quantumForecast.model.backend})
-- Average AQI Forecast: ${Math.round(quantumForecast.hourly.reduce((sum: number, h: any) => sum + h.aqi, 0) / quantumForecast.hourly.length)}
-- Min AQI: ${Math.min(...quantumForecast.hourly.map((h: any) => h.aqi))}
-- Max AQI: ${Math.max(...quantumForecast.hourly.map((h: any) => h.aqi))}
-- Average PM2.5: ${Math.round(quantumForecast.hourly.reduce((sum: number, h: any) => sum + h.pm25, 0) / quantumForecast.hourly.length)} μg/m³
-` : ''}
-
-Selected Scenario: ${scenario}
-`;
-
-    const systemPrompt = `You are AuraEarth Resource Intelligence, an advanced system specializing in atmospheric load and industrial continuity.
+const systemPrompt = `You are AuraEarth Resource Intelligence, an advanced system specializing in atmospheric load and industrial continuity.
  
  CRITICAL RULES:
  1. Base ALL analysis ONLY on the provided telemetry measurements.
@@ -72,8 +28,96 @@ Selected Scenario: ${scenario}
  
  Format your response with clear markdown headers (##) and bullet points for readability.`;
 
-    const userPrompt = `Analyze the atmospheric load impact for ${cityName} and provide a comprehensive summary with these sections:
+async function callLovableAI(userPrompt: string, apiKey: string): Promise<string> {
+  console.log('[analyze-impact] Calling Lovable AI gateway...');
+  const response = await fetch(LOVABLE_AI_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-3-flash-preview',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 2048,
+    }),
+  });
 
+  if (response.status === 429) throw new Error('RATE_LIMITED');
+  if (response.status === 402) throw new Error('PAYMENT_REQUIRED');
+  if (!response.ok) {
+    const t = await response.text();
+    console.error('[analyze-impact] Lovable AI error:', response.status, t);
+    throw new Error(`Lovable AI error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const analysis = data.choices?.[0]?.message?.content;
+  if (!analysis) throw new Error('No analysis from Lovable AI');
+  return analysis;
+}
+
+async function callGeminiFallback(userPrompt: string, apiKey: string): Promise<string> {
+  console.log('[analyze-impact] Falling back to direct Gemini API...');
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+      generationConfig: { temperature: 0.7, topP: 0.95, topK: 40, maxOutputTokens: 2048 }
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('[analyze-impact] Gemini API error:', response.status, errorText);
+    throw new Error(`Gemini service error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const analysis = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!analysis) throw new Error('No analysis from Gemini');
+  return analysis;
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 200, headers: corsHeaders });
+  }
+
+  try {
+    const { cityName, airQuality, quantumForecast, scenario } = await req.json();
+    console.log('[analyze-impact] Analyzing for:', { cityName, scenario });
+
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+
+    if (!LOVABLE_API_KEY && !GEMINI_API_KEY) {
+      console.warn('No AI keys configured, using algorithmic fallback');
+      const analysis = generateMockImpactAnalysis(cityName, airQuality, quantumForecast, scenario);
+      return new Response(JSON.stringify({ analysis }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    const dataContext = `
+City: ${cityName}
+Current Air Quality Measurements:
+- AQI: ${airQuality.aqi}
+- PM2.5: ${airQuality.pm25} μg/m³
+- O₃: ${airQuality.o3} μg/m³
+- NO₂: ${airQuality.no2} μg/m³
+- SO₂: ${airQuality.so2} μg/m³
+- CO: ${airQuality.co} μg/m³
+${quantumForecast ? `Quantum Forecast (Next 24 Hours):
+- Model: ${quantumForecast.model.name} (${quantumForecast.model.backend})
+- Average AQI: ${Math.round(quantumForecast.hourly.reduce((sum: number, h: any) => sum + h.aqi, 0) / quantumForecast.hourly.length)}
+- Min/Max AQI: ${Math.min(...quantumForecast.hourly.map((h: any) => h.aqi))} / ${Math.max(...quantumForecast.hourly.map((h: any) => h.aqi))}` : ''}
+Selected Scenario: ${scenario}`;
+
+    const userPrompt = `Analyze the atmospheric load impact for ${cityName} with these sections:
 1. Atmospheric Baseline Assessment
 2. Personnel Capacity Analysis
 3. Atmospheric Composition
@@ -82,65 +126,48 @@ Selected Scenario: ${scenario}
 
 ${dataContext}`;
 
-    console.log('Calling Gemini API for impact analysis...');
+    let analysis: string | null = null;
 
-    try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            topP: 0.95,
-            topK: 40,
-            maxOutputTokens: 2048,
-          }
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Gemini API error:', response.status, errorText);
-        throw new Error(`Gemini service error: ${response.status}`);
+    // Primary: Lovable AI
+    if (LOVABLE_API_KEY) {
+      try {
+        analysis = await callLovableAI(userPrompt, LOVABLE_API_KEY);
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        if (errMsg === 'RATE_LIMITED') {
+          return new Response(JSON.stringify({ error: 'Rate limited. Please try again shortly.' }), {
+            status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        if (errMsg === 'PAYMENT_REQUIRED') {
+          return new Response(JSON.stringify({ error: 'AI credits exhausted.' }), {
+            status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        console.error('[analyze-impact] Lovable AI failed:', errMsg);
       }
-
-      const data = await response.json();
-      const analysis = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (!analysis) {
-        throw new Error('No analysis generated from Gemini API');
-      }
-
-      console.log('Analysis generated successfully, length:', analysis.length);
-
-      return new Response(
-        JSON.stringify({ analysis }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    } catch (apiError) {
-      console.error('Gemini call failed, falling back:', apiError);
-      const analysis = generateMockImpactAnalysis(cityName, airQuality, quantumForecast, scenario);
-      return new Response(
-        JSON.stringify({ analysis }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
     }
-  } catch (error) {
-    console.error('Error in analyze-impact:', error);
-    return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : 'Unknown error',
-        details: error instanceof Error ? error.stack : undefined
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+
+    // Fallback: Direct Gemini
+    if (!analysis && GEMINI_API_KEY) {
+      try {
+        analysis = await callGeminiFallback(userPrompt, GEMINI_API_KEY);
+      } catch (err) {
+        console.error('[analyze-impact] Gemini fallback failed:', err);
       }
+    }
+
+    // Final fallback: algorithmic
+    if (!analysis) {
+      analysis = generateMockImpactAnalysis(cityName, airQuality, quantumForecast, scenario);
+    }
+
+    return new Response(JSON.stringify({ analysis }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  } catch (error) {
+    console.error('[analyze-impact] Fatal error:', error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
